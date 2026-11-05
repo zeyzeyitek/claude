@@ -3,11 +3,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: full-bleed 3D viewport; floating instrument panel at right (bottom sheet on phones); plan view inside panel. */
+/* Layout: full-bleed 3D viewport; cluster HUD pinned bottom-left; function-test panel at right (bottom sheet on phones). */
 :root{
   --bg:#e6eae8; --panel:#f8faf9; --panel-a:rgba(248,250,249,.92); --ink:#172026; --muted:#56656d;
   --line:#d0d8da; --chip:#edf1f0; --accent:#a35f00; --accent-ink:#ffffff; --accent-soft:#f4e4c6;
-  --prm:#1f63c6; --seat:#2f527c; --obst:#9aa3a8; --door:#d18a12;
+  --prm:#1f63c6; --seat:#2f527c; --obst:#9aa3a8; --door:#d18a12; --ok:#1d8a4a; --warn:#c2410c;
   --f-display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
   --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -15,11 +15,11 @@
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
   --bg:#0f1417; --panel:#182025; --panel-a:rgba(24,32,37,.92); --ink:#e6ecee; --muted:#93a2aa;
   --line:#2b363c; --chip:#212b31; --accent:#f0a617; --accent-ink:#1a1204; --accent-soft:#3a2c10;
-  --prm:#5b9bff; --seat:#6f9ccf; --obst:#5d686e; --door:#f0a617; color-scheme:dark } }
+  --prm:#5b9bff; --seat:#6f9ccf; --obst:#5d686e; --door:#f0a617; --ok:#4cc982; --warn:#ff7a45; color-scheme:dark } }
 :root[data-theme="dark"]{
   --bg:#0f1417; --panel:#182025; --panel-a:rgba(24,32,37,.92); --ink:#e6ecee; --muted:#93a2aa;
   --line:#2b363c; --chip:#212b31; --accent:#f0a617; --accent-ink:#1a1204; --accent-soft:#3a2c10;
-  --prm:#5b9bff; --seat:#6f9ccf; --obst:#5d686e; --door:#f0a617; color-scheme:dark }
+  --prm:#5b9bff; --seat:#6f9ccf; --obst:#5d686e; --door:#f0a617; --ok:#4cc982; --warn:#ff7a45; color-scheme:dark }
 
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;overflow:hidden}
@@ -39,26 +39,41 @@ h1 .led{color:var(--accent)}
 .seg:focus-visible,.qbtn:focus-visible,#panelToggle:focus-visible,.sitbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .seg:disabled{opacity:.4;cursor:default}
 
+#hint{top:calc(136px + env(safe-area-inset-top,0px));left:calc(12px + env(safe-area-inset-left,0px));padding:7px 12px;font:400 12px/1.5 var(--f-mono);color:var(--muted);max-width:330px}
+#hint kbd{font:500 11px var(--f-mono);color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:3px;padding:0 4px}
+
 #crosshair{position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;pointer-events:none}
 #crosshair::before,#crosshair::after{content:"";position:absolute;background:rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.35)}
 #crosshair::before{left:7px;top:0;width:2px;height:16px}
 #crosshair::after{top:7px;left:0;height:2px;width:16px}
 #hoverLabel{left:50%;top:calc(50% + 22px);transform:translateX(-50%);padding:5px 10px;font:500 12px/1.3 var(--f-mono);white-space:nowrap;pointer-events:none}
+#hoverLabel b{color:var(--accent);font-weight:500}
 
-#hint{left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));padding:7px 12px;font:400 12px/1.4 var(--f-mono);color:var(--muted);white-space:nowrap}
-#hint kbd{font:500 11px var(--f-mono);color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:3px;padding:0 4px}
+#cluster{position:absolute;left:calc(12px + env(safe-area-inset-left,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));width:min(460px,calc(100vw - 400px));min-width:300px;height:auto;aspect-ratio:880/330;pointer-events:none;filter:drop-shadow(0 6px 18px rgba(0,0,0,.35))}
 
-#panel{top:calc(12px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));width:340px;display:flex;flex-direction:column;background:var(--panel);overflow:hidden}
+#panel{top:calc(12px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));width:350px;display:flex;flex-direction:column;background:var(--panel);overflow:hidden}
 #panelHead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line)}
 #panelHead h2{margin:0;font:700 15px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase}
 #panelToggle{display:none;appearance:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:5px;padding:6px 10px;font:600 12px/1 var(--f-display);letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
 #panelBody{overflow:auto;padding:4px 16px 16px;display:grid;gap:18px;align-content:start}
 section h3{margin:12px 0 8px;font:600 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-dl.spec{margin:0;display:grid;grid-template-columns:1fr auto;column-gap:12px;row-gap:0}
-dl.spec dt,dl.spec dd{padding:6px 0;border-bottom:1px solid var(--line);margin:0}
-dl.spec dt{color:var(--muted)}
-dl.spec dd{font:500 13px var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
-.note{margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.45}
+.note{margin:6px 0 0;font-size:12.5px;color:var(--muted);line-height:1.45}
+.note kbd{font:500 11px var(--f-mono);color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:3px;padding:0 4px}
+
+table.sig{width:100%;border-collapse:collapse;font:400 12px/1.2 var(--f-mono);font-variant-numeric:tabular-nums}
+table.sig td{padding:5px 0;border-bottom:1px solid var(--line)}
+table.sig td:last-child{text-align:right}
+.st{display:inline-block;padding:2px 6px;border-radius:3px;background:var(--chip);color:var(--muted);font-weight:500}
+.st.on{background:var(--accent-soft);color:var(--ink)}
+.st.open{background:var(--warn);color:#fff}
+.st.move{background:var(--accent);color:var(--accent-ink)}
+.st.ok{color:var(--ok)}
+#log{list-style:none;margin:0;padding:0;max-height:190px;overflow:auto;border:1px solid var(--line);border-radius:6px;font:400 11.5px/1.35 var(--f-mono)}
+#log li{padding:5px 8px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:52px 1fr;gap:6px}
+#log li:last-child{border-bottom:0}
+#log time{color:var(--muted);font-variant-numeric:tabular-nums}
+#log li.warn span{color:var(--warn)}
+#log li.empty{display:block;color:var(--muted)}
 
 .qgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .qbtn{appearance:none;text-align:left;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:6px;padding:8px 10px;cursor:pointer;display:grid;gap:2px}
@@ -70,15 +85,18 @@ dl.spec dd{font:500 13px var(--f-mono);text-align:right;font-variant-numeric:tab
 .legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font:400 11px var(--f-mono);color:var(--muted)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 
-#sel{border:1px solid var(--line);border-radius:6px;padding:12px;min-height:72px}
+#sel{border:1px solid var(--line);border-radius:6px;padding:12px;min-height:64px}
 #sel .empty{margin:0;color:var(--muted);line-height:1.45}
 #sel .code{font:500 11px var(--f-mono);letter-spacing:.06em;color:var(--accent)}
 #sel h4{margin:3px 0 6px;font:700 18px/1.15 var(--f-display)}
 #sel p{margin:0 0 8px;line-height:1.45;color:var(--muted)}
 #sel .tag{display:inline-block;font:500 10px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:3px;background:var(--accent-soft);color:var(--ink);margin-bottom:8px}
+#sel dl{margin:0;display:grid;grid-template-columns:1fr auto;column-gap:12px}
+#sel dt,#sel dd{margin:0;padding:5px 0;border-bottom:1px solid var(--line)}
+#sel dt{color:var(--muted)} #sel dd{font:500 12.5px var(--f-mono);text-align:right}
 .sitbtn{appearance:none;margin-top:10px;width:100%;border:0;border-radius:6px;padding:9px;background:var(--accent);color:var(--accent-ink);font:600 13px var(--f-display);letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
 
-#joy{position:absolute;left:calc(20px + env(safe-area-inset-left,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));width:116px;height:116px;border-radius:50%;background:rgba(20,26,30,.28);border:2px solid rgba(255,255,255,.5);touch-action:none;display:none}
+#joy{position:absolute;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));width:116px;height:116px;border-radius:50%;background:rgba(20,26,30,.28);border:2px solid rgba(255,255,255,.5);touch-action:none;display:none}
 #knob{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.3)}
 @media (any-pointer:coarse){ body.walk #joy{display:block} }
 
@@ -88,11 +106,11 @@ dl.spec dd{font:500 13px var(--f-mono);text-align:right;font-variant-numeric:tab
   #brand{padding:8px 12px} h1{font-size:18px}
   #modebar{top:calc(70px + env(safe-area-inset-top,0px))}
   #hint{display:none}
-  #panel{top:auto;left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));width:auto;max-height:58%}
+  #cluster{left:calc(8px + env(safe-area-inset-left,0px));bottom:auto;top:calc(118px + env(safe-area-inset-top,0px));width:min(420px,calc(100vw - 16px));min-width:0}
+  #panel{top:auto;left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));width:auto;max-height:52%}
   #panelToggle{display:inline-block}
   #panel.collapsed #panelBody{display:none}
   #panel.collapsed #panelHead{border-bottom:0}
-  #joy{bottom:calc(78px + env(safe-area-inset-bottom,0px))}
 }
 @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
 </style>
@@ -103,7 +121,7 @@ dl.spec dd{font:500 13px var(--f-mono);text-align:right;font-variant-numeric:tab
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev A</div>
+    <div class="eyebrow">Konsept · Rev B</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
   </div>
 
@@ -113,19 +131,30 @@ dl.spec dd{font:500 13px var(--f-mono);text-align:right;font-variant-numeric:tab
     <button class="seg" id="mRoof" aria-pressed="false" disabled title="Dış görünümde tavanı kaldırır">Kesit</button>
   </div>
 
-  <div id="hint" class="float"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> yürü · <kbd>Shift</kbd> hızlı · sürükle: bak · tıkla: incele</div>
+  <div id="hint" class="float"></div>
+
+  <canvas id="cluster" width="880" height="330" aria-label="Gösterge paneli (cluster)"></canvas>
 
   <div id="joy" aria-hidden="true"><div id="knob"></div></div>
 
   <aside id="panel" class="float collapsed">
     <div id="panelHead">
-      <h2>Tasarım paneli</h2>
+      <h2>Fonksiyon testi</h2>
       <button id="panelToggle" aria-expanded="false">Aç</button>
     </div>
     <div id="panelBody">
       <section>
+        <h3>Sinyaller</h3>
+        <table class="sig"><tbody id="sig"></tbody></table>
+        <p class="note">Sürücü panelinin sağındaki kırmızı butonlar kapıları açar ve kapatır (K1 · K2 · K3). Kısayol: <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>. Direklerdeki kırmızı butonlar durak isteği verir. Kapı açılınca istek sıfırlanır. Kapanan kapının arasında durursan kapı geri açılır.</p>
+      </section>
+      <section>
+        <h3>Olay günlüğü</h3>
+        <ol id="log"><li class="empty">Henüz olay yok. Bir kapı butonuna bas.</li></ol>
+      </section>
+      <section>
         <h3>Seçili öğe</h3>
-        <div id="sel"><p class="empty">Bir koltuğa, butona ya da kapıya tıkla. Kodu, ölçüsü ve konumu burada görünür.</p></div>
+        <div id="sel"><p class="empty">Bir öğeye tıkla. Kodu, yüksekliği ve konumu burada görünür.</p></div>
       </section>
       <section>
         <h3>Hızlı git</h3>
@@ -140,12 +169,7 @@ dl.spec dd{font:500 13px var(--f-mono);text-align:right;font-variant-numeric:tab
           <span><i style="background:var(--door)"></i>Kapı</span>
           <span><i style="background:var(--obst)"></i>Davlumbaz / kabin</span>
         </div>
-        <p class="note">Ön taraf sağda. Planın alt kenarı aracın sağ (kapı) tarafı. Plana tıklayınca oraya ışınlanırsın.</p>
-      </section>
-      <section>
-        <h3>Araç özeti</h3>
-        <dl class="spec" id="spec"></dl>
-        <p class="note" id="specNote"></p>
+        <p class="note">Ön taraf sağda, kapı tarafı altta. Plana tıklayınca oraya ışınlanırsın.</p>
       </section>
     </div>
   </aside>
@@ -160,17 +184,30 @@ const $=s=>document.querySelector(s);
 const fail=()=>{$('#fail').hidden=false};
 if(!window.THREE){fail();return;}
 
-/* ---------- Ana ölçüler (metre) ---------- */
+/* ================= Ölçüler (metre) ================= */
 const L=12, W=2.55, HW=W/2, WT=0.08, IN=HW-WT, CEIL=2.35, ROOF=2.75, GROUND=-0.34;
 const FRONT=6, REAR=-6;
 const DOORS=[
-  {id:1,x0:4.25,x1:5.45,w:1200,name:'Kapı 1 · ön',desc:'Çift kanatlı, içe salınımlı. Biniş kapısı, sürücünün yanında.'},
+  {id:1,x0:4.25,x1:5.45,w:1200,name:'Kapı 1 · ön',desc:'Çift kanatlı, içe salınımlı. Biniş kapısı.'},
   {id:2,x0:0.00,x1:1.20,w:1200,name:'Kapı 2 · orta',desc:'Çift kanatlı. Tekerlekli sandalye rampası bu kapıda.'},
-  {id:3,x0:-4.60,x1:-3.60,w:1000,name:'Kapı 3 · arka',desc:'Çift kanatlı, iniş kapısı. Arka dingilin arkasında.'}
+  {id:3,x0:-4.60,x1:-3.60,w:1000,name:'Kapı 3 · arka',desc:'Çift kanatlı, iniş kapısı.'}
 ];
-const AXLES=[3.3,-2.6], ARCH=0.65; // dingil mesafesi 5 900 mm
+const AXLES=[3.3,-2.6], ARCH=0.65;
 
-/* ---------- Renderer ---------- */
+/* ================= Araç durumu (yazılım tarafı) ================= */
+const V={speed:0,rpm:620,gear:'N',stopReq:false,prmReq:false,temp:17,odo:47389,stopBrake:false};
+const DOOR_T=2.4;
+const doorS={};DOORS.forEach(d=>doorS[d.id]={state:'CLOSED',pos:0,pivots:[],btnMat:null});
+const t0=performance.now();
+const logEl=$('#log');let logN=0;
+function log(text,cls){
+  if(!logN)logEl.innerHTML='';logN++;
+  const li=document.createElement('li');if(cls)li.className=cls;
+  li.innerHTML=`<time>${((performance.now()-t0)/1000).toFixed(1)} s</time><span></span>`;li.lastChild.textContent=text;
+  logEl.prepend(li);while(logEl.children.length>40)logEl.lastChild.remove();
+}
+
+/* ================= Renderer ================= */
 let renderer;
 try{ renderer=new THREE.WebGLRenderer({canvas:$('#view'),antialias:true}); }catch(e){fail();return;}
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
@@ -179,411 +216,491 @@ scene.background=new THREE.Color('#c5d2d8');
 scene.fog=new THREE.Fog('#c5d2d8',35,110);
 const camera=new THREE.PerspectiveCamera(70,1,0.03,250);
 camera.rotation.order='YXZ';
-
-scene.add(new THREE.HemisphereLight('#f5f8fa','#6c716b',0.9));
-const sun=new THREE.DirectionalLight('#fff4e2',0.7); sun.position.set(8,14,10); scene.add(sun);
-[2.6,-2.4].forEach(x=>{const p=new THREE.PointLight('#fff8ec',0.35,9); p.position.set(x,2.1,0); scene.add(p);});
+scene.add(new THREE.HemisphereLight('#f5f8fa','#6c716b',0.95));
+const sun=new THREE.DirectionalLight('#fff4e2',0.7);sun.position.set(8,14,10);scene.add(sun);
+[3.0,-0.5,-3.8].forEach(x=>{const p=new THREE.PointLight('#fff8ec',0.28,8);p.position.set(x,2.1,0);scene.add(p);});
 
 const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:0.7,metalness:0.05},o||{}));
-function tex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.anisotropy=4;return t;}
+function tex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;if(draw)draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.anisotropy=4;return t;}
+function rr(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
+let seed=7;const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280;};
 
-const moquette=tex(256,256,(g,w,h)=>{
-  g.fillStyle='#22385a';g.fillRect(0,0,w,h);
-  const cols=['#e3a72f','#4a86b8','#c9513f','#d7dde3'];
-  let s=7; const r=()=>{s=(s*9301+49297)%233280;return s/233280;};
-  for(let i=0;i<260;i++){g.fillStyle=cols[i%4];const x=r()*w,y=r()*h,k=2+r()*5;
-    if(i%3) g.fillRect(x,y,k*1.6,k*0.7); else {g.beginPath();g.arc(x,y,k*0.6,0,7);g.fill();}}
-});
-moquette.wrapS=moquette.wrapT=THREE.RepeatWrapping; moquette.repeat.set(2,2);
+const moquette=tex(256,256,(g,w,h)=>{g.fillStyle='#253a58';g.fillRect(0,0,w,h);const cols=['#e3a72f','#4a86b8','#c9513f','#d7dde3'];
+  for(let i=0;i<260;i++){g.fillStyle=cols[i%4];const x=rnd()*w,y=rnd()*h,k=2+rnd()*5;if(i%3)g.fillRect(x,y,k*1.6,k*0.7);else{g.beginPath();g.arc(x,y,k*0.6,0,7);g.fill();}}});
+moquette.wrapS=moquette.wrapT=THREE.RepeatWrapping;moquette.repeat.set(2,2);
+const floorTex=tex(512,512,(g,w,h)=>{g.fillStyle='#596067';g.fillRect(0,0,w,h);for(let i=0;i<5000;i++){g.fillStyle=['#6b737a','#4b5157','#7d858b','#d8b23a'][i%17===0?3:i%3];g.fillRect(rnd()*w,rnd()*h,2,2);}});
+floorTex.wrapS=floorTex.wrapT=THREE.RepeatWrapping;floorTex.repeat.set(10,2.2);
 
 const MAT={
-  body:M('#f3f4f1',{roughness:0.45}), lining:M('#dde2e2'), floor:M('#3c444b',{roughness:0.95}), ceil:M('#f0f1ee'),
-  frame:M('#2a2f33',{roughness:0.5}),
-  glass:new THREE.MeshStandardMaterial({color:'#a3c6d1',transparent:true,opacity:0.22,roughness:0.1,metalness:0.1,depthWrite:false}),
-  darkGlass:M('#1d272d',{roughness:0.2}), pole:M('#f1bf16',{roughness:0.35,metalness:0.2}),
-  stripe:M('#c97c10',{roughness:0.5}), stripe2:M('#24405f',{roughness:0.5}),
-  arch:M('#949da3'), tire:M('#1b1d1f',{roughness:0.95}), hub:M('#aab1b5',{metalness:0.6,roughness:0.35}),
-  shell:M('#59636c',{roughness:0.5}), fabric:M('#ffffff',{map:moquette,roughness:0.95}),
-  red:M('#d8261c',{roughness:0.4,emissive:'#3a0000'}), blue:M('#1f63c6',{roughness:0.4,emissive:'#001438'}),
-  green:M('#1e9c4a',{roughness:0.4,emissive:'#002410'}), yellow:M('#e8b818'), pad:M('#3e5570'),
-  black:M('#111417',{roughness:0.6}), light:new THREE.MeshBasicMaterial({color:'#fffdf2'}),
-  asphalt:M('#767b77',{roughness:1}), walk:M('#b9b5ab',{roughness:1}), driverSeat:M('#2b3035'),
-  ramp:M('#5b656d',{roughness:0.8}), validator:M('#3b4248',{roughness:0.4}),
-  head:new THREE.MeshBasicMaterial({color:'#fffbe8'}), tail:new THREE.MeshBasicMaterial({color:'#c4140c'})
+  body:M('#f2f3f0',{roughness:0.35,metalness:0.1}), lining:M('#dfe3e3'), panel:M('#c9ced1'), floor:M('#ffffff',{map:floorTex,roughness:0.95}),
+  ceil:M('#f0f1ee'), frame:M('#1d2124',{roughness:0.45}),
+  glass:new THREE.MeshStandardMaterial({color:'#33474f',transparent:true,opacity:0.32,roughness:0.08,metalness:0.2,depthWrite:false}),
+  black:M('#121518',{roughness:0.5}), skirt:M('#2b3034',{roughness:0.6}), pole:M('#f1bf16',{roughness:0.35,metalness:0.2}),
+  stripe:M('#c97c10',{roughness:0.5}), arch:M('#8e979d'), tire:M('#1a1c1e',{roughness:0.95}), rim:M('#d6d9da',{metalness:0.5,roughness:0.3}),
+  shell:M('#6a737b',{roughness:0.5}), fabric:M('#ffffff',{map:moquette,roughness:0.95}),
+  red:M('#d8261c',{roughness:0.4,emissive:'#3a0000'}), stopBtn:M('#d8261c',{roughness:0.35,emissive:'#300000'}),
+  blue:M('#1f63c6',{roughness:0.35,emissive:'#001438'}), green:M('#1e9c4a',{roughness:0.4,emissive:'#002410'}),
+  yellow:M('#e8b818'), pad:M('#3e5570'), light:new THREE.MeshBasicMaterial({color:'#fffdf2'}),
+  asphalt:M('#767b77',{roughness:1}), walk:M('#b9b5ab',{roughness:1}), driverSeat:M('#2b3035'), dash:M('#2e3337',{roughness:0.6}), dashLight:M('#c7ccd0',{roughness:0.6}),
+  ramp:M('#5b656d',{roughness:0.8}), validator:M('#3b4248',{roughness:0.4}), chrome:M('#c3c8cb',{metalness:0.8,roughness:0.25}),
+  head:new THREE.MeshBasicMaterial({color:'#fffbe8'}), drl:new THREE.MeshBasicMaterial({color:'#eaf6ff'}), tail:new THREE.MeshBasicMaterial({color:'#c4140c'})
 };
 
-const roofGroup=new THREE.Group(); scene.add(roofGroup);
+const roofGroup=new THREE.Group();scene.add(roofGroup);
 function box(w,h,d,m,x,y,z,parent){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);if(m===MAT.glass)o.userData.noPick=true;(parent||scene).add(o);return o;}
 function boxE(x0,x1,y0,y1,z0,z1,m,parent){return box(x1-x0,y1-y0,z1-z0,m,(x0+x1)/2,(y0+y1)/2,(z0+z1)/2,parent);}
-function cyl(r,h,m,x,y,z,parent,seg){const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,seg||14),m);o.position.set(x,y,z);(parent||scene).add(o);return o;}
+function cyl(r,h,m,x,y,z,parent,seg){const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,seg||16),m);o.position.set(x,y,z);(parent||scene).add(o);return o;}
 function info(o,d){o.userData.info=d;return o;}
 function subtract(range,cuts){let s=[range];cuts.forEach(([c0,c1])=>{s=s.flatMap(([a,b])=>{if(c1<=a||c0>=b)return[[a,b]];const r=[];if(c0>a)r.push([a,c0]);if(c1<b)r.push([c1,b]);return r;});});return s;}
+const obstacles=[];const obst=(x0,x1,z0,z1,kind)=>obstacles.push({x0,x1,z0,z1,kind});
+const counters={};const code=p=>{counters[p]=(counters[p]||0)+1;return p+'-'+String(counters[p]).padStart(2,'0');};
 
-const obstacles=[];
-const obst=(x0,x1,z0,z1,kind)=>obstacles.push({x0,x1,z0,z1,kind});
-const counters={};
-const code=(p)=>{counters[p]=(counters[p]||0)+1;return p+'-'+String(counters[p]).padStart(2,'0');};
-
-/* ---------- Zemin, çevre ---------- */
+/* ================= Çevre ================= */
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(240,240),MAT.asphalt);ground.rotation.x=-Math.PI/2;ground.position.y=GROUND-0.001;scene.add(ground);
-boxE(-40,40,GROUND,GROUND+0.15,2.15,10,MAT.walk); // kaldırım
+boxE(-40,40,GROUND,GROUND+0.15,2.15,10,MAT.walk);
 boxE(-40,40,GROUND+0.15,GROUND+0.16,2.15,2.35,M('#d9d5c8'));
-for(let x=-38;x<40;x+=6) boxE(x,x+3,GROUND,GROUND+0.004,-3.6,-3.48,M('#eeeeea'));
-const stopPole=cyl(0.04,2.7,MAT.frame,7.4,GROUND+0.15+1.35,3.0);
-const stopSign=new THREE.Mesh(new THREE.PlaneGeometry(0.6,0.6),new THREE.MeshBasicMaterial({map:tex(256,256,(g)=>{g.fillStyle='#1d5b3a';g.fillRect(0,0,256,256);g.fillStyle='#fff';g.font='bold 64px sans-serif';g.textAlign='center';g.fillText('DURAK',128,150);}),side:THREE.DoubleSide}));
+for(let x=-38;x<40;x+=6)boxE(x,x+3,GROUND,GROUND+0.004,-3.6,-3.48,M('#eeeeea'));
+info(cyl(0.04,2.7,MAT.frame,7.4,GROUND+0.15+1.35,3.0),{name:'Durak direği',code:'ENV-01',desc:'Çevre öğesi. Kaldırım yüksekliği 150 mm.'});
+const stopSign=new THREE.Mesh(new THREE.PlaneGeometry(0.6,0.6),new THREE.MeshBasicMaterial({side:THREE.DoubleSide,map:tex(256,256,g=>{g.fillStyle='#1d5b3a';g.fillRect(0,0,256,256);g.fillStyle='#fff';g.font='bold 64px sans-serif';g.textAlign='center';g.fillText('DURAK',128,150);})}));
 stopSign.position.set(7.4,GROUND+2.6,3.0);stopSign.rotation.y=Math.PI/2;scene.add(stopSign);
-info(stopPole,{name:'Durak direği',code:'ENV-01',desc:'Referans çevre öğesi. Kaldırım yüksekliği 150 mm.'});
-const shadowTex=tex(256,64,(g,w,h)=>{const gr=g.createRadialGradient(w/2,h/2,4,w/2,h/2,w/2);gr.addColorStop(0,'rgba(0,0,0,.55)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,w,h);});
-const sh=new THREE.Mesh(new THREE.PlaneGeometry(14,4.2),new THREE.MeshBasicMaterial({map:shadowTex,transparent:true,depthWrite:false}));
-sh.rotation.x=-Math.PI/2;sh.position.y=GROUND+0.002;sh.userData.noPick=true;scene.add(sh);
+const shTex=tex(256,64,(g,w,h)=>{const gr=g.createRadialGradient(w/2,h/2,4,w/2,h/2,w/2);gr.addColorStop(0,'rgba(0,0,0,.55)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,w,h);});
+const sh=new THREE.Mesh(new THREE.PlaneGeometry(14,4.2),new THREE.MeshBasicMaterial({map:shTex,transparent:true,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=GROUND+0.002;sh.userData.noPick=true;scene.add(sh);
 
-/* ---------- Gövde ---------- */
+/* ================= Gövde ================= */
 boxE(REAR,FRONT,-0.05,0,-HW,HW,MAT.floor);
-boxE(REAR+0.2,FRONT-0.2,-0.3,-0.05,-0.9,0.9,MAT.black); // şasi alt
-DOORS.forEach(d=>boxE(d.x0,d.x1,0,0.004,IN-0.07,IN,MAT.yellow)); // kapı eşik şeridi
-
+boxE(REAR+0.2,FRONT-0.2,-0.3,-0.05,-0.9,0.9,MAT.black);
+DOORS.forEach(d=>boxE(d.x0,d.x1,0,0.004,IN-0.07,IN,MAT.yellow));
 const wheelRanges=AXLES.map(a=>[a-ARCH,a+ARCH]);
 [1,-1].forEach(s=>{
-  const zc=s*(HW-WT/2), z0=zc-WT/2, z1=zc+WT/2;
+  const zc=s*(HW-WT/2),z0=zc-WT/2,z1=zc+WT/2,ze=s*(HW+0.003);
   const cuts=s>0?DOORS.map(d=>[d.x0,d.x1]):[];
   subtract([REAR,FRONT],cuts).forEach(([a,b])=>{
-    subtract([a,b],wheelRanges).forEach(([p,q])=>boxE(p,q,0,0.95,z0,z1,MAT.body));
-    wheelRanges.forEach(([p,q])=>{const pa=Math.max(p,a),qb=Math.min(q,b);if(qb>pa)boxE(pa,qb,0.72,0.95,z0,z1,MAT.body);});
-    boxE(a,b,0.95,2.15,zc-0.01,zc+0.01,MAT.glass);
+    subtract([a,b],wheelRanges).forEach(([p,q])=>boxE(p,q,0,0.92,z0,z1,MAT.body));
+    wheelRanges.forEach(([p,q])=>{const pa=Math.max(p,a),qb=Math.min(q,b);if(qb>pa)boxE(pa,qb,0.72,0.92,z0,z1,MAT.body);});
+    boxE(a,b,0.92,2.2,zc-0.01,zc+0.01,MAT.glass);
+    boxE(a,b,0.9,0.95,ze-0.003,ze+0.003,MAT.black);boxE(a,b,2.17,2.24,ze-0.003,ze+0.003,MAT.black);
     const n=Math.max(1,Math.round((b-a)/1.45));
-    for(let i=0;i<=n;i++){const px=a+(b-a)*i/n;boxE(Math.max(a,px-0.04),Math.min(b,px+0.04),0.95,2.15,z0,z1,MAT.frame);}
-    const ze=s*(HW+0.003);
-    subtract([a,b],wheelRanges).forEach(([p,q])=>{boxE(p,q,0.62,0.7,ze-0.002,ze+0.002,MAT.stripe);boxE(p,q,0.52,0.6,ze-0.002,ze+0.002,MAT.stripe2);});
+    for(let i=0;i<=n;i++){const px=a+(b-a)*i/n;boxE(Math.max(a,px-0.035),Math.min(b,px+0.035),0.92,2.2,z0,z1,MAT.frame);}
+    subtract([a,b],wheelRanges).forEach(([p,q])=>boxE(p,q,0.6,0.64,ze-0.002,ze+0.002,MAT.stripe));
   });
-  subtract([REAR,FRONT],wheelRanges).forEach(([p,q])=>boxE(p,q,-0.3,0,z0,z1,MAT.body));
-  boxE(REAR,FRONT,2.15,ROOF,z0,z1,MAT.body);
-  boxE(REAR+0.3,FRONT-0.3,2.2,2.34,s*(HW+0.004)-0.002,s*(HW+0.004)+0.002,MAT.frame);
+  subtract([REAR,FRONT],wheelRanges).forEach(([p,q])=>{boxE(p,q,-0.15,0,z0,z1,MAT.body);boxE(p,q,-0.3,-0.15,z0,z1,MAT.skirt);});
+  boxE(REAR,FRONT,2.2,ROOF,z0,z1,MAT.body);
+  wheelRanges.forEach(([p,q])=>{boxE(p-0.04,q+0.04,0.72,0.77,ze-0.004,ze+0.004,MAT.black);boxE(p-0.04,p,-0.3,0.77,ze-0.004,ze+0.004,MAT.black);boxE(q,q+0.04,-0.3,0.77,ze-0.004,ze+0.004,MAT.black);});
 });
-
-// tekerlekler ve iç davlumbazlar
 AXLES.forEach((a,ai)=>[1,-1].forEach(s=>{
-  const t=cyl(0.48,0.26,MAT.tire,a,GROUND+0.48,s*(HW-0.22),null,28);t.rotation.x=Math.PI/2;
-  const h=cyl(0.27,0.27,MAT.hub,a,GROUND+0.48,s*(HW-0.22),null,20);h.rotation.x=Math.PI/2;
-  info(t,{name:(ai?'Arka':'Ön')+' tekerlek · '+(s>0?'sağ':'sol'),code:code('WHL'),desc:'Lastik çapı ~960 mm. Dingil mesafesi 5 900 mm.'});
-  const zi0=s>0?IN-0.5:-IN, zi1=s>0?IN:-IN+0.5;
-  info(boxE(a-ARCH,a+ARCH,0,0.7,zi0,zi1,MAT.arch),{name:'Tekerlek davlumbazı',code:code('ARC'),desc:'Üzerinde podyum koltuk var. Yükseklik 700 mm.',tag:'Engel'});
+  const t=cyl(0.48,0.28,MAT.tire,a,GROUND+0.48,s*(HW-0.22),null,32);t.rotation.x=Math.PI/2;
+  const h=cyl(0.29,0.29,MAT.rim,a,GROUND+0.48,s*(HW-0.22),null,24);h.rotation.x=Math.PI/2;
+  const c=cyl(0.09,0.3,MAT.frame,a,GROUND+0.48,s*(HW-0.22),null,12);c.rotation.x=Math.PI/2;
+  info(t,{name:(ai?'Arka':'Ön')+' tekerlek · '+(s>0?'sağ':'sol'),code:code('WHL'),desc:'Lastik çapı ~960 mm.'});
+  const zi0=s>0?IN-0.5:-IN,zi1=s>0?IN:-IN+0.5;
+  info(boxE(a-ARCH,a+ARCH,0,0.7,zi0,zi1,MAT.arch),{name:'Tekerlek davlumbazı',code:code('ARC'),desc:'Üzerinde podyum koltuk var. Yükseklik 700 mm.'});
   obst(a-ARCH,a+ARCH,zi0,zi1,'arch');
 }));
 
-// kapı kanatları
+// Kapı kanatları: dış kenardaki menteşe kolonu etrafında içe döner
 DOORS.forEach(d=>{
-  const lw=(d.x1-d.x0)/2, zc=HW-0.05;
+  const lw=(d.x1-d.x0)/2,zc=HW-0.05;
   [0,1].forEach(k=>{
-    const g=new THREE.Group(); const cx=d.x0+lw*(k+0.5);
-    box(lw-0.08,1.85,0.02,MAT.glass,0,1.15,0,g);
-    box(0.04,2.12,0.05,MAT.frame,-lw/2+0.02,1.06,0,g);box(0.04,2.12,0.05,MAT.frame,lw/2-0.02,1.06,0,g);
-    box(lw,0.05,0.05,MAT.frame,0,2.1,0,g);box(lw,0.2,0.04,MAT.frame,0,0.12,0,g);
+    const pv=new THREE.Group();pv.position.set(k?d.x1:d.x0,0,zc);scene.add(pv);
+    const g=new THREE.Group();g.position.x=k?-lw/2:lw/2;pv.add(g);
+    box(lw-0.08,1.9,0.02,MAT.glass,0,1.17,0,g);
+    box(0.045,2.18,0.05,MAT.frame,-lw/2+0.022,1.09,0,g);box(0.045,2.18,0.05,MAT.frame,lw/2-0.022,1.09,0,g);
+    box(lw,0.05,0.05,MAT.frame,0,2.16,0,g);box(lw,0.2,0.04,MAT.frame,0,0.12,0,g);
     box(0.03,0.9,0.04,MAT.pole,(k?-1:1)*(lw/2-0.1),1.1,-0.05,g);
-    g.position.set(cx,0,zc);scene.add(g);
-    info(g,{name:d.name,code:'DOOR-0'+d.id,desc:d.desc+' Net geçiş '+d.w+' mm.',tag:'Fonksiyon: sonra'});
+    cyl(0.025,2.2,MAT.frame,0,1.1,-0.03,pv,10);
+    info(g,{name:d.name,code:'DOOR-0'+d.id,desc:d.desc+' Net geçiş '+d.w+' mm. Sürücü panelindeki K'+d.id+' butonuyla açılır/kapanır.',tag:'Fonksiyon: aktif'});
+    doorS[d.id].pivots.push({pv,dir:k?-1:1});
   });
-  boxE(d.x0-0.05,d.x1+0.05,2.12,2.18,HW-0.08,HW,MAT.frame);
+  boxE(d.x0-0.05,d.x1+0.05,2.18,2.24,HW-0.08,HW,MAT.frame);
 });
 
-// ön yüz
-boxE(FRONT-0.08,FRONT,-0.3,0.95,-HW,HW,MAT.body);
-boxE(FRONT-0.04,FRONT,0.95,2.6,-HW,HW,MAT.glass);
-boxE(FRONT-0.08,FRONT,2.6,ROOF,-HW,HW,MAT.body);
-boxE(FRONT-0.02,FRONT+0.06,-0.3,0.05,-HW,HW,MAT.black);
-[-1,1].forEach(s=>{boxE(FRONT,FRONT+0.01,0.18,0.34,s*0.85,s*1.15,MAT.head);
-  boxE(FRONT-0.3,FRONT+0.05,2.0,2.04,s*HW,s*(HW+0.25),MAT.frame);
-  boxE(FRONT-0.05,FRONT+0.05,1.55,2.05,s*(HW+0.2),s*(HW+0.36),MAT.black);});
-boxE(FRONT-0.12,FRONT-0.07,2.3,2.58,-1.05,1.05,MAT.black);
+// Ön yüz
+boxE(FRONT-0.08,FRONT,-0.3,0.85,-HW,HW,MAT.body);
+boxE(FRONT-0.04,FRONT,0.85,2.45,-HW+0.1,HW-0.1,MAT.glass);
+boxE(FRONT-0.08,FRONT+0.004,2.45,ROOF,-HW,HW,MAT.black);
+[-1,1].forEach(s=>{
+  boxE(FRONT-0.08,FRONT+0.004,0.85,2.45,s>0?HW-0.1:-HW,s>0?HW:-HW+0.1,MAT.black);
+  boxE(FRONT,FRONT+0.012,0.36,0.44,s*0.72,s*1.2,MAT.head);
+  boxE(FRONT,FRONT+0.012,0.47,0.49,s*0.62,s*1.2,MAT.drl);
+  boxE(FRONT-0.25,FRONT+0.3,2.56,2.61,s*(HW-0.1),s*(HW+0.06),MAT.black);
+  boxE(FRONT+0.22,FRONT+0.3,1.85,2.58,s*(HW-0.06),s*(HW+0.12),MAT.black);
+});
+boxE(FRONT-0.02,FRONT+0.05,-0.08,0.16,-0.9,0.9,MAT.black);
+boxE(FRONT-0.02,FRONT+0.07,-0.3,-0.08,-HW,HW,MAT.skirt);
 const destTex=tex(1024,128,(g,w,h)=>{g.fillStyle='#0b0b0b';g.fillRect(0,0,w,h);g.fillStyle='#ffb000';g.font='bold 86px monospace';g.textBaseline='middle';g.fillText('12M',30,h/2+4);g.font='bold 74px monospace';g.fillText('TASARIM HATTI',300,h/2+4);});
-const dest=new THREE.Mesh(new THREE.PlaneGeometry(2.0,0.24),new THREE.MeshBasicMaterial({map:destTex}));
-dest.position.set(FRONT-0.065,2.44,0);dest.rotation.y=Math.PI/2;scene.add(dest);
-info(dest,{name:'Ön hat/varış tabelası',code:'PIS-EXT-01',desc:'LED tabela, amber. İçerik sonra yolcu bilgi sistemine bağlanacak.'});
+const dest=new THREE.Mesh(new THREE.PlaneGeometry(2.0,0.22),new THREE.MeshBasicMaterial({map:destTex}));
+dest.position.set(FRONT+0.006,2.6,0);dest.rotation.y=Math.PI/2;scene.add(dest);
+info(dest,{name:'Ön hat/varış tabelası',code:'PIS-EXT-01',desc:'LED tabela, amber.'});
 
-// arka yüz
+// Arka yüz
 boxE(REAR,REAR+0.08,-0.3,ROOF,-HW,HW,MAT.body);
-boxE(REAR-0.005,REAR,1.45,2.3,-1.0,1.0,MAT.darkGlass);
-[-1,1].forEach(s=>boxE(REAR-0.01,REAR,0.25,0.75,s*1.0,s*1.2,MAT.tail));
-boxE(REAR-0.06,REAR+0.02,-0.3,0.05,-HW,HW,MAT.black);
+boxE(REAR-0.006,REAR,0.95,ROOF,-HW+0.08,HW-0.08,MAT.black);
+boxE(REAR-0.006,REAR,0.05,0.6,-0.7,0.7,MAT.black);
+[-1,1].forEach(s=>boxE(REAR-0.012,REAR,0.25,1.5,s*(HW-0.12),s*(HW-0.04),MAT.tail));
+boxE(REAR-0.06,REAR+0.02,-0.3,-0.05,-HW,HW,MAT.skirt);
 
-// tavan
+// Tavan
 boxE(REAR,FRONT,2.7,2.78,-HW,HW,MAT.body,roofGroup);
+boxE(REAR+0.15,FRONT-0.3,2.78,3.0,-HW+0.06,HW-0.06,MAT.body,roofGroup);
 boxE(REAR+0.08,FRONT-0.08,2.33,2.36,-IN,IN,MAT.ceil,roofGroup);
-info(boxE(-1.2,1.6,2.78,3.05,-0.95,0.95,M('#dfe2e0'),roofGroup),{name:'Klima ünitesi (tavan)',code:'HVAC-01',desc:'Toplam yükseklik ~3 050 mm.'});
-[-0.66,0.66].forEach(z=>boxE(-5.6,4.2,2.31,2.33,z-0.05,z+0.05,MAT.light,roofGroup));
-[1.0,-3.2].forEach(x=>info(boxE(x-0.4,x+0.4,2.3,2.33,-0.4,0.4,M('#cfd4d4'),roofGroup),{name:'Tavan acil çıkış kapağı',code:code('EMG-HTC'),desc:'Havalandırma + acil çıkış. Ölçü 800 × 800 mm.'}));
+[1,-1].forEach(s=>{
+  boxE(REAR+0.1,FRONT-0.1,2.12,2.33,s>0?IN-0.3:-IN,s>0?IN:-IN+0.3,MAT.lining,roofGroup);
+  boxE(REAR+0.3,4.2,2.105,2.12,s>0?IN-0.3:-IN+0.26,s>0?IN-0.26:-IN+0.3,MAT.light,roofGroup);
+});
+boxE(-5.4,4.0,2.32,2.33,-0.06,0.06,MAT.light,roofGroup);
+[1.0,-3.2].forEach(x=>info(boxE(x-0.4,x+0.4,2.3,2.33,-0.4,0.4,M('#cfd4d4'),roofGroup),{name:'Tavan acil çıkış kapağı',code:code('EMG-HTC'),desc:'800 × 800 mm.'}));
 
-/* ---------- Sürücü kabini ---------- */
+/* ================= Sürücü kokpiti ================= */
 const CAB_X=4.28;
 info(boxE(CAB_X,CAB_X+0.06,0,1.05,-IN,-0.25,MAT.lining),{name:'Sürücü kabin bölmesi',code:'CAB-01',desc:'Alt panel opak, üst cam.'});
-boxE(CAB_X,CAB_X+0.06,1.05,1.85,-IN,-0.25,MAT.glass);
-boxE(CAB_X,CAB_X+0.06,1.85,1.9,-IN,-0.25,MAT.frame);
-info(boxE(CAB_X+0.06,5.0,0,1.05,-0.28,-0.22,MAT.lining),{name:'Kabin yan kapısı',code:'CAB-02',desc:'Yarım yükseklikte kabin kapısı.'});
+boxE(CAB_X,CAB_X+0.06,1.05,1.85,-IN,-0.25,MAT.glass);boxE(CAB_X,CAB_X+0.06,1.85,1.9,-IN,-0.25,MAT.frame);
+info(boxE(CAB_X+0.06,5.0,0,1.05,-0.28,-0.22,MAT.lining),{name:'Kabin yan kapısı',code:'CAB-02',desc:'Yarım yükseklik.'});
 obst(CAB_X,CAB_X+0.06,-IN,-0.25,'cab');obst(CAB_X+0.06,5.0,-0.28,-0.22,'cab');
-info(boxE(5.45,5.95,0,1.0,-IN,0.1,MAT.frame),{name:'Sürücü gösterge paneli',code:'DASH-01',desc:'Kokpit modülü.'});
-obst(5.45,5.95,-IN,0.1,'cab');
-info(boxE(5.6,5.95,0,0.9,0.1,IN,MAT.lining),{name:'Ön konsol',code:'DASH-02',desc:'Bilet / bilgi konsolu, kapı 1 önü.'});
-obst(5.6,5.95,0.1,IN,'cab');
-const dashTex=tex(512,256,(g,w,h)=>{g.fillStyle='#0c1216';g.fillRect(0,0,w,h);g.fillStyle='#7fd18b';g.font='bold 30px monospace';
-  ['K1','K2','K3'].forEach((k,i)=>{g.strokeStyle='#7fd18b';g.lineWidth=3;g.strokeRect(24+i*160,24,130,90);g.fillText(k,64+i*160,70);g.font='18px monospace';g.fillText('KAPALI',48+i*160,100);g.font='bold 30px monospace';});
-  g.fillStyle='#e8eef0';g.font='bold 64px monospace';g.fillText('0',40,210);g.font='24px monospace';g.fillText('km/h',110,210);g.fillStyle='#ffb000';g.fillText('DURAK İSTEĞİ: —',250,205);});
-const dash=new THREE.Mesh(new THREE.PlaneGeometry(0.5,0.25),new THREE.MeshBasicMaterial({map:dashTex}));
-dash.position.set(5.5,1.16,-0.72);dash.rotation.y=-Math.PI/2;dash.rotateX(-0.35);scene.add(dash);
-info(dash,{name:'Sürücü ekranı',code:'DASH-SCR',desc:'Kapı durumları, hız, durak isteği. Değerler fonksiyon adımında canlı olacak.',tag:'Fonksiyon: sonra'});
-const wheel=new THREE.Mesh(new THREE.TorusGeometry(0.22,0.025,10,32),MAT.black);
-wheel.position.set(5.22,1.02,-0.72);wheel.rotation.y=Math.PI/2;wheel.rotateOnWorldAxis(new THREE.Vector3(0,0,1),0.55);scene.add(wheel);
-info(wheel,{name:'Direksiyon',code:'DRV-STW',desc:'Çap 440 mm, ayarlı kolon.'});
-const dcp=info(boxE(5.42,5.5,1.0,1.04,-0.36,-0.1,MAT.frame),{name:'Kapı kumanda paneli',code:'DRV-DCP',desc:'K1 · K2 · K3 aç/kapa ve diz çöktürme butonları. Fonksiyonlar sonraki adımda.',tag:'Fonksiyon: sonra'});
-[-0.32,-0.24,-0.16].forEach(z=>boxE(5.43,5.49,1.04,1.06,z-0.025,z+0.025,MAT.green));
+// ana konsol gövdesi
+info(boxE(5.6,5.95,0,0.98,-IN,0.1,MAT.dash),{name:'Kokpit konsolu',code:'DASH-01',desc:'Sürücü çevresini saran modül.'});
+boxE(5.35,5.6,0,0.78,-IN,0.02,MAT.dash);
+obst(5.35,5.95,-IN,0.1,'cab');
+info(boxE(5.6,5.95,0,0.9,0.1,IN,MAT.lining),{name:'Ön konsol',code:'DASH-02',desc:'Kapı 1 önü.'});obst(5.6,5.95,0.1,IN,'cab');
+// cluster yuvası
+boxE(5.5,5.66,0.98,1.25,-0.97,-0.47,MAT.dash);
+boxE(5.44,5.5,1.22,1.26,-0.97,-0.47,MAT.dash);
+// panel dokuları
+function panelTex(kind){return tex(300,480,(g,cw,ch)=>{
+  g.fillStyle='#3a4045';g.fillRect(0,0,cw,ch);g.save();g.translate(cw,0);g.rotate(Math.PI/2);
+  const DW=ch,DH=cw;g.fillStyle='#c9ced2';g.fillRect(6,6,DW-12,DH-12);
+  const btn=(x,y,w,h,ic)=>{g.fillStyle='#eef0f1';rr(g,x,y,w,h,5);g.fill();g.strokeStyle='#9aa1a6';g.lineWidth=1.5;g.stroke();
+    g.strokeStyle='#4d555b';g.lineWidth=2.5;g.beginPath();if(ic%3===0){g.rect(x+w/2-9,y+h/2-6,18,12);}else if(ic%3===1){g.moveTo(x+w/2-10,y+h/2);g.lineTo(x+w/2+10,y+h/2);g.moveTo(x+w/2,y+h/2-7);g.lineTo(x+w/2,y+h/2+7);}else{g.arc(x+w/2,y+h/2,7,0,6.3);}g.stroke();};
+  let ic=0;
+  if(kind==='right'){
+    for(let r=0;r<3;r++)for(let c=0;c<7;c++)btn(18+c*64,18+r*46,54,36,ic++);
+    g.fillStyle='#1b1f22';g.font='bold 22px sans-serif';g.textAlign='center';
+    [60,140,220].forEach((x,i)=>{g.fillText('K'+(i+1),x,196);g.fillStyle='#9aa1a6';g.beginPath();g.arc(x,240,36,0,6.3);g.fill();g.fillStyle='#1b1f22';});
+    btn(300,214,70,50,1);btn(384,214,70,50,2);
+    g.fillStyle='#1b1f22';g.font='13px sans-serif';g.fillText('KAPI',140,286);
+  }else{
+    for(let r=0;r<5;r++)for(let c=0;c<3;c++)btn(14+c*66,18+r*52,56,40,ic++);
+    g.fillStyle='#fff';rr(g,24,218,40,40,5);g.fill();g.fillStyle='#d8261c';g.beginPath();g.moveTo(44,224);g.lineTo(62,254);g.lineTo(26,254);g.closePath();g.fill();
+  }
+  g.restore();});}
+const rp=new THREE.Mesh(new THREE.PlaneGeometry(0.3,0.48),new THREE.MeshStandardMaterial({map:panelTex('right'),roughness:0.7}));
+rp.rotation.x=-Math.PI/2;rp.position.set(5.45,0.962,-0.22);scene.add(rp);
+boxE(5.3,5.6,0.78,0.96,-0.46,0.02,MAT.dash);
+info(rp,{name:'Sağ kumanda paneli',code:'DRV-PNL-R',desc:'Kapı butonları (kırmızı) ve yardımcı fonksiyonlar.'});
+const lp=new THREE.Mesh(new THREE.PlaneGeometry(0.3,0.22),new THREE.MeshStandardMaterial({map:panelTex('left'),roughness:0.7}));
+lp.rotation.x=-Math.PI/2;lp.position.set(5.45,0.962,-1.085);scene.add(lp);
+boxE(5.3,5.6,0.78,0.96,-IN,-0.975,MAT.dash);
+info(lp,{name:'Sol kumanda paneli',code:'DRV-PNL-L',desc:'Aydınlatma, dörtlü flaşör. Fonksiyonlar sonra.',tag:'Fonksiyon: sonra'});
+// kırmızı kapı butonları
+[-0.40,-0.32,-0.24].forEach((z,i)=>{
+  const id=i+1;
+  cyl(0.034,0.012,MAT.chrome,5.36,0.968,z,null,24);
+  const m=M('#e0261b',{roughness:0.3,emissive:'#300000'});doorS[id].btnMat=m;
+  const b=cyl(0.026,0.026,m,5.36,0.98,z,null,24);
+  info(b,{name:'Kapı butonu K'+id,code:'DRV-BTN-K'+id,desc:'Basınca Kapı '+id+' açılır, tekrar basınca kapanır. Kapı hareket ederken buton yanıp söner, açıkken sürekli yanar.',tag:'Fonksiyon: aktif',
+    action:()=>doorToggle(id,'Sürücü paneli K'+id)});
+});
+// cluster (3D, HUD ile aynı çizim)
+const clusterTex=tex(880,330);
+const cl3=new THREE.Mesh(new THREE.PlaneGeometry(0.44,0.165),new THREE.MeshBasicMaterial({map:clusterTex}));
+cl3.position.set(5.495,1.11,-0.72);cl3.rotation.y=-Math.PI/2;cl3.rotateX(-0.28);scene.add(cl3);
+info(cl3,{name:'Gösterge paneli (cluster)',code:'DASH-CLU',desc:'Hız, devir, vites, kapı durumu ve uyarı lambaları. Sol alttaki HUD ile aynı.',tag:'Fonksiyon: aktif'});
+// direksiyon
+const wheel=new THREE.Group();
+const rim=new THREE.Mesh(new THREE.TorusGeometry(0.22,0.028,12,40),MAT.black);wheel.add(rim);
+const hubm=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.085,0.05,20),MAT.black);hubm.rotation.x=Math.PI/2;wheel.add(hubm);
+[[0,-1],[0.87,0.5],[-0.87,0.5]].forEach(([sx,sy])=>{const sp=box(0.03,0.16,0.02,MAT.black,sx*0.13,sy*0.13,0,wheel);sp.rotation.z=Math.atan2(sy,sx)+Math.PI/2;});
+wheel.position.set(5.2,1.0,-0.72);wheel.rotation.y=Math.PI/2;wheel.rotateOnWorldAxis(new THREE.Vector3(0,0,1),0.55);scene.add(wheel);
+info(wheel,{name:'Direksiyon',code:'DRV-STW',desc:'Çap 450 mm.'});
+cyl(0.03,0.5,MAT.black,5.42,0.78,-0.72).rotation.z=0.9;
 
-/* ---------- Koltuklar ---------- */
-let seatTotal=0;
+/* ================= Koltuklar ================= */
 function addSeat(x,side,n,pod,face,opt){
-  opt=opt||{};
-  const wN=n*0.44, g=new THREE.Group(), fab=opt.mat||MAT.fabric;
+  opt=opt||{};const wN=n*0.44,g=new THREE.Group(),fab=opt.mat||MAT.fabric;
   box(0.44,0.09,wN-0.02,fab,0.03,0.44,0,g);
   const back=box(0.07,0.55,wN-0.02,fab,-0.19,0.76,0,g);back.rotation.z=0.12;
   const sb=box(0.03,0.6,wN,MAT.shell,-0.235,0.75,0,g);sb.rotation.z=0.12;
   box(0.46,0.03,wN,MAT.shell,0.03,0.385,0,g);
-  if(pod===0||opt.legs) for(let i=0;i<n;i++) box(0.06,0.37,0.06,MAT.frame,0,0.185,-wN/2+0.22+i*0.44,g);
+  if(pod===0||opt.legs)for(let i=0;i<n;i++)box(0.06,0.37,0.06,MAT.frame,0,0.185,-wN/2+0.22+i*0.44,g);
   const z=side===0?0:side*(IN-wN/2);
   if(side!==0&&!opt.noHandle){const lz=-side*face*(wN/2-0.05);box(0.04,0.14,0.04,MAT.pole,-0.24,1.1,lz,g);}
   g.position.set(x,pod,z);g.rotation.y=face>0?0:Math.PI;scene.add(g);
   obst(x-0.26,x+0.26,z-wN/2,z+wN/2,opt.kind||'seat');
-  if(!opt.driver) seatTotal+=n;
   const sitZ=side===0?0:z+side*0.22;
-  const tagName=opt.driver?'Sürücü koltuğu':(n===5?'Arka sıra koltuğu (5’li)':'Yolcu koltuğu (çift)');
-  info(g,{name:tagName,code:opt.code||code(side>0?'SEAT-R':side<0?'SEAT-L':'SEAT-B'),
-    desc:opt.desc||((face>0?'Öne bakan':'Arkaya bakan')+(pod>0.31?' · davlumbaz üstü podyum':'')+'. Koltuk genişliği 440 mm/kişi.'),
+  info(g,{name:opt.driver?'Sürücü koltuğu':(n===5?'Arka sıra koltuğu (5’li)':'Yolcu koltuğu (çift)'),code:opt.code||code(side>0?'SEAT-R':side<0?'SEAT-L':'SEAT-B'),
+    desc:opt.desc||((face>0?'Öne bakan':'Arkaya bakan')+(pod>0.31?' · davlumbaz üstü podyum':'')+'.'),
     h:(0.485+pod)*1000,hLabel:'Oturma yüksekliği',
     sit:{x:x+0.04*face,z:sitZ,eye:pod+1.22,yaw:face>0?-Math.PI/2:Math.PI/2}});
-  return {x,z,n,face,side};
+  return {x,z,n,face,side,pod};
 }
-const P=0.32; // podyum
-const rows=[];
-// sol
+const P=0.32,rows=[];
 rows.push(addSeat(3.65,-1,2,P,1),addSeat(3.05,-1,2,P,-1),addSeat(2.25,-1,2,0,1));
 rows.push(addSeat(-0.35,-1,2,0,1),addSeat(-1.1,-1,2,0,1),addSeat(-2.3,-1,2,P,1),addSeat(-3.0,-1,2,P,1),addSeat(-3.75,-1,2,0,1),addSeat(-4.5,-1,2,0,1));
-// sağ
 rows.push(addSeat(3.65,1,2,P,1),addSeat(3.05,1,2,P,-1));
 rows.push(addSeat(-0.75,1,2,0,1),addSeat(-1.5,1,2,0,1),addSeat(-2.3,1,2,P,1),addSeat(-3.0,1,2,P,1),addSeat(-4.9,1,2,0,1));
-// arka platform + 5'li
-info(boxE(REAR+0.08,-5.25,0,0.35,-IN,IN,MAT.arch),{name:'Arka platform',code:'PLT-01',desc:'Motor bölmesi üstü, 350 mm basamak.',tag:'Engel'});
+info(boxE(REAR+0.08,-5.25,0,0.35,-IN,IN,MAT.arch),{name:'Arka platform',code:'PLT-01',desc:'Motor bölmesi üstü, 350 mm basamak.'});
 obst(REAR+0.08,-5.25,-IN,IN,'arch');
 addSeat(-5.6,0,5,0.35,1,{legs:true});
-// sürücü
 addSeat(4.85,-1,1,0.08,1,{driver:true,mat:MAT.driverSeat,noHandle:true,kind:'cab',code:'DRV-SEAT',desc:'Havalı süspansiyonlu sürücü koltuğu.'});
-// duvar durak butonları (oturan yolcu)
+
+/* ================= Durak isteği butonları ================= */
+function stopAction(src){return ()=>stopRequest(false,src);}
 rows.forEach(r=>{
-  const pod=Math.abs(r.x-AXLES[0])<ARCH||Math.abs(r.x-AXLES[1])<ARCH?P:0;
-  const b=boxE(r.x+0.1*r.face-0.025,r.x+0.1*r.face+0.025,1.0+pod,1.07+pod,r.side*IN-0.015,r.side*IN+0.015,MAT.red);
-  info(b,{name:'Durak isteme butonu (duvar)',code:code('BTN-STOP'),desc:'Oturan yolcu için pencere altında.',tag:'Fonksiyon: sonra'});
+  const c=code('BTN-STOP');
+  const b=boxE(r.x+0.1*r.face-0.025,r.x+0.1*r.face+0.025,1.0+r.pod,1.07+r.pod,r.side*IN-0.015,r.side*IN+0.015,MAT.stopBtn);
+  info(b,{name:'Durak isteme butonu (duvar)',code:c,desc:'Oturan yolcu için pencere altında. Basınca tüm durak butonları ve cluster lambası yanar.',tag:'Fonksiyon: aktif',action:stopAction(c)});
 });
 
-/* ---------- Engelli (PRM) alanı — kapı 2 karşısı ---------- */
+/* ================= Engelli alanı ================= */
 const prmTex=tex(256,256,(g,w,h)=>{g.fillStyle='#1f63c6';g.fillRect(0,0,w,h);g.strokeStyle='#fff';g.fillStyle='#fff';g.lineWidth=14;g.lineCap='round';
   g.beginPath();g.arc(118,62,18,0,7);g.fill();g.beginPath();g.moveTo(112,92);g.lineTo(112,150);g.lineTo(170,150);g.lineTo(190,200);g.stroke();
   g.beginPath();g.moveTo(112,115);g.lineTo(160,115);g.stroke();g.beginPath();g.arc(118,170,46,0.6,5.6);g.stroke();});
 const prmFloor=new THREE.Mesh(new THREE.PlaneGeometry(1.8,0.85),new THREE.MeshStandardMaterial({map:prmTex,roughness:0.9,transparent:true,opacity:0.85}));
 prmFloor.rotation.x=-Math.PI/2;prmFloor.position.set(0.95,0.004,-IN+0.43);scene.add(prmFloor);
-info(prmFloor,{name:'Tekerlekli sandalye alanı',code:'PRM-01',desc:'1 300 × 750 mm üstü alan, arkaya bakan konum. Kapı 2 rampasının tam karşısında.',tag:'Erişilebilirlik'});
-info(boxE(1.84,1.96,0.4,1.35,-IN,-0.45,MAT.pad),{name:'Sırt dayama paneli',code:'PRM-02',desc:'Arkaya bakan tekerlekli sandalye için.',tag:'Erişilebilirlik'});
+info(prmFloor,{name:'Tekerlekli sandalye alanı',code:'PRM-01',desc:'Arkaya bakan konum, kapı 2 rampasının karşısında.'});
+info(boxE(1.84,1.96,0.4,1.35,-IN,-0.45,MAT.pad),{name:'Sırt dayama paneli',code:'PRM-02',desc:'Arkaya bakan tekerlekli sandalye için.'});
 obst(1.84,1.96,-IN,-0.45,'prm');
-const fold=info(boxE(0.1,0.96,0.5,0.95,-IN,-IN+0.07,MAT.fabric),{name:'Katlanır koltuk (2)',code:'SEAT-F-01',desc:'Yana bakan, katlı konumda. Açılınca 2 kişi.',tag:'Fonksiyon: sonra'});
+info(boxE(0.1,0.96,0.5,0.95,-IN,-IN+0.07,MAT.fabric),{name:'Katlanır koltuk (2)',code:'SEAT-F-01',desc:'Katlı konumda.',tag:'Fonksiyon: sonra'});
 obst(0.1,0.96,-IN,-IN+0.08,'prm');
-const rail=cyl(0.018,1.75,MAT.pole,0.98,0.85,-IN+0.09);rail.rotation.z=Math.PI/2;
-info(rail,{name:'Tutunma barı (yatay)',code:'RAIL-PRM',desc:'Yükseklik 850 mm.'});
-info(boxE(1.72,1.8,0.82,0.9,-IN-0.0,-IN+0.03,MAT.blue),{name:'Engelli durak isteme butonu',code:'BTN-PRM-01',desc:'Mavi, sandalyeden erişim yüksekliğinde. Sürücüye ayrı uyarı verir.',tag:'Fonksiyon: sonra'});
-info(boxE(1.84,1.9,0.95,1.02,-0.6,-0.5,MAT.blue),{name:'Engelli durak isteme butonu',code:'BTN-PRM-02',desc:'Panel üstünde ikinci buton.',tag:'Fonksiyon: sonra'});
-info(boxE(0.05,1.15,0.004,0.014,IN-0.85,IN-0.02,MAT.ramp),{name:'Katlanır rampa · kapı 2',code:'RAMP-01',desc:'Kapalı konumda. Açık rampa eğimi hedefi ≤ %12.',tag:'Fonksiyon: sonra'});
+const rail=cyl(0.018,1.75,MAT.pole,0.98,0.85,-IN+0.09);rail.rotation.z=Math.PI/2;info(rail,{name:'Tutunma barı (yatay)',code:'RAIL-PRM',desc:'Yükseklik 850 mm.'});
+info(boxE(1.72,1.8,0.82,0.9,-IN,-IN+0.03,MAT.blue),{name:'Engelli durak isteme butonu',code:'BTN-PRM-01',desc:'Mavi. Durak isteğine ek olarak sürücüye rampa gerektiğini bildirir.',tag:'Fonksiyon: aktif',action:()=>stopRequest(true,'BTN-PRM-01')});
+info(boxE(1.84,1.9,0.95,1.02,-0.6,-0.5,MAT.blue),{name:'Engelli durak isteme butonu',code:'BTN-PRM-02',desc:'Panel üstünde ikinci buton.',tag:'Fonksiyon: aktif',action:()=>stopRequest(true,'BTN-PRM-02')});
+info(boxE(0.05,1.15,0.004,0.014,IN-0.85,IN-0.02,MAT.ramp),{name:'Katlanır rampa · kapı 2',code:'RAMP-01',desc:'Kapalı konumda.',tag:'Fonksiyon: sonra'});
 
-/* ---------- Direkler, barlar, butonlar ---------- */
-const poles=[
-  // kapı kenarları (sağ)
-  [4.18,IN-0.12,'d1'],[1.27,IN-0.12,'d2'],[-0.07,IN-0.12,'d2'],[-3.53,IN-0.12,'d3'],[-4.63,IN-0.12,'d3'],
-  // koridor
-  [2.5,-0.3],[-0.12,-0.3],[-1.35,-0.3],[-3.25,-0.3],[-4.75,-0.3],
-  [2.8,0.3],[-1.0,0.3],[-2.05,0.3],[-4.15,0.3],[0.6,0.32],[3.95,0.3],[1.98,-0.32]
-];
+/* ================= Direkler ================= */
+const poles=[[4.18,IN-0.12,'d1'],[1.27,IN-0.12,'d2'],[-0.07,IN-0.12,'d2'],[-3.53,IN-0.12,'d3'],[-4.63,IN-0.12,'d3'],
+  [2.5,-0.3],[-0.12,-0.3],[-1.35,-0.3],[-3.25,-0.3],[-4.75,-0.3],[2.8,0.3],[-1.0,0.3],[-2.05,0.3],[-4.15,0.3],[0.6,0.32],[3.95,0.3],[1.98,-0.32]];
 poles.forEach(([x,z,tagd])=>{
-  const p=cyl(0.018,CEIL,MAT.pole,x,CEIL/2,z);
-  info(p,{name:'Dikey tutunma direği',code:code('POLE'),desc:'Ø 35 mm, sarı (kontrast). Tabandan tavana.'});
+  info(cyl(0.018,CEIL,MAT.pole,x,CEIL/2,z),{name:'Dikey tutunma direği',code:code('POLE'),desc:'Ø 35 mm.'});
   obst(x-0.03,x+0.03,z-0.03,z+0.03,'pole');
-  const zz=z-Math.sign(z)*0.025;
-  const b=box(0.045,0.07,0.035,MAT.red,x,1.3,zz);
-  info(b,{name:'Durak isteme butonu',code:code('BTN-STOP'),desc:'Direk üstü, yükseklik 1 300 mm. Basınca “DURACAK” uyarısı yanacak.',tag:'Fonksiyon: sonra'});
-  if(tagd==='d2'||tagd==='d3'){ if((tagd==='d2'&&x>1)||(tagd==='d3'&&x>-4)){
-    info(box(0.05,0.07,0.04,MAT.green,x,1.1,zz),{name:'Kapı açma isteği',code:code('BTN-DOOR'),desc:'Yeşil buton, '+(tagd==='d2'?'kapı 2':'kapı 3')+' yanında. Araç dururken kapıyı açtırır.',tag:'Fonksiyon: sonra'});}}
+  const zz=z-Math.sign(z)*0.025,c=code('BTN-STOP');
+  info(box(0.045,0.07,0.035,MAT.stopBtn,x,1.3,zz),{name:'Durak isteme butonu',code:c,desc:'Direk üstü, 1 300 mm. Basınca tüm durak butonları ve cluster lambası yanar.',tag:'Fonksiyon: aktif',action:stopAction(c)});
+  if((tagd==='d2'&&x>1)||(tagd==='d3'&&x>-4))
+    info(box(0.05,0.07,0.04,MAT.green,x,1.1,zz),{name:'Kapı açma isteği',code:code('BTN-DOOR'),desc:'Yolcu kapı isteği.',tag:'Fonksiyon: sonra'});
 });
 [[4.18,'Kapı 1'],[1.27,'Kapı 2'],[-3.53,'Kapı 3']].forEach(([x,n])=>{
-  const v=box(0.12,0.2,0.08,MAT.validator,x-0.02,1.0,IN-0.2);
-  box(0.08,0.06,0.005,M('#3fb070',{emissive:'#0e3a20'}),x-0.02,1.05,IN-0.24,scene);
-  info(v,{name:'Kart okuyucu (validatör)',code:code('VAL'),desc:n+' yanında. Temassız kart / QR.',tag:'Fonksiyon: sonra'});
+  const v=box(0.12,0.2,0.08,MAT.validator,x-0.02,1.0,IN-0.2);box(0.08,0.06,0.005,M('#3fb070',{emissive:'#0e3a20'}),x-0.02,1.05,IN-0.24);
+  info(v,{name:'Kart okuyucu (validatör)',code:code('VAL'),desc:n+' yanında.',tag:'Fonksiyon: sonra'});
 });
-[-0.3,0.3].forEach(z=>{const r=cyl(0.018,9.6,MAT.pole,-0.8,1.92,z);r.rotation.z=Math.PI/2;info(r,{name:'Tavan tutunma barı',code:code('RAIL'),desc:'Yükseklik 1 920 mm, koridor boyunca.'});});
-[3.3,-0.75,-3.4].forEach(x=>{[-1,1].forEach(s=>info(box(0.06,0.14,0.04,MAT.red,x,1.75,s*(IN-0.02)),{name:'Acil cam kırma çekici',code:code('EMG-HAM'),desc:'Pencere dikmesinde, 1 750 mm.'}));});
-const ext=cyl(0.07,0.42,MAT.red,4.18,0.25,-0.95);info(ext,{name:'Yangın söndürücü',code:'EMG-EXT',desc:'6 kg, kabin bölmesi arkası.'});obst(4.08,4.27,-1.05,-0.85,'cab');
+[-0.3,0.3].forEach(z=>{const r=cyl(0.018,9.6,MAT.pole,-0.8,1.92,z);r.rotation.z=Math.PI/2;info(r,{name:'Tavan tutunma barı',code:code('RAIL'),desc:'Yükseklik 1 920 mm.'});});
+[3.3,-0.75,-3.4].forEach(x=>[-1,1].forEach(s=>info(box(0.06,0.14,0.04,MAT.red,x,1.75,s*(IN-0.02)),{name:'Acil cam kırma çekici',code:code('EMG-HAM'),desc:'Pencere dikmesinde.'})));
+info(cyl(0.07,0.42,MAT.red,4.18,0.25,-0.95),{name:'Yangın söndürücü',code:'EMG-EXT',desc:'6 kg.'});obst(4.08,4.27,-1.05,-0.85,'cab');
 
-/* ---------- Yolcu bilgi ekranları ---------- */
-const pisTex=tex(512,160,(g,w,h)=>{g.fillStyle='#06090c';g.fillRect(0,0,w,h);g.fillStyle='#ffb000';g.fillRect(0,0,w,34);
-  g.fillStyle='#111';g.font='bold 22px sans-serif';g.fillText('SONRAKİ DURAK',14,25);g.textAlign='right';g.fillText('14:32',w-14,25);g.textAlign='left';
-  g.fillStyle='#fff';g.font='bold 52px sans-serif';g.fillText('Belediye Meydanı',14,98);g.fillStyle='#9fb3bf';g.font='22px sans-serif';g.fillText('Çıkış: sağ taraf · 2 dk',14,138);});
+/* ================= Yolcu bilgi ekranları ================= */
+const pisTex=tex(512,160);
+function drawPIS(){const g=pisTex.image.getContext('2d'),w=512,h=160;g.fillStyle='#06090c';g.fillRect(0,0,w,h);
+  const req=V.stopReq;g.fillStyle=req?'#e0261b':'#ffb000';g.fillRect(0,0,w,34);
+  g.fillStyle=req?'#fff':'#111';g.font='bold 22px sans-serif';g.textAlign='left';g.fillText(req?'DURACAK':'SONRAKİ DURAK',14,25);
+  const d=new Date();g.textAlign='right';g.fillText(String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'),w-14,25);g.textAlign='left';
+  g.fillStyle='#fff';g.font='bold 52px sans-serif';g.fillText('Belediye Meydanı',14,98);
+  g.fillStyle='#9fb3bf';g.font='22px sans-serif';g.fillText('Çıkış: sağ taraf · 2 dk',14,138);pisTex.needsUpdate=true;}
+drawPIS();
 [2.6,-2.1].forEach(x=>{
-  const b=boxE(x-0.025,x+0.025,2.02,2.28,-0.38,0.38,MAT.black,roofGroup);
-  boxE(x-0.01,x+0.01,2.28,2.33,-0.05,0.05,MAT.frame,roofGroup);
-  [1,-1].forEach(s=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(0.72,0.22),new THREE.MeshBasicMaterial({map:pisTex}));p.position.set(x+s*0.027,2.15,0);p.rotation.y=s*Math.PI/2;roofGroup.add(p);info(p,{name:'Yolcu bilgi ekranı',code:'PIS-INT-'+(x>0?'01':'02'),desc:'Çift taraflı TFT, 18.5". İçerik demo.',tag:'Fonksiyon: sonra'});});
-  info(b,{name:'Yolcu bilgi ekranı',code:'PIS-INT-'+(x>0?'01':'02'),desc:'Çift taraflı TFT, 18.5".'});
+  const b=boxE(x-0.025,x+0.025,2.0,2.26,-0.38,0.38,MAT.black,roofGroup);boxE(x-0.01,x+0.01,2.26,2.33,-0.05,0.05,MAT.frame,roofGroup);
+  const c='PIS-INT-'+(x>0?'01':'02');
+  [1,-1].forEach(s=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(0.72,0.22),new THREE.MeshBasicMaterial({map:pisTex}));p.position.set(x+s*0.027,2.13,0);p.rotation.y=s*Math.PI/2;roofGroup.add(p);
+    info(p,{name:'Yolcu bilgi ekranı',code:c,desc:'Çift taraflı TFT. Durak isteği gelince başlık “DURACAK” olur.',tag:'Fonksiyon: aktif'});});
+  info(b,{name:'Yolcu bilgi ekranı',code:c,desc:'Çift taraflı TFT.'});
 });
 
-/* ---------- Durum ---------- */
-const R=0.22, STAND=1.65;
-const st={mode:'walk',x:0.6,z:0.6,eye:STAND,eyeT:STAND,yaw:-Math.PI/2,pitch:-0.05,keys:{},orbit:{theta:0.75,phi:1.08,r:16},roof:true,joy:{x:0,y:0}};
-const inBounds=(x,z)=>x>REAR+0.08+R&&x<FRONT-0.1-R&&z>-IN+R&&z<IN-R;
-const free=(x,z,r)=>{r=r===undefined?R:r;if(!inBounds(x,z))return false;for(const o of obstacles){if(x>o.x0-r&&x<o.x1+r&&z>o.z0-r&&z<o.z1+r)return false;}return true;};
-function tryMove(dx,dz){
-  if(!free(st.x,st.z)){const nx=st.x+dx,nz=st.z+dz;if(inBounds(nx,nz)){st.x=nx;st.z=nz;}return;}
-  if(free(st.x+dx,st.z))st.x+=dx; if(free(st.x,st.z+dz))st.z+=dz;
+/* ================= Fonksiyonlar ================= */
+function doorToggle(id,src){
+  const s=doorS[id],prev=s.state;
+  s.state=(prev==='CLOSED'||prev==='CLOSING')?'OPENING':'CLOSING';
+  log(`${src} → Kapı ${id}: ${prev} → ${s.state}`);
+}
+function stopRequest(prm,src){
+  if(prm&&!V.prmReq){V.prmReq=true;log(`${src} → StopReq_PRM=1 (rampa gerekli)`);}
+  if(!V.stopReq){V.stopReq=true;log(`${src} → StopReq=1`);}
+  else if(!prm)log(`${src} → StopReq zaten 1`);
+  refreshStop();
+}
+function refreshStop(){MAT.stopBtn.emissive.set(V.stopReq?'#ff2a14':'#300000');MAT.blue.emissive.set(V.prmReq?'#2d7bff':'#001438');drawPIS();}
+function playerInDoor(d){return st.mode==='walk'&&st.x>d.x0-0.05&&st.x<d.x1+0.05&&st.z>IN-0.6&&st.z<HW+0.5;}
+let blink=0;
+function updateDoors(dt){
+  blink+=dt;const bl=(blink%0.6)<0.3;
+  DOORS.forEach(d=>{const s=doorS[d.id];
+    if(s.state==='CLOSING'&&playerInDoor(d)){s.state='OPENING';log(`Sıkışma algılandı → Kapı ${d.id} yeniden açılıyor`,'warn');}
+    if(s.state==='OPENING'){s.pos=Math.min(1,s.pos+dt/DOOR_T);if(s.pos>=1){s.state='OPEN';log(`Kapı ${d.id}: OPEN`);
+      if(V.stopReq||V.prmReq){V.stopReq=V.prmReq=false;refreshStop();log(`Kapı ${d.id} açıldı → StopReq=0 (sıfırlandı)`);}}}
+    else if(s.state==='CLOSING'){s.pos=Math.max(0,s.pos-dt/DOOR_T);if(s.pos<=0){s.state='CLOSED';log(`Kapı ${d.id}: CLOSED`);}}
+    const p=s.pos,e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+    s.pivots.forEach(q=>q.pv.rotation.y=q.dir*e*Math.PI/2*0.94);
+    s.btnMat.emissive.set(s.state==='CLOSED'?'#300000':s.state==='OPEN'?'#ff2a14':(bl?'#ff2a14':'#400000'));
+  });
+  const sb=DOORS.some(d=>doorS[d.id].state!=='CLOSED');
+  if(sb!==V.stopBrake){V.stopBrake=sb;log(`BusStopBrake=${sb?1:0}`+(sb?' (kapı açık, hareket engeli)':''));}
 }
 
-/* ---------- Özet ---------- */
-(function spec(){
-  let cells=0;const s=0.1;
-  for(let x=REAR+0.1+s/2;x<5.4;x+=s)for(let z=-IN+s/2;z<IN;z+=s){
-    if(x>CAB_X&&z<-0.2)continue; if(x>0.05&&x<1.96&&z<-0.3)continue;
-    if(DOORS.some(d=>x>d.x0&&x<d.x1&&z>IN-0.45))continue;
-    if(obstacles.some(o=>{const e=o.kind==='seat'?0.15:0;return x>o.x0-e&&x<o.x1+e&&z>o.z0&&z<o.z1;}))continue;
-    cells++;}
-  const area=cells*s*s, stand=Math.floor(area*8);
-  const fmt=v=>String(v).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
-  const rowsSpec=[['Uzunluk',fmt(12000)+' mm'],['Genişlik',fmt(2550)+' mm'],['Yükseklik (klima dahil)','~'+fmt(3050)+' mm'],['İç tavan yüksekliği',fmt(2350)+' mm'],
-    ['Taban yüksekliği',fmt(340)+' mm'],['Dingil mesafesi',fmt(5900)+' mm'],['Kapı düzeni','3 · 1200/1200/1000'],
-    ['Oturan yolcu',seatTotal+' + 2 katlanır'],['Ayakta (tahmini)',String(stand)],['Tekerlekli sandalye','1 yer · kapı 2']];
-  $('#spec').innerHTML=rowsSpec.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('');
-  $('#specNote').textContent=`Ayakta kapasite: serbest alan ${area.toFixed(1).replace('.',',')} m² × 8 kişi/m². Koltuk önü 150 mm, kapı salınım alanı ve engelli alanı hariç. Ön tasarım tahminidir.`;
-})();
+/* ================= Cluster çizimi ================= */
+function drawCluster(g,w,h){
+  g.clearRect(0,0,w,h);
+  rr(g,4,4,w-8,h-8,46);const bg=g.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#0d1216');bg.addColorStop(1,'#05070a');g.fillStyle=bg;g.fill();
+  g.strokeStyle='#2d353c';g.lineWidth=4;g.stroke();
+  const F='"Barlow Semi Condensed","Arial Narrow",sans-serif';
+  function gauge(cx,cy,r,min,max,minor,major,lab,val,red){
+    const a0=0.75*Math.PI,sw=1.5*Math.PI,ang=v=>a0+(v-min)/(max-min)*sw;
+    g.strokeStyle='#1b232a';g.lineWidth=2;g.beginPath();g.arc(cx,cy,r,a0,a0+sw);g.stroke();
+    if(red){g.strokeStyle='#e0301e';g.lineWidth=8;g.beginPath();g.arc(cx,cy,r-4,ang(red[0]),ang(red[1]));g.stroke();}
+    for(let v=min;v<=max+1e-6;v+=minor){const a=ang(v),M=Math.abs(v/major-Math.round(v/major))<1e-6,l=M?18:9;
+      g.strokeStyle=M?'#e8edf0':'#7c8790';g.lineWidth=M?3:1.6;g.beginPath();g.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);g.lineTo(cx+Math.cos(a)*(r-l),cy+Math.sin(a)*(r-l));g.stroke();
+      if(Math.abs(v/lab-Math.round(v/lab))<1e-6){g.fillStyle='#e8edf0';g.font=`600 19px ${F}`;g.textAlign='center';g.textBaseline='middle';g.fillText(String(v),cx+Math.cos(a)*(r-36),cy+Math.sin(a)*(r-36));}}
+    g.fillStyle='#10161b';g.beginPath();g.arc(cx,cy,r*0.46,0,7);g.fill();g.strokeStyle='#38424a';g.lineWidth=2;g.stroke();
+    const a=ang(Math.max(min,Math.min(max,val)));
+    g.strokeStyle='#ff3b22';g.lineWidth=5;g.lineCap='round';g.shadowColor='#ff3b22';g.shadowBlur=10;
+    g.beginPath();g.moveTo(cx+Math.cos(a)*r*0.5,cy+Math.sin(a)*r*0.5);g.lineTo(cx+Math.cos(a)*(r-12),cy+Math.sin(a)*(r-12));g.stroke();g.shadowBlur=0;g.lineCap='butt';
+  }
+  gauge(168,172,140,0,120,5,10,20,V.speed,null);
+  g.fillStyle='#fff';g.textAlign='center';g.textBaseline='alphabetic';g.font=`700 54px ${F}`;g.fillText(String(Math.round(V.speed)),168,184);
+  g.fillStyle='#8f9aa3';g.font=`500 16px ${F}`;g.fillText('km/h',168,206);
+  gauge(712,172,140,0,30,1,5,5,V.rpm/100,[25,30]);
+  g.fillStyle='#fff';g.font=`700 58px ${F}`;g.fillText(V.gear,712,190);g.fillStyle='#8f9aa3';g.font=`500 14px ${F}`;g.fillText('x100 1/min',712,212);
+  // orta ekran
+  g.fillStyle='#0a1014';rr(g,318,20,244,262,14);g.fill();g.strokeStyle='#1f282e';g.lineWidth=2;g.stroke();
+  const d=new Date();g.fillStyle='#e8edf0';g.font=`600 20px ${F}`;g.textAlign='left';g.fillText(V.temp+' °C',332,46);
+  g.textAlign='right';g.fillText(String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'),548,46);
+  g.strokeStyle='#1f282e';g.beginPath();g.moveTo(330,58);g.lineTo(550,58);g.stroke();
+  // otobüs şeması (ön yukarıda), kapılar sağda
+  const bx=400,by=70,bw=44,bh=170;g.fillStyle='#1a2329';rr(g,bx,by,bw,bh,10);g.fill();g.strokeStyle='#6c7880';g.lineWidth=2;g.stroke();
+  g.fillStyle='#2b363d';g.fillRect(bx+6,by+6,bw-12,16);
+  DOORS.forEach(dd=>{const s=doorS[dd.id],y0=by+(FRONT-dd.x1)/L*bh,y1=by+(FRONT-dd.x0)/L*bh;
+    const col=s.state==='CLOSED'?'#3ddc84':s.state==='OPEN'?'#ff3b22':'#ffb000';
+    g.fillStyle=col;g.fillRect(bx+bw-3,y0,7,y1-y0);
+    if(s.state!=='CLOSED'){const e=s.pos*14;g.fillRect(bx+bw+4,y0,e,4);g.fillRect(bx+bw+4,y1-4,e,4);}
+    g.textAlign='left';g.font=`700 17px ${F}`;g.fillStyle='#e8edf0';g.fillText('K'+dd.id,bx+bw+26,(y0+y1)/2-2);
+    g.font=`500 13px ${F}`;g.fillStyle=col;g.fillText(s.state==='CLOSED'?'KAPALI':s.state==='OPEN'?'AÇIK':s.state==='OPENING'?'AÇILIYOR':'KAPANIYOR',bx+bw+26,(y0+y1)/2+14);});
+  g.fillStyle='#8f9aa3';g.font=`500 13px ${F}`;g.textAlign='center';g.fillText('ÖN',bx+bw/2,by-4);
+  g.fillStyle='#c9d1d6';g.font=`500 17px ${F}`;g.fillText(V.odo.toLocaleString('tr-TR')+' km',440,272);
+  // uyarı lambaları
+  const tt=[['DURAK FRENİ',V.stopBrake,'#ffb000'],['DURAK İSTEĞİ',V.stopReq,'#ffb000'],['RAMPA',V.prmReq,'#4d9bff'],['KAPI AÇIK',DOORS.some(x=>doorS[x.id].state!=='CLOSED'),'#ff3b22']];
+  const pos=[[168,262],[168,296],[712,262],[712,296]];
+  tt.forEach(([t,on,c],i)=>{const [x,y]=pos[i];g.font=`700 14px ${F}`;const tw=g.measureText(t).width+18;
+    rr(g,x-tw/2,y-13,tw,24,5);g.fillStyle=on?c:'#151b20';g.fill();g.fillStyle=on?'#0b0e10':'#3c464e';g.textAlign='center';g.fillText(t,x,y+5);});
+}
+const hud=$('#cluster'),hudG=hud.getContext('2d'),c3G=clusterTex.image.getContext('2d');
+function renderCluster(){drawCluster(hudG,880,330);drawCluster(c3G,880,330);clusterTex.needsUpdate=true;}
 
-/* ---------- Hızlı git ---------- */
-const QUICK=[
-  ['Kapı 1','Ön biniş',4.85,0.75,STAND,Math.PI/2],
-  ['Kapı 2','Orta · rampa',0.6,0.75,STAND,0.35],
-  ['Kapı 3','Arka iniş',-4.1,0.75,STAND,-Math.PI/2],
-  ['Sürücü yeri','Oturur göz',4.9,-0.72,1.3,-Math.PI/2],
-  ['Engelli alanı','Sandalye gözü',1.45,-0.75,1.25,Math.PI/2],
-  ['Arka sıra','Koridor boyu',-5.55,0,1.57,-Math.PI/2]
-];
+/* ================= Sinyal tablosu ================= */
+const SIG=[['VehSpeed',()=>V.speed.toFixed(1)+' km/h'],['EngineSpeed',()=>Math.round(V.rpm)+' rpm'],['Gear',()=>V.gear],
+  ...DOORS.map(d=>['DoorState_K'+d.id,()=>{const s=doorS[d.id];const cls=s.state==='CLOSED'?'ok':s.state==='OPEN'?'open':'move';return `<span class="st ${cls}">${s.state}${s.state.endsWith('ING')?' '+Math.round(s.pos*100)+'%':''}</span>`;}]),
+  ['StopReq',()=>`<span class="st ${V.stopReq?'on':''}">${V.stopReq?1:0}</span>`],['StopReq_PRM',()=>`<span class="st ${V.prmReq?'on':''}">${V.prmReq?1:0}</span>`],
+  ['BusStopBrake',()=>`<span class="st ${V.stopBrake?'on':''}">${V.stopBrake?1:0}</span>`]];
+$('#sig').innerHTML=SIG.map(([n],i)=>`<tr><td>${n}</td><td id="sg${i}"></td></tr>`).join('');
+const sigCells=SIG.map((_,i)=>$('#sg'+i));
+function renderSignals(){SIG.forEach(([,f],i)=>{const v=f();if(sigCells[i].innerHTML!==v)sigCells[i].innerHTML=v;});}
+
+/* ================= Hareket ================= */
+const R=0.22,STAND=1.65;
+const st={mode:'walk',x:4.9,z:-0.72,eye:1.3,seated:true,seatEye:1.3,yaw:-1.92,pitch:-0.36,keys:{},orbit:{theta:0.75,phi:1.08,r:16},roof:true,joy:{x:0,y:0}};
+const inFoot=(x,z)=>x>REAR-R&&x<FRONT+R&&z>-HW-R&&z<HW+R;
+function free(x,z){
+  if(Math.abs(x)>35||Math.abs(z)>25)return false;
+  if(Math.abs(x-7.4)<0.3&&Math.abs(z-3.0)<0.3)return false;
+  if(!inFoot(x,z))return true;
+  if(z>IN-R)return DOORS.some(d=>doorS[d.id].pos>0.85&&x>d.x0+R+0.04&&x<d.x1-R-0.04);
+  if(z<-IN+R||x<REAR+0.08+R||x>FRONT-0.1-R)return false;
+  for(const o of obstacles)if(x>o.x0-R&&x<o.x1+R&&z>o.z0-R&&z<o.z1+R)return false;
+  for(const d of DOORS){if(doorS[d.id].pos<0.05)continue;const lw=(d.x1-d.x0)/2*doorS[d.id].pos;
+    for(const hx of [d.x0,d.x1])if(Math.abs(x-hx)<0.04+R&&z>HW-0.05-lw-R)return false;}
+  return true;
+}
+const escapeOk=(x,z)=>inFoot(x,z)?(z>-IN+0.05&&z<IN-0.05&&x>REAR+0.1&&x<FRONT-0.1):true;
+function tryMove(dx,dz){
+  if(!free(st.x,st.z)){if(escapeOk(st.x+dx,st.z+dz)){st.x+=dx;st.z+=dz;}return;}
+  if(free(st.x+dx,st.z))st.x+=dx;if(free(st.x,st.z+dz))st.z+=dz;
+}
+const floorAt=(x,z)=>(x>REAR&&x<FRONT&&Math.abs(z)<HW)?0:(z>2.15?GROUND+0.15:GROUND);
+
+/* ================= Hızlı git ================= */
+const QUICK=[['Sürücü yeri','Kapı butonları',4.9,-0.72,1.3,-1.92,-0.36],['Kapı 1','Ön biniş',4.85,0.7,null,Math.PI/2,-0.05],
+  ['Kapı 2','Orta · rampa',0.6,0.7,null,0.35,-0.05],['Kapı 3','Arka iniş',-4.1,0.7,null,-Math.PI/2,-0.05],
+  ['Dışarı · kaldırım','Kapı 2 önü',0.6,3.4,null,Math.PI,-0.05],['Arka sıra','Koridor boyu',-5.55,0,1.57,-Math.PI/2,-0.06]];
 $('#quick').innerHTML=QUICK.map((q,i)=>`<button class="qbtn" data-i="${i}"><b>${q[0]}</b><span>${q[1]}</span></button>`).join('');
-$('#quick').addEventListener('click',e=>{const b=e.target.closest('.qbtn');if(!b)return;const q=QUICK[+b.dataset.i];teleport(q[2],q[3],q[4],q[5]);});
-function teleport(x,z,eye,yaw){setMode('walk');st.x=x;st.z=z;st.eye=st.eyeT=eye;st.yaw=yaw;st.pitch=-0.06;st.seated=eye<STAND-0.05;$('#view').focus({preventScroll:true});}
+$('#quick').addEventListener('click',e=>{const b=e.target.closest('.qbtn');if(!b)return;const q=QUICK[+b.dataset.i];teleport(q[2],q[3],q[4],q[5],q[6]);});
+function teleport(x,z,eye,yaw,pitch){setMode('walk');st.x=x;st.z=z;st.seated=eye!=null;st.seatEye=eye||0;st.eye=eye!=null?eye:floorAt(x,z)+STAND;st.yaw=yaw;st.pitch=pitch==null?-0.06:pitch;$('#view').focus({preventScroll:true});}
 
-/* ---------- Plan haritası ---------- */
-const map=$('#map'),mg=map.getContext('2d');
-const MP={pad:16};
-const mx=x=>MP.pad+(x-REAR)/L*(map.width-2*MP.pad);
-const mz=z=>MP.pad+(z+HW)/W*(map.height-2*MP.pad);
+/* ================= Plan ================= */
+const map=$('#map'),mg=map.getContext('2d'),MP={pad:16};
+const mx=x=>MP.pad+(x-REAR)/L*(map.width-2*MP.pad),mz=z=>MP.pad+(z+HW)/W*(map.height-2*MP.pad);
 let css={};
-function readCss(){const cs=getComputedStyle(document.documentElement);['--ink','--muted','--line','--accent','--prm','--seat','--obst','--door','--panel','--chip'].forEach(k=>css[k]=cs.getPropertyValue(k).trim());}
-readCss();
-try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readCss);}catch(e){}
+function readCss(){const cs=getComputedStyle(document.documentElement);['--ink','--muted','--accent','--prm','--seat','--obst','--door','--panel','--warn'].forEach(k=>css[k]=cs.getPropertyValue(k).trim());}
+readCss();try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readCss);}catch(e){}
 new MutationObserver(readCss).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 function drawMap(){
   const w=map.width,h=map.height;mg.clearRect(0,0,w,h);
   mg.fillStyle=css['--panel'];mg.fillRect(mx(REAR),mz(-HW),mx(FRONT)-mx(REAR),mz(HW)-mz(-HW));
   mg.fillStyle=css['--prm'];mg.globalAlpha=0.25;mg.fillRect(mx(0.05),mz(-IN),mx(1.84)-mx(0.05),mz(-0.32)-mz(-IN));mg.globalAlpha=1;
-  obstacles.forEach(o=>{
-    mg.fillStyle=o.kind==='seat'?css['--seat']:o.kind==='prm'?css['--prm']:o.kind==='pole'?css['--accent']:css['--obst'];
+  obstacles.forEach(o=>{mg.fillStyle=o.kind==='seat'?css['--seat']:o.kind==='prm'?css['--prm']:o.kind==='pole'?css['--accent']:css['--obst'];
     if(o.kind==='pole'){mg.beginPath();mg.arc(mx((o.x0+o.x1)/2),mz((o.z0+o.z1)/2),2.5,0,7);mg.fill();return;}
-    mg.fillRect(mx(o.x0),mz(o.z0),Math.max(2,mx(o.x1)-mx(o.x0)),Math.max(2,mz(o.z1)-mz(o.z0)));
-  });
+    mg.fillRect(mx(o.x0),mz(o.z0),Math.max(2,mx(o.x1)-mx(o.x0)),Math.max(2,mz(o.z1)-mz(o.z0)));});
   mg.strokeStyle=css['--ink'];mg.lineWidth=2;mg.strokeRect(mx(REAR),mz(-HW),mx(FRONT)-mx(REAR),mz(HW)-mz(-HW));
-  DOORS.forEach(d=>{mg.fillStyle=css['--door'];mg.fillRect(mx(d.x0),mz(HW)-3,mx(d.x1)-mx(d.x0),6);
+  DOORS.forEach(d=>{const s=doorS[d.id];mg.fillStyle=s.state==='CLOSED'?css['--door']:css['--warn'];mg.fillRect(mx(d.x0),mz(HW)-3,mx(d.x1)-mx(d.x0),6);
     mg.fillStyle=css['--ink'];mg.font='600 18px "IBM Plex Mono",monospace';mg.textAlign='center';mg.fillText('K'+d.id,mx((d.x0+d.x1)/2),h-1);});
   mg.fillStyle=css['--muted'];mg.font='500 16px "IBM Plex Mono",monospace';mg.textAlign='right';mg.fillText('ÖN →',w-MP.pad,13);
-  // oyuncu
-  if(st.mode==='walk'){
-    const px=mx(st.x),pz=mz(st.z),fx=-Math.sin(st.yaw),fz=-Math.cos(st.yaw),a=Math.atan2(fz*(mz(1)-mz(0)),fx*(mx(1)-mx(0)));
+  if(st.mode==='walk'){const px=mx(st.x),pz=Math.min(h-4,mz(st.z)),fx=-Math.sin(st.yaw),fz=-Math.cos(st.yaw),a=Math.atan2(fz*(mz(1)-mz(0)),fx*(mx(1)-mx(0)));
     mg.fillStyle=css['--accent'];mg.globalAlpha=0.3;mg.beginPath();mg.moveTo(px,pz);mg.arc(px,pz,46,a-0.55,a+0.55);mg.closePath();mg.fill();mg.globalAlpha=1;
-    mg.beginPath();mg.arc(px,pz,6,0,7);mg.fill();mg.strokeStyle=css['--panel'];mg.lineWidth=2;mg.stroke();
-  }
+    mg.beginPath();mg.arc(px,pz,6,0,7);mg.fill();mg.strokeStyle=css['--panel'];mg.lineWidth=2;mg.stroke();}
 }
-map.addEventListener('click',e=>{
-  const r=map.getBoundingClientRect(),cx=(e.clientX-r.left)*map.width/r.width,cy=(e.clientY-r.top)*map.height/r.height;
-  const x=REAR+(cx-MP.pad)/(map.width-2*MP.pad)*L, z=-HW+(cy-MP.pad)/(map.height-2*MP.pad)*W;
-  let best=null;
-  for(let rr=0;rr<1.2&&!best;rr+=0.05)for(let a=0;a<6.28&&!best;a+=0.4){const tx=x+Math.cos(a)*rr,tz=z+Math.sin(a)*rr;if(free(tx,tz))best=[tx,tz];}
-  if(best)teleport(best[0],best[1],STAND,st.mode==='walk'?st.yaw:-Math.PI/2);
-});
+map.addEventListener('click',e=>{const r=map.getBoundingClientRect(),cx=(e.clientX-r.left)*map.width/r.width,cy=(e.clientY-r.top)*map.height/r.height;
+  const x=REAR+(cx-MP.pad)/(map.width-2*MP.pad)*L,z=-HW+(cy-MP.pad)/(map.height-2*MP.pad)*W;let best=null;
+  for(let rr2=0;rr2<1.2&&!best;rr2+=0.05)for(let a=0;a<6.28&&!best;a+=0.4){const tx=x+Math.cos(a)*rr2,tz=z+Math.sin(a)*rr2;if(inFoot(tx,tz)&&free(tx,tz))best=[tx,tz];}
+  if(best)teleport(best[0],best[1],null,st.mode==='walk'?st.yaw:-Math.PI/2);});
 
-/* ---------- Seçim ---------- */
-const ray=new THREE.Raycaster(), ndc=new THREE.Vector2();
-let selHelper=null;
-function pickAt(cx,cy){
-  ndc.set(cx,cy);ray.setFromCamera(ndc,camera);
-  const hits=ray.intersectObjects(scene.children,true);
-  for(const h of hits){
-    let o=h.object;if(o.userData.noPick||!o.visible)continue;
-    if(!o.parent.visible&&o.parent!==scene)continue;
-    while(o&&!o.userData.info)o=o.parent;
-    return o?{obj:o,dist:h.distance}:null;
-  }
-  return null;
-}
+/* ================= Seçim / etkileşim ================= */
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();let selHelper=null;
+function pickAt(cx,cy){ndc.set(cx,cy);ray.setFromCamera(ndc,camera);
+  for(const h of ray.intersectObjects(scene.children,true)){let o=h.object;if(o.userData.noPick||!o.visible)continue;if(o.parent&&o.parent!==scene&&!o.parent.visible)continue;
+    while(o&&!o.userData.info)o=o.parent;return o?{obj:o,dist:h.distance}:null;}return null;}
 const fmtmm=v=>String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' mm';
-function select(o){
+function select(o,fromAction){
   if(selHelper){scene.remove(selHelper);selHelper=null;}
-  const el=$('#sel');
-  if(!o){el.innerHTML='<p class="empty">Bir koltuğa, butona ya da kapıya tıkla. Kodu, ölçüsü ve konumu burada görünür.</p>';return;}
-  const d=o.userData.info;
-  selHelper=new THREE.BoxHelper(o,0xf0a617);selHelper.userData.noPick=true;scene.add(selHelper);
+  const el=$('#sel');if(!o){el.innerHTML='<p class="empty">Bir öğeye tıkla. Kodu, yüksekliği ve konumu burada görünür.</p>';return;}
+  const d=o.userData.info;selHelper=new THREE.BoxHelper(o,0xf0a617);selHelper.userData.noPick=true;scene.add(selHelper);
   const bb=new THREE.Box3().setFromObject(o),c=new THREE.Vector3();bb.getCenter(c);
-  const side=c.z>0.1?'Sağ (kapı tarafı)':c.z<-0.1?'Sol':'Orta';
-  const h=d.h!==undefined?d.h:c.y*1000;
+  const side=c.z>0.1?'Sağ (kapı tarafı)':c.z<-0.1?'Sol':'Orta',h=d.h!==undefined?d.h:c.y*1000;
   el.innerHTML=`<div class="code">${d.code}</div><h4>${d.name}</h4>${d.tag?`<span class="tag">${d.tag}</span>`:''}<p>${d.desc}</p>
-  <dl class="spec"><dt>${d.hLabel||'Yükseklik (taban üstü)'}</dt><dd>${c.y<0?'taban altı':fmtmm(h)}</dd><dt>Ön uçtan mesafe</dt><dd>${fmtmm((FRONT-c.x)*1000)}</dd><dt>Taraf</dt><dd>${side}</dd></dl>
+  <dl><dt>${d.hLabel||'Yükseklik (taban üstü)'}</dt><dd>${c.y<0?'taban altı':fmtmm(h)}</dd><dt>Ön uçtan mesafe</dt><dd>${fmtmm((FRONT-c.x)*1000)}</dd><dt>Taraf</dt><dd>${side}</dd></dl>
   ${d.sit?'<button class="sitbtn" id="sitBtn">Bu koltuğa otur</button>':''}`;
   if(d.sit)$('#sitBtn').onclick=()=>teleport(d.sit.x,d.sit.z,d.sit.eye,d.sit.yaw);
-  if(window.matchMedia('(max-width:760px)').matches)setPanel(true);
+  if(!fromAction&&matchMedia('(max-width:760px)').matches)setPanel(true);
 }
+function activate(o){if(!o)return;const d=o.userData.info;if(d.action){d.action();select(o,true);}else select(o);}
 
-/* ---------- Mod ---------- */
 function setMode(m){
   st.mode=m;document.body.classList.toggle('walk',m==='walk');
-  $('#mWalk').setAttribute('aria-pressed',m==='walk');$('#mOrbit').setAttribute('aria-pressed',m==='orbit');
-  $('#mRoof').disabled=m!=='orbit';
+  $('#mWalk').setAttribute('aria-pressed',m==='walk');$('#mOrbit').setAttribute('aria-pressed',m==='orbit');$('#mRoof').disabled=m!=='orbit';
   $('#crosshair').hidden=m!=='walk';if(m!=='walk')$('#hoverLabel').hidden=true;
   roofGroup.visible=m==='walk'?true:st.roof;
-  $('#hint').innerHTML=m==='walk'?'<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> yürü · <kbd>Shift</kbd> hızlı · sürükle: bak · tıkla: incele'
-    :'sürükle: döndür · tekerlek: yakınlaş · tıkla: incele';
+  $('#hint').innerHTML=m==='walk'?'<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> yürü · <kbd>Shift</kbd> hızlı · sürükle: bak<br>tıkla ya da <kbd>E</kbd>: bas / incele · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> kapılar'
+    :'sürükle: döndür · tekerlek: yakınlaş<br>tıkla: bas / incele · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> kapılar';
 }
-$('#mWalk').onclick=()=>setMode('walk');
-$('#mOrbit').onclick=()=>setMode('orbit');
+$('#mWalk').onclick=()=>setMode('walk');$('#mOrbit').onclick=()=>setMode('orbit');
 $('#mRoof').onclick=()=>{st.roof=!st.roof;roofGroup.visible=st.roof;$('#mRoof').setAttribute('aria-pressed',!st.roof);};
 function setPanel(open){$('#panel').classList.toggle('collapsed',!open);$('#panelToggle').setAttribute('aria-expanded',open);$('#panelToggle').textContent=open?'Kapat':'Aç';}
 $('#panelToggle').onclick=()=>setPanel($('#panel').classList.contains('collapsed'));
-if(!window.matchMedia('(max-width:760px)').matches)setPanel(true);
+if(!matchMedia('(max-width:760px)').matches)setPanel(true);
 
-/* ---------- Giriş ---------- */
-const cv=$('#view'), ptrs=new Map();let drag=null,pinch=0;
+/* ================= Giriş ================= */
+const cv=$('#view'),ptrs=new Map();let drag=null,pinch=0;
 cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(ptrs.size===1)drag={x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,t:performance.now(),moved:0};
+  if(ptrs.size===1)drag={x:e.clientX,y:e.clientY,t:performance.now(),moved:0};
   if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch=Math.hypot(a.x-b.x,a.y-b.y);drag=null;}});
-cv.addEventListener('pointermove',e=>{
-  if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+cv.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(ptrs.size===2&&st.mode==='orbit'){const [a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);if(pinch)st.orbit.r=Math.min(45,Math.max(4,st.orbit.r*pinch/d));pinch=d;return;}
   if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.x=e.clientX;drag.y=e.clientY;drag.moved+=Math.abs(dx)+Math.abs(dy);
   if(st.mode==='walk'){st.yaw+=dx*0.0045;st.pitch=Math.max(-1.35,Math.min(1.35,st.pitch+dy*0.0045));}
-  else{st.orbit.theta+=dx*0.006;st.orbit.phi=Math.max(0.12,Math.min(1.52,st.orbit.phi-dy*0.005));}
-});
+  else{st.orbit.theta+=dx*0.006;st.orbit.phi=Math.max(0.12,Math.min(1.52,st.orbit.phi-dy*0.005));}});
 const endPtr=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);
-  if(drag&&drag.moved<8&&performance.now()-drag.t<600&&e.type==='pointerup'){const r=cv.getBoundingClientRect();const p=pickAt((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);select(p&&p.obj);}
+  if(drag&&drag.moved<8&&performance.now()-drag.t<600&&e.type==='pointerup'){const r=cv.getBoundingClientRect();const p=pickAt((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);if(p)activate(p.obj);else select(null);}
   if(ptrs.size===0)drag=null;pinch=0;};
 cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
 cv.addEventListener('wheel',e=>{if(st.mode!=='orbit')return;e.preventDefault();st.orbit.r=Math.min(45,Math.max(4,st.orbit.r*(1+e.deltaY*0.001)));},{passive:false});
-addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,textarea'))return;const k=e.key.toLowerCase();st.keys[k]=true;
-  if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)&&document.activeElement===cv)e.preventDefault();
-  if(k==='enter'&&st.mode==='walk'&&document.activeElement===cv){const p=pickAt(0,0);select(p&&p.dist<4?p.obj:null);}});
+addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,textarea'))return;const k=e.key.toLowerCase();
+  if(['1','2','3'].includes(k)&&!e.repeat){doorToggle(+k,'Klavye '+k);return;}
+  if((k==='e'||k==='enter')&&!e.repeat&&st.mode==='walk'){const p=pickAt(0,0);if(p&&p.dist<4)activate(p.obj);return;}
+  st.keys[k]=true;if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)&&document.activeElement===cv)e.preventDefault();});
 addEventListener('keyup',e=>{st.keys[e.key.toLowerCase()]=false;});
 addEventListener('blur',()=>{st.keys={};});
-
-// dokunmatik joystick
 const joy=$('#joy'),knob=$('#knob');let joyId=null;
 function joySet(e){const r=joy.getBoundingClientRect();let x=(e.clientX-r.left-r.width/2)/(r.width/2),y=(e.clientY-r.top-r.height/2)/(r.height/2);const m=Math.hypot(x,y);if(m>1){x/=m;y/=m;}st.joy={x,y};knob.style.transform=`translate(${x*34}px,${y*34}px)`;}
 joy.addEventListener('pointerdown',e=>{joyId=e.pointerId;joy.setPointerCapture(e.pointerId);joySet(e);});
@@ -591,33 +708,30 @@ joy.addEventListener('pointermove',e=>{if(e.pointerId===joyId)joySet(e);});
 const joyEnd=e=>{if(e.pointerId!==joyId)return;joyId=null;st.joy={x:0,y:0};knob.style.transform='';};
 joy.addEventListener('pointerup',joyEnd);joy.addEventListener('pointercancel',joyEnd);
 
-/* ---------- Boyut ---------- */
 function resize(){const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 new ResizeObserver(resize).observe(cv);resize();
 
-/* ---------- Döngü ---------- */
-let last=performance.now(),hoverT=0;
+/* ================= Döngü ================= */
+let last=performance.now(),hoverT=0,slowT=0;
 setMode('walk');
 function frame(now){
   const dt=Math.min(0.05,(now-last)/1000);last=now;const k=st.keys;
+  updateDoors(dt);
+  V.rpm=620+Math.sin(now/310)*6+Math.sin(now/97)*3;
   if(st.mode==='walk'){
-    const turn=(k.arrowleft?1:0)-(k.arrowright?1:0);st.yaw+=turn*1.9*dt;
-    let f=(k.w||k.arrowup?1:0)-(k.s||k.arrowdown?1:0)-st.joy.y, s=(k.d?1:0)-(k.a?1:0)+st.joy.x;
+    st.yaw+=((k.arrowleft?1:0)-(k.arrowright?1:0))*1.9*dt;
+    let f=(k.w||k.arrowup?1:0)-(k.s||k.arrowdown?1:0)-st.joy.y,s=(k.d?1:0)-(k.a?1:0)+st.joy.x;
     const m=Math.hypot(f,s);if(m>1){f/=m;s/=m;}
-    if(m>0.05){
-      if(st.seated){st.seated=false;st.eyeT=STAND;}
-      const sp=(k.shift?2.6:1.35)*dt,sy=Math.sin(st.yaw),cy=Math.cos(st.yaw);
-      tryMove((-sy*f+cy*s)*sp,(-cy*f-sy*s)*sp);
-    }
-    st.eye+=(st.eyeT-st.eye)*Math.min(1,dt*6);
+    if(m>0.05){st.seated=false;const sp=(k.shift?2.6:1.35)*dt,sy=Math.sin(st.yaw),cy=Math.cos(st.yaw);tryMove((-sy*f+cy*s)*sp,(-cy*f-sy*s)*sp);}
+    const target=st.seated?st.seatEye:floorAt(st.x,st.z)+STAND;st.eye+=(target-st.eye)*Math.min(1,dt*6);
     camera.position.set(st.x,st.eye,st.z);camera.rotation.set(st.pitch,st.yaw,0);
     hoverT-=dt;if(hoverT<=0){hoverT=0.15;const p=pickAt(0,0),hl=$('#hoverLabel');
-      if(p&&p.dist<4){hl.textContent=p.obj.userData.info.name+'  ·  '+p.obj.userData.info.code;hl.hidden=false;}else hl.hidden=true;}
+      if(p&&p.dist<4){const d=p.obj.userData.info;hl.innerHTML='';hl.append(d.name+'  ·  '+d.code);if(d.action){const b=document.createElement('b');b.textContent='  ·  E: bas';hl.append(b);}hl.hidden=false;}else hl.hidden=true;}
   }else{
     const o=st.orbit,t=new THREE.Vector3(0,0.9,0);
-    camera.position.set(t.x+o.r*Math.sin(o.phi)*Math.cos(o.theta),t.y+o.r*Math.cos(o.phi),t.z+o.r*Math.sin(o.phi)*Math.sin(o.theta));
-    camera.lookAt(t);
+    camera.position.set(t.x+o.r*Math.sin(o.phi)*Math.cos(o.theta),t.y+o.r*Math.cos(o.phi),t.z+o.r*Math.sin(o.phi)*Math.sin(o.theta));camera.lookAt(t);
   }
+  slowT-=dt;if(slowT<=0){slowT=0.08;renderCluster();renderSignals();}
   if(selHelper)selHelper.update();
   renderer.render(scene,camera);drawMap();
   requestAnimationFrame(frame);
