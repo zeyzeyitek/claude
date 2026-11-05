@@ -65,9 +65,9 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outl
 #cluster{display:block;width:100%;height:auto;aspect-ratio:880/330;pointer-events:none;filter:drop-shadow(0 6px 18px rgba(0,0,0,.35))}
 
 #panel{top:calc(12px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));width:360px;display:flex;flex-direction:column;background:var(--panel);overflow:hidden}
-#panelHead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 8px 0 16px;border-bottom:1px solid var(--line)}
+#panelHead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 8px 0 10px;border-bottom:1px solid var(--line)}
 .tabs{display:flex;gap:2px}
-.tab{appearance:none;border:0;background:transparent;color:var(--muted);font:700 14px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;padding:14px 8px 12px;border-bottom:2px solid transparent;cursor:pointer}
+.tab{appearance:none;border:0;background:transparent;color:var(--muted);font:700 13px/1 var(--f-display);letter-spacing:.05em;text-transform:uppercase;padding:14px 6px 12px;border-bottom:2px solid transparent;cursor:pointer}
 .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 .tab .cnt{font:500 11px var(--f-mono);color:var(--muted);margin-left:4px}
 #panelToggle{display:none;appearance:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:5px;padding:6px 10px;font:600 12px/1 var(--f-display);letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
@@ -126,6 +126,21 @@ table.sig td:last-child{text-align:right}
 #sel dt{color:var(--muted)} #sel dd{font:500 12.5px var(--f-mono);text-align:right}
 .sitbtn{appearance:none;margin-top:10px;width:100%;border:0;border-radius:6px;padding:9px;background:var(--accent);color:var(--accent-ink);font:600 13px var(--f-display);letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
 
+.bgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.bchip{appearance:none;display:grid;gap:2px;justify-items:start;text-align:left;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:5px;padding:5px 6px;cursor:pointer;min-width:0}
+.bchip .top{display:flex;align-items:center;gap:4px;font:500 10px var(--f-mono);color:var(--muted)}
+.bchip .led{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.bchip.on .led{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.bchip b{font:600 11.5px/1.1 var(--f-display);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.bchip.todo b{color:var(--muted);font-weight:500}
+.bchip[aria-selected="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+#bcard{border:1px solid var(--line);border-radius:6px;padding:12px;display:grid;gap:8px}
+#bcard .code{font:500 11px var(--f-mono);color:var(--accent)}
+#bcard h4{margin:0;font:700 18px/1.15 var(--f-display)}
+#bcard p{margin:0;line-height:1.45;color:var(--muted);font-size:13px}
+#bcard dl{margin:0;display:grid;grid-template-columns:1fr auto;column-gap:12px}
+#bcard dt,#bcard dd{margin:0;padding:5px 0;border-bottom:1px solid var(--line)} #bcard dt{color:var(--muted)} #bcard dd{font:500 12.5px var(--f-mono);text-align:right}
+.brow{display:flex;gap:8px} .brow .pbtn{flex:1} .pbtn.ghost{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
 #joy{position:absolute;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));width:116px;height:116px;border-radius:50%;background:rgba(20,26,30,.28);border:2px solid rgba(255,255,255,.5);touch-action:none;display:none}
 #knob{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.3)}
 @media (any-pointer:coarse){ body.walk #joy{display:block} }
@@ -149,7 +164,7 @@ table.sig td:last-child{text-align:right}
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev C</div>
+    <div class="eyebrow">Konsept · Rev D</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
   </div>
 
@@ -168,6 +183,7 @@ table.sig td:last-child{text-align:right}
 
   <div id="hud">
     <div id="hudBar">
+      <button class="hbtn" id="hRelease" aria-pressed="false"><canvas width="44" height="44" id="hRelIcon"></canvas>Türfreigabe<span class="lamp"></span></button>
       <button class="hbtn" id="hLight" aria-pressed="true"><canvas width="44" height="44" id="hLightIcon"></canvas>İç aydınlatma<span class="lamp"></span></button>
     </div>
     <canvas id="cluster" width="880" height="330" aria-label="Gösterge paneli (cluster)"></canvas>
@@ -179,6 +195,7 @@ table.sig td:last-child{text-align:right}
     <div id="panelHead">
       <div class="tabs" role="tablist">
         <button class="tab" role="tab" id="tReq" aria-selected="true" aria-controls="pReq">Gereksinim<span class="cnt" id="reqCnt"></span></button>
+        <button class="tab" role="tab" id="tBtn" aria-selected="false" aria-controls="pBtn">Butonlar</button>
         <button class="tab" role="tab" id="tSig" aria-selected="false" aria-controls="pSig">Sinyal</button>
         <button class="tab" role="tab" id="tNav" aria-selected="false" aria-controls="pNav">Gezin</button>
       </div>
@@ -202,11 +219,23 @@ table.sig td:last-child{text-align:right}
       </section>
     </div>
 
+    <div class="pbody" id="pBtn" role="tabpanel" hidden>
+      <section>
+        <h3>Gösterge butonları <span id="btnCnt"></span></h3>
+        <div class="bgrid" id="bgrid" role="tablist" aria-label="Gösterge butonları"></div>
+        <p class="note">Her butonun kendi kartı var: seç, oku, bas. Yeşil nokta butonun açık olduğunu gösterir. Soluk yazılı butonların fonksiyonu henüz tanımlı değil; basınca sadece günlüğe yazılır. Kuralı yazdığın an eklerim.</p>
+      </section>
+      <section>
+        <h3>Seçili buton</h3>
+        <div id="bcard"></div>
+      </section>
+    </div>
+
     <div class="pbody" id="pSig" role="tabpanel" hidden>
       <section>
         <h3>Sinyaller</h3>
         <table class="sig"><tbody id="sig"></tbody></table>
-        <p class="note">Kapılar: sürücü panelindeki kırmızı butonlar veya <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>. Durak isteği: kırmızı butonlar. Özel istekler: kapı 3 çevresindeki mavi panel. İç aydınlatma: <kbd>L</kbd>.</p>
+        <p class="note">Kapılar: sürücü panelindeki kırmızı butonlar veya <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>. Durak isteği: kırmızı butonlar. Özel istekler: kapı 3 çevresindeki mavi panel. Türfreigabe: <kbd>F</kbd>. İç aydınlatma: <kbd>L</kbd>.</p>
       </section>
       <section>
         <h3>Olay günlüğü</h3>
@@ -259,9 +288,10 @@ const AXLES=[3.3,-2.6], ARCH=0.65;
 const KIND={stroller:{name:'Bebek arabası',sig:'StopReq_Stroller',code:'BTN-STR'},prm:{name:'Engelli',sig:'StopReq_PRM',code:'BTN-PRM'},elderly:{name:'Yaşlı yolcu',sig:'StopReq_Elderly',code:'BTN-ELD'}};
 
 /* ================= Araç durumu ================= */
-const V={speed:0,rpm:620,gear:'N',stopReq:false,req:{stroller:false,prm:false,elderly:false},temp:17,odo:47389,stopBrake:false,intLight:true,night:false};
+const V={speed:0,rpm:620,gear:'N',stopReq:false,req:{stroller:false,prm:false,elderly:false},temp:17,odo:47389,stopBrake:false,intLight:true,night:false,
+  release:false,kneel:false,ramp:false,rampPos:0,dim:false,engine:true,hazard:false,head:false,park:false,stopBrakeMan:false,doorLock:false};
 const DOOR_T=2.4;
-const doorS={};DOORS.forEach(d=>doorS[d.id]={state:'CLOSED',pos:0,pivots:[],btnMat:null,beepT:0});
+const doorS={};DOORS.forEach(d=>doorS[d.id]={state:'CLOSED',pos:0,pivots:[],btnMat:null,beepT:0,auto:false,hold:false,timer:0,openAt:0});
 const t0=performance.now();const now_s=()=>((performance.now()-t0)/1000).toFixed(1)+' s';
 const logEl=$('#log');let logN=0;
 function log(text,cls){
@@ -303,7 +333,11 @@ const SFX={
   beep:p=>tone(2300,0.15,{type:'square',vol:0.06,pos:p}),
   thunk:p=>{tone(140,0.22,{vol:0.45,pos:p,slide:55});noise(0.15,{freq:700,vol:0.15,pos:p});noise(0.4,{freq:3500,q:0.5,vol:0.12,pos:p,delay:0.05});},
   buzz:p=>{tone(360,0.5,{type:'sawtooth',vol:0.1,pos:p});tone(372,0.5,{type:'sawtooth',vol:0.08,pos:p});},
-  relay:()=>{tone(2600,0.025,{type:'square',vol:0.05});tone(180,0.07,{vol:0.14,delay:0.015});}
+  relay:()=>{tone(2600,0.025,{type:'square',vol:0.05});tone(180,0.07,{vol:0.14,delay:0.015});},
+  motor:()=>tone(170,2.8,{type:'sawtooth',vol:0.05,pos:[0.6,0.2,HW],slide:240,attack:0.25}),
+  horn:()=>{tone(392,0.7,{type:'sawtooth',vol:0.12,pos:[FRONT,0.5,0],attack:0.02});tone(494,0.7,{type:'sawtooth',vol:0.1,pos:[FRONT,0.5,0],attack:0.02});},
+  crank:()=>{noise(1.2,{freq:300,q:0.8,vol:0.25,pos:[-5.5,0.5,0],ftype:'lowpass'});tone(55,1.4,{type:'sawtooth',vol:0.12,pos:[-5.5,0.5,0],slide:38,attack:0.3});},
+  tick:()=>tone(1500,0.02,{type:'square',vol:0.04,pos:[5.4,1,-0.6]})
 };
 const doorPos=d=>[(d.x0+d.x1)/2,1.7,HW-0.1];
 
@@ -346,19 +380,19 @@ function btnTex(k,bg){return tex(128,128,(g)=>{g.fillStyle=bg||'#1f63c6';rr(g,0,
 (()=>{const g=$('#hLightIcon').getContext('2d');g.drawImage(ICON.lamp,4,4,36,36);})();
 
 /* ---------- Malzemeler ---------- */
-const moquette=tex(256,256,(g,w,h)=>{g.fillStyle='#253a58';g.fillRect(0,0,w,h);const cols=['#e3a72f','#4a86b8','#c9513f','#d7dde3'];
-  for(let i=0;i<260;i++){g.fillStyle=cols[i%4];const x=rnd()*w,y=rnd()*h,k=2+rnd()*5;if(i%3)g.fillRect(x,y,k*1.6,k*0.7);else{g.beginPath();g.arc(x,y,k*0.6,0,7);g.fill();}}});
+const moquette=tex(256,256,(g,w,h)=>{g.fillStyle='#1c3d75';g.fillRect(0,0,w,h);const cols=['#4f8fd8','#8fc1f0','#e8eef5','#f2b630'];
+  for(let i=0;i<300;i++){g.fillStyle=cols[i%9===0?3:i%3];const x=rnd()*w,y=rnd()*h,k=2+rnd()*5;if(i%3)g.fillRect(x,y,k*1.6,k*0.7);else{g.beginPath();g.arc(x,y,k*0.6,0,7);g.fill();}}});
 moquette.wrapS=moquette.wrapT=THREE.RepeatWrapping;moquette.repeat.set(2,2);
 const floorTex=tex(512,512,(g,w,h)=>{g.fillStyle='#596067';g.fillRect(0,0,w,h);for(let i=0;i<5000;i++){g.fillStyle=['#6b737a','#4b5157','#7d858b','#d8b23a'][i%17===0?3:i%3];g.fillRect(rnd()*w,rnd()*h,2,2);}});
 floorTex.wrapS=floorTex.wrapT=THREE.RepeatWrapping;floorTex.repeat.set(10,2.2);
 const MAT={
-  body:M('#f2f3f0',{roughness:0.35,metalness:0.1}), lining:M('#dfe3e3'), floor:M('#ffffff',{map:floorTex,roughness:0.95}),
+  body:M('#f2f3f0',{roughness:0.35,metalness:0.1}), livery:M('#1f57a8',{roughness:0.32,metalness:0.15}), key:M('#3b4247',{roughness:0.5}), ind:new THREE.MeshBasicMaterial({color:'#3a2a10'}), lining:M('#dfe3e3'), floor:M('#ffffff',{map:floorTex,roughness:0.95}),
   ceil:M('#f0f1ee'), frame:M('#1d2124',{roughness:0.45}),
   glass:new THREE.MeshStandardMaterial({color:'#33474f',transparent:true,opacity:0.3,roughness:0.06,metalness:0.25,depthWrite:false}),
   black:M('#121518',{roughness:0.5}), skirt:M('#2b3034',{roughness:0.6}),
   pole:M('#e9b625',{roughness:0.28,metalness:0.35}), fitting:M('#9da4a8',{roughness:0.3,metalness:0.7}),
   stripe:M('#c97c10',{roughness:0.5}), arch:M('#8e979d'), tire:M('#1a1c1e',{roughness:0.95}), rim:M('#d6d9da',{metalness:0.5,roughness:0.3}),
-  shell:M('#6a737b',{roughness:0.5}), fabric:M('#ffffff',{map:moquette,roughness:0.95}),
+  shell:M('#5d666e',{roughness:0.42,metalness:0.05}), fabric:M('#ffffff',{map:moquette,roughness:0.95}),
   red:M('#d8261c',{roughness:0.4,emissive:'#3a0000'}), stopBtn:M('#d8261c',{roughness:0.35,emissive:'#300000'}),
   blue:M('#1f63c6',{roughness:0.35,emissive:'#001438'}), green:M('#1e9c4a',{roughness:0.4,emissive:'#002410'}),
   yellow:M('#e8b818'), pad:M('#3e5570'), light:new THREE.MeshBasicMaterial({color:'#fffdf2'}),
@@ -396,15 +430,14 @@ const wheelRanges=AXLES.map(a=>[a-ARCH,a+ARCH]);
   const zc=s*(HW-WT/2),z0=zc-WT/2,z1=zc+WT/2,ze=s*(HW+0.003);
   const cuts=s>0?DOORS.map(d=>[d.x0,d.x1]):[];
   subtract([REAR,FRONT],cuts).forEach(([a,b])=>{
-    subtract([a,b],wheelRanges).forEach(([p,q])=>boxE(p,q,0,0.92,z0,z1,MAT.body));
-    wheelRanges.forEach(([p,q])=>{const pa=Math.max(p,a),qb=Math.min(q,b);if(qb>pa)boxE(pa,qb,0.72,0.92,z0,z1,MAT.body);});
+    subtract([a,b],wheelRanges).forEach(([p,q])=>{boxE(p,q,0,0.92,z0,z1,MAT.livery);boxE(p,q,0.004,0.92,s>0?z0-0.006:z1,s>0?z0:z1+0.006,MAT.lining);});
+    wheelRanges.forEach(([p,q])=>{const pa=Math.max(p,a),qb=Math.min(q,b);if(qb>pa)boxE(pa,qb,0.72,0.92,z0,z1,MAT.livery);});
     boxE(a,b,0.92,2.2,zc-0.01,zc+0.01,MAT.glass);
     boxE(a,b,0.9,0.95,ze-0.003,ze+0.003,MAT.black);boxE(a,b,2.17,2.24,ze-0.003,ze+0.003,MAT.black);
     const n=Math.max(1,Math.round((b-a)/1.45));
     for(let i=0;i<=n;i++){const px=a+(b-a)*i/n;boxE(Math.max(a,px-0.035),Math.min(b,px+0.035),0.92,2.2,z0,z1,MAT.frame);}
-    subtract([a,b],wheelRanges).forEach(([p,q])=>boxE(p,q,0.6,0.64,ze-0.002,ze+0.002,MAT.stripe));
   });
-  subtract([REAR,FRONT],wheelRanges).forEach(([p,q])=>{boxE(p,q,-0.15,0,z0,z1,MAT.body);boxE(p,q,-0.3,-0.15,z0,z1,MAT.skirt);});
+  subtract([REAR,FRONT],wheelRanges).forEach(([p,q])=>{boxE(p,q,-0.15,0,z0,z1,MAT.livery);boxE(p,q,-0.3,-0.15,z0,z1,MAT.skirt);});
   boxE(REAR,FRONT,2.2,ROOF,z0,z1,MAT.body);
   wheelRanges.forEach(([p,q])=>{boxE(p-0.04,q+0.04,0.72,0.77,ze-0.004,ze+0.004,MAT.black);boxE(p-0.04,p,-0.3,0.77,ze-0.004,ze+0.004,MAT.black);boxE(q,q+0.04,-0.3,0.77,ze-0.004,ze+0.004,MAT.black);});
 });
@@ -469,35 +502,68 @@ info(boxE(5.6,5.95,0,0.98,-IN,0.1,MAT.dash),{name:'Kokpit konsolu',code:'DASH-01
 boxE(5.35,5.6,0,0.78,-IN,0.02,MAT.dash);obst(5.35,5.95,-IN,0.1,'cab');
 info(boxE(5.6,5.95,0,0.9,0.1,IN,MAT.lining),{name:'Ön konsol',code:'DASH-02',desc:'Kapı 1 önü.'});obst(5.6,5.95,0.1,IN,'cab');
 boxE(5.5,5.66,0.98,1.25,-0.97,-0.47,MAT.dash);boxE(5.44,5.5,1.22,1.26,-0.97,-0.47,MAT.dash);
-function panelTex(kind){return tex(300,kind==='right'?480:220,(g,cw,ch)=>{
-  g.fillStyle='#3a4045';g.fillRect(0,0,cw,ch);g.save();g.translate(cw,0);g.rotate(Math.PI/2);
-  const DW=ch,DH=cw;g.fillStyle='#c9ced2';g.fillRect(6,6,DW-12,DH-12);
-  const btn=(x,y,w,h,ic)=>{g.fillStyle='#eef0f1';rr(g,x,y,w,h,5);g.fill();g.strokeStyle='#9aa1a6';g.lineWidth=1.5;g.stroke();
-    g.strokeStyle='#4d555b';g.lineWidth=2.5;g.beginPath();if(ic%3===0)g.rect(x+w/2-9,y+h/2-6,18,12);else if(ic%3===1){g.moveTo(x+w/2-10,y+h/2);g.lineTo(x+w/2+10,y+h/2);g.moveTo(x+w/2,y+h/2-7);g.lineTo(x+w/2,y+h/2+7);}else g.arc(x+w/2,y+h/2,7,0,6.3);g.stroke();};
-  let ic=0;g.fillStyle='#1b1f22';g.font='bold 22px sans-serif';g.textAlign='center';
-  if(kind==='right'){
-    for(let r=0;r<3;r++)for(let c=0;c<7;c++)btn(18+c*64,18+r*46,54,36,ic++);
-    g.fillStyle='#1b1f22';[60,140,220].forEach((x,i)=>{g.fillText('K'+(i+1),x,196);g.fillStyle='#9aa1a6';g.beginPath();g.arc(x,240,36,0,6.3);g.fill();g.fillStyle='#1b1f22';});
-    btn(300,214,70,50,1);btn(384,214,70,50,2);g.font='13px sans-serif';g.fillText('KAPI',140,286);
-  }else{
-    for(let c=0;c<2;c++)btn(14+c*66,18,56,40,ic++);btn(14,76,56,40,ic++);
-    g.fillStyle='#fff';rr(g,24,150,40,40,5);g.fill();g.fillStyle='#d8261c';g.beginPath();g.moveTo(44,156);g.lineTo(62,186);g.lineTo(26,186);g.closePath();g.fill();
-    g.fillStyle='#9aa1a6';g.beginPath();g.arc(160,240,36,0,6.3);g.fill();g.fillStyle='#1b1f22';g.font='bold 15px sans-serif';g.fillText('İÇ IŞIK',160,190);
-  }
-  g.restore();});}
-const rp=new THREE.Mesh(new THREE.PlaneGeometry(0.3,0.48),new THREE.MeshStandardMaterial({map:panelTex('right'),roughness:0.7}));rp.rotation.x=-Math.PI/2;rp.position.set(5.45,0.962,-0.22);scene.add(rp);
-boxE(5.3,5.6,0.78,0.96,-0.46,0.02,MAT.dash);info(rp,{name:'Sağ kumanda paneli',code:'DRV-PNL-R',desc:'Kapı butonları (kırmızı).'});
-const lp=new THREE.Mesh(new THREE.PlaneGeometry(0.3,0.22),new THREE.MeshStandardMaterial({map:panelTex('left'),roughness:0.7}));lp.rotation.x=-Math.PI/2;lp.position.set(5.45,0.962,-1.085);scene.add(lp);
-boxE(5.3,5.6,0.78,0.96,-IN,-0.975,MAT.dash);info(lp,{name:'Sol kumanda paneli',code:'DRV-PNL-L',desc:'İç aydınlatma, dörtlü flaşör.'});
+function panelBase(w,h,labels){return tex(w,h,(g,cw,ch)=>{g.fillStyle='#2c3237';g.fillRect(0,0,cw,ch);g.fillStyle='#3d444a';g.fillRect(6,6,cw-12,ch-12);
+  if(labels){g.save();g.translate(cw,0);g.rotate(Math.PI/2);g.fillStyle='#e8edf0';g.font='bold 18px sans-serif';g.textAlign='center';labels.forEach(([t,x,y])=>g.fillText(t,x,y));g.restore();}});}
+const rp=new THREE.Mesh(new THREE.PlaneGeometry(0.3,0.48),new THREE.MeshStandardMaterial({map:panelBase(300,480,[['K1',60,200],['K2',140,200],['K3',220,200]]),roughness:0.7}));
+rp.rotation.x=-Math.PI/2;rp.position.set(5.45,0.962,-0.22);scene.add(rp);boxE(5.3,5.6,0.78,0.96,-0.46,0.02,MAT.dash);
+info(rp,{name:'Sağ kumanda paneli',code:'DRV-PNL-R',desc:'21 fonksiyon butonu ve kırmızı kapı butonları.'});
+const lp=new THREE.Mesh(new THREE.PlaneGeometry(0.3,0.22),new THREE.MeshStandardMaterial({map:panelBase(300,220),roughness:0.7}));
+lp.rotation.x=-Math.PI/2;lp.position.set(5.45,0.962,-1.085);scene.add(lp);boxE(5.3,5.6,0.78,0.96,-IN,-0.975,MAT.dash);
+info(lp,{name:'Sol kumanda paneli',code:'DRV-PNL-L',desc:'9 fonksiyon butonu.'});
 [-0.40,-0.32,-0.24].forEach((z,i)=>{const id=i+1;
   cyl(0.034,0.012,MAT.chrome,5.36,0.968,z,null,24);
   const m=M('#e0261b',{roughness:0.3,emissive:'#300000'});doorS[id].btnMat=m;
-  info(cyl(0.026,0.026,m,5.36,0.98,z,null,24),{name:'Kapı butonu K'+id,code:'DRV-BTN-K'+id,desc:'Basınca Kapı '+id+' açılır, tekrar basınca kapanır. Hareket ederken yanıp söner, açıkken sürekli yanar.',tag:'Fonksiyon: aktif',
+  info(cyl(0.026,0.026,m,5.36,0.98,z,null,24),{name:'Kapı butonu K'+id,code:'DRV-BTN-K'+id,desc:'Basınca Kapı '+id+' açılır, tekrar basınca kapanır. Otomatik modda açık tutulan kapıyı da bu buton kapatır.',tag:'Fonksiyon: aktif',
     action:()=>doorToggle(id,'Sürücü paneli K'+id)});});
-// iç aydınlatma 3D butonu (sol panel)
-cyl(0.034,0.012,MAT.chrome,5.36,0.968,-1.06,null,24);
-const lightBtnMat=M('#f2f3ee',{roughness:0.3,emissive:'#3ddc84',emissiveIntensity:0.5});
-info(cyl(0.026,0.026,lightBtnMat,5.36,0.98,-1.06,null,24),{name:'İç aydınlatma butonu',code:'DRV-BTN-LGT',desc:'Yolcu salonu aydınlatmasını açar/kapatır. Göstergedeki butonla aynı fonksiyon.',tag:'Fonksiyon: aktif',action:()=>setIntLight(!V.intLight,'Sürücü paneli')});
+
+/* ---------- 30 gösterge butonu ---------- */
+const BTN=[
+ {label:'SERBEST',name:'Türfreigabe (kapı serbest)',type:'toggle',impl:true,get:()=>V.release,fn:(on,src)=>setRelease(on,src),desc:'Kapıları otomatik moda alır (DoorMode=AUTO). Bekleyen durak isteği varsa K2 ve K3 açılır. Normal istekte kapı tam açıldıktan 5 s sonra kendiliğinden kapanır. Bebek arabası veya engelli isteğinde kapı açık kalır, sürücü K butonuyla kapatır. Kapatınca otomatik açılmış kapılar kapanır.'},
+ {label:'DİZ',name:'Diz çöktürme (kneeling)',type:'toggle',impl:true,get:()=>V.kneel,fn:(on,src)=>{V.kneel=on;SFX.hiss([2,0,HW]);log(`${src} → Kneel=${on?1:0}`);},desc:'Aracın sağ tarafını alçaltır. Cluster’da DİZ lambası yanar.'},
+ {label:'RAMPA',name:'Rampa · kapı 2',type:'toggle',impl:true,get:()=>V.ramp,fn:(on,src)=>setRamp(on,src),desc:'Kapı 2 tamamen açıkken rampayı kaldırıma açar, tekrar basınca toplar. Rampa açıkken K2 kapanamaz.'},
+ {label:'İSTEK ↺',name:'Durak isteği sıfırla',type:'momentary',impl:true,fn:src=>resetStop(src),desc:'StopReq ve tüm özel istekleri sıfırlar.'},
+ {label:'IŞIK',name:'İç aydınlatma',type:'toggle',impl:true,get:()=>V.intLight,fn:(on,src)=>setIntLight(on,src),desc:'Yolcu salonu aydınlatmasını açar/kapatır. Cluster’da yeşil lamba.'},
+ {label:'IŞIK ½',name:'İç aydınlatma %50',type:'toggle',impl:true,get:()=>V.dim,fn:(on,src)=>{V.dim=on;applyLighting();log(`${src} → IntLightDim=${on?1:0}`);},desc:'Aydınlatmayı yarı güce düşürür (gece sürüşü).'},
+ {label:'SÜRÜCÜ',name:'Sürücü yeri lambası',type:'toggle'},
+ {label:'A/C',name:'Klima AUTO',type:'toggle'},
+ {label:'FAN +',name:'Fan hızı artır',type:'momentary'},
+ {label:'FAN −',name:'Fan hızı azalt',type:'momentary'},
+ {label:'ISITICI',name:'Konvektör ısıtıcı',type:'toggle'},
+ {label:'CAM ISI',name:'Ön cam ısıtma',type:'toggle'},
+ {label:'MİKROFON',name:'Anons mikrofonu',type:'toggle'},
+ {label:'ANONS',name:'Sonraki durak anonsu',type:'momentary',impl:true,fn:src=>announce(src),desc:'Gong çalar ve sonraki durağı sesli okur.'},
+ {label:'TABELA',name:'Hat tabelası güncelle',type:'momentary'},
+ {label:'BİLET',name:'Bilet sistemi',type:'toggle'},
+ {label:'KAMERA',name:'Kamera monitörü',type:'toggle'},
+ {label:'OKUL',name:'Okul taşıtı modu',type:'toggle'},
+ {label:'ALARM',name:'Sessiz alarm',type:'toggle'},
+ {label:'K.KİLİT',name:'Kapı kilidi',type:'toggle',impl:true,get:()=>V.doorLock,fn:(on,src)=>{V.doorLock=on;log(`${src} → DoorLock=${on?1:0}`+(on?' (kapılar açılamaz)':''));},desc:'Aktifken hiçbir kapı açılmaz. Sürücü ve otomatik açma engellenir.'},
+ {label:'MOTOR',name:'Motor start/stop',type:'toggle',impl:true,get:()=>V.engine,fn:(on,src)=>{V.engine=on;log(`${src} → Engine=${on?'RUN':'OFF'}`);if(on)SFX.crank();else SFX.thunk([-5.5,0.5,0]);},desc:'Motoru çalıştırır/durdurur. Devir göstergesi buna göre değişir.'},
+ {label:'FLAŞÖR',name:'Dörtlü flaşör',type:'toggle',impl:true,get:()=>V.hazard,fn:(on,src)=>{V.hazard=on;log(`${src} → Hazard=${on?1:0}`);},desc:'Dört köşedeki sinyaller yanıp söner. Cluster’da ok lambası, tık sesi.'},
+ {label:'FAR',name:'Farlar',type:'toggle',impl:true,get:()=>V.head,fn:(on,src)=>{V.head=on;applyLighting();log(`${src} → Headlights=${on?1:0}`);},desc:'Ön farları açar/kapatır.'},
+ {label:'SİS',name:'Sis farı',type:'toggle'},
+ {label:'AYNA ISI',name:'Ayna ısıtma',type:'toggle'},
+ {label:'SİLECEK',name:'Silecek',type:'toggle'},
+ {label:'KORNA',name:'Korna',type:'momentary',impl:true,fn:src=>{SFX.horn();log(`${src} → Horn`);},desc:'Korna çalar.'},
+ {label:'ASR OFF',name:'Çekiş kontrolü kapalı',type:'toggle'},
+ {label:'PARK',name:'Park freni',type:'toggle',impl:true,get:()=>V.park,fn:(on,src)=>{V.park=on;SFX.hiss([3,0,0]);log(`${src} → ParkBrake=${on?1:0}`);},desc:'Park frenini çeker/bırakır. Cluster’da P lambası.'},
+ {label:'DUR.FR',name:'Durak freni (manuel)',type:'toggle',impl:true,get:()=>V.stopBrakeMan,fn:(on,src)=>{V.stopBrakeMan=on;log(`${src} → BusStopBrake_Manual=${on?1:0}`);},desc:'Durak frenini kapı durumundan bağımsız devreye alır.'}
+];
+function keyTex(label){return tex(64,80,(g,cw,ch)=>{g.fillStyle='#d9dde0';g.fillRect(0,0,cw,ch);g.save();g.translate(cw,0);g.rotate(Math.PI/2);
+  let fs=16;g.font=`bold ${fs}px sans-serif`;while(g.measureText(label).width>72&&fs>8){fs--;g.font=`bold ${fs}px sans-serif`;}
+  g.fillStyle='#1c2125';g.textAlign='center';g.textBaseline='middle';g.fillText(label,40,38);g.restore();});}
+BTN.forEach((b,i)=>{
+  b.id='B'+String(i+1).padStart(2,'0');b.state=false;if(!b.get)b.get=()=>b.state;
+  let x,z;
+  if(i<21){const r=Math.floor(i/7),c=i%7;x=5.44+r*0.058;z=-0.44+c*0.065;b.where=`Sağ panel · ${r+1}. sıra, ${c+1}. sütun`;}
+  else{const j=i-21,r=Math.floor(j/3),c=j%3;x=5.44+r*0.058;z=-1.16+c*0.072;b.where=`Sol panel · ${r+1}. sıra, ${c+1}. sütun`;}
+  const body=boxE(x-0.022,x+0.022,0.962,0.976,z-0.027,z+0.027,MAT.key);
+  const top=new THREE.Mesh(new THREE.PlaneGeometry(0.034,0.05),new THREE.MeshStandardMaterial({map:keyTex(b.label),roughness:0.5}));
+  top.rotation.x=-Math.PI/2;top.position.set(x-0.004,0.9765,z);scene.add(top);
+  b.ledM=new THREE.MeshBasicMaterial({color:'#1a2024'});boxE(x+0.014,x+0.02,0.976,0.978,z-0.012,z+0.012,b.ledM);
+  const inf={name:b.id+' · '+b.name,code:'DASH-'+b.id,desc:b.desc||'Fonksiyon henüz tanımlı değil. Kuralı yazınca eklenecek.',tag:b.impl?'Fonksiyon: aktif':'Fonksiyon: sonra',action:()=>pressBtn(b,'Gösterge '+b.id)};
+  info(body,inf);info(top,inf);b.mesh=body;
+});
 const clusterTex=tex(880,330);
 const cl3=new THREE.Mesh(new THREE.PlaneGeometry(0.44,0.165),new THREE.MeshBasicMaterial({map:clusterTex}));cl3.position.set(5.495,1.11,-0.72);cl3.rotation.y=-Math.PI/2;cl3.rotateX(-0.28);scene.add(cl3);
 info(cl3,{name:'Gösterge paneli (cluster)',code:'DASH-CLU',desc:'Hız, devir, vites, kapı durumu ve uyarı lambaları. Sol alttaki HUD ile aynı.',tag:'Fonksiyon: aktif'});
@@ -508,33 +574,52 @@ const hubm=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.085,0.05,20),MAT.bl
 wheel.position.set(5.2,1.0,-0.72);wheel.rotation.y=Math.PI/2;wheel.rotateOnWorldAxis(new THREE.Vector3(0,0,1),0.55);scene.add(wheel);
 info(wheel,{name:'Direksiyon',code:'DRV-STW',desc:'Çap 450 mm.'});
 cyl(0.03,0.5,MAT.black,5.42,0.78,-0.72).rotation.z=0.9;
+// sinyal lambaları (dörtlü flaşör)
+[1,-1].forEach(s=>{
+  boxE(FRONT,FRONT+0.012,0.52,0.6,s*(HW-0.32),s*(HW-0.1),MAT.ind);
+  boxE(REAR-0.012,REAR,1.58,1.75,s*(HW-0.12),s*(HW-0.04),MAT.ind);
+  boxE(3.0,3.14,0.74,0.8,s*(HW+0.004)-0.003,s*(HW+0.004)+0.003,MAT.ind);
+});
 
 /* ================= Koltuklar ================= */
+const EXT=(s,d,bt,bs)=>{const g=new THREE.ExtrudeGeometry(s,{depth:d,bevelEnabled:true,bevelThickness:bt,bevelSize:bs,bevelSegments:3,curveSegments:10});g.translate(0,0,-d/2);return g;};
+const SHELL_GEO=(()=>{const s=new THREE.Shape();s.moveTo(0.23,0.455);s.lineTo(-0.13,0.43);s.quadraticCurveTo(-0.18,0.43,-0.19,0.5);s.lineTo(-0.33,1.0);
+  s.quadraticCurveTo(-0.345,1.065,-0.385,1.03);s.lineTo(-0.24,0.48);s.quadraticCurveTo(-0.225,0.395,-0.14,0.39);s.lineTo(0.21,0.395);s.quadraticCurveTo(0.255,0.405,0.23,0.455);
+  return EXT(s,0.4,0.014,0.01);})();
+const PAN_GEO=(()=>{const s=new THREE.Shape();s.moveTo(0.215,0.454);s.quadraticCurveTo(0.25,0.47,0.205,0.497);s.lineTo(-0.11,0.472);s.quadraticCurveTo(-0.15,0.466,-0.135,0.432);s.lineTo(0.215,0.454);
+  return EXT(s,0.35,0.012,0.008);})();
+const BACK_GEO=(()=>{const ux=-0.27,uy=0.963,nx=0.963,ny=0.27,T=0.036,p=t=>[-0.19+ux*t,0.5+uy*t];const A=p(0.07),B=p(0.44);
+  const C=[B[0]+nx*T,B[1]+ny*T],D=[A[0]+nx*T,A[1]+ny*T];
+  const s=new THREE.Shape();s.moveTo(A[0],A[1]);s.lineTo(B[0],B[1]);s.quadraticCurveTo(B[0]+nx*T*0.6+ux*0.03,B[1]+ny*T*0.6+uy*0.03,C[0],C[1]);
+  s.lineTo(D[0],D[1]);s.quadraticCurveTo(A[0]+nx*T*0.6-ux*0.03,A[1]+ny*T*0.6-uy*0.03,A[0],A[1]);
+  return EXT(s,0.35,0.012,0.008);})();
+const HANDLE_GEO=new THREE.TorusGeometry(0.05,0.011,8,18,Math.PI);
 function addSeat(x,side,n,pod,face,opt){
-  opt=opt||{};const wN=n*0.44,g=new THREE.Group(),fab=opt.mat||MAT.fabric;
-  box(0.44,0.09,wN-0.02,fab,0.03,0.44,0,g);
-  const back=box(0.07,0.55,wN-0.02,fab,-0.19,0.76,0,g);back.rotation.z=0.12;
-  const sb=box(0.03,0.6,wN,MAT.shell,-0.235,0.75,0,g);sb.rotation.z=0.12;
-  box(0.46,0.03,wN,MAT.shell,0.03,0.385,0,g);
-  if(pod===0||opt.legs)for(let i=0;i<n;i++)box(0.06,0.37,0.06,MAT.frame,0,0.185,-wN/2+0.22+i*0.44,g);
+  opt=opt||{};const g=new THREE.Group(),fab=opt.mat||MAT.fabric,shellM=opt.shell||MAT.shell,wN=n*0.44;
+  for(let i=0;i<n;i++){const lz=-wN/2+0.22+i*0.44;
+    [[SHELL_GEO,shellM],[PAN_GEO,fab],[BACK_GEO,fab]].forEach(([geo,m])=>{const o=new THREE.Mesh(geo,m);o.position.z=lz;g.add(o);});}
+  box(0.05,0.035,Math.max(0.1,wN-0.06),MAT.fitting,0,0.37,0,g);
+  if(side!==0&&pod===0){const az=-side*face*(wN/2-0.07);cyl(0.022,0.37,MAT.fitting,0.02,0.185,az,g,12);box(0.16,0.012,0.06,MAT.fitting,0.02,0.006,az,g);
+    box(0.06,0.14,0.03,MAT.fitting,0,0.33,side*face*(wN/2-0.015),g);}
+  if(opt.legs)for(let i=0;i<n;i++)cyl(0.02,0.37,MAT.fitting,0.02,0.185,-wN/2+0.22+i*0.44,g,10);
+  if(side!==0&&!opt.noHandle){const hd=new THREE.Mesh(HANDLE_GEO,MAT.pole);hd.rotation.y=Math.PI/2;hd.position.set(-0.37,1.035,-side*face*(wN/2-0.08));g.add(hd);}
   const z=side===0?0:side*(IN-wN/2);
-  if(side!==0&&!opt.noHandle){const lz=-side*face*(wN/2-0.05);box(0.04,0.14,0.04,MAT.pole,-0.24,1.1,lz,g);}
   g.position.set(x,pod,z);g.rotation.y=face>0?0:Math.PI;scene.add(g);
-  obst(x-0.26,x+0.26,z-wN/2,z+wN/2,opt.kind||'seat');
+  obst(face>0?x-0.3:x-0.26,face>0?x+0.26:x+0.3,z-wN/2,z+wN/2,opt.kind||'seat');
   const sitZ=side===0?0:z+side*0.22;
   info(g,{name:opt.driver?'Sürücü koltuğu':(n===5?'Arka sıra koltuğu (5’li)':'Yolcu koltuğu (çift)'),code:opt.code||code(side>0?'SEAT-R':side<0?'SEAT-L':'SEAT-B'),
-    desc:opt.desc||((face>0?'Öne bakan':'Arkaya bakan')+(pod>0.31?' · davlumbaz üstü podyum':'')+'.'),h:(0.485+pod)*1000,hLabel:'Oturma yüksekliği',
-    sit:{x:x+0.04*face,z:sitZ,eye:pod+1.22,yaw:face>0?-Math.PI/2:Math.PI/2}});
+    desc:opt.desc||((face>0?'Öne bakan':'Arkaya bakan')+(pod>0.31?' · davlumbaz üstü podyum':'')+'. Plastik kabuk, kumaş minder, sırt eğimi ~16°.'),h:(0.485+pod)*1000,hLabel:'Oturma yüksekliği',
+    sit:{x:x+0.02*face,z:sitZ,eye:pod+1.2,yaw:face>0?-Math.PI/2:Math.PI/2}});
   return {x,z,n,face,side,pod};
 }
 const P=0.32,rows=[];
-rows.push(addSeat(3.65,-1,2,P,1),addSeat(3.05,-1,2,P,-1),addSeat(2.25,-1,2,0,1));
+rows.push(addSeat(3.7,-1,2,P,1),addSeat(2.95,-1,2,P,1),addSeat(2.25,-1,2,0,1));
 rows.push(addSeat(-0.35,-1,2,0,1),addSeat(-1.1,-1,2,0,1),addSeat(-2.3,-1,2,P,1),addSeat(-3.0,-1,2,P,1),addSeat(-3.75,-1,2,0,1),addSeat(-4.5,-1,2,0,1));
-rows.push(addSeat(3.65,1,2,P,1),addSeat(3.05,1,2,P,-1));
+rows.push(addSeat(3.78,1,2,P,1),addSeat(2.92,1,2,P,-1));
 rows.push(addSeat(-0.75,1,2,0,1),addSeat(-1.5,1,2,0,1),addSeat(-2.3,1,2,P,1),addSeat(-3.0,1,2,P,1),addSeat(-4.9,1,2,0,1));
 info(boxE(REAR+0.08,-5.25,0,0.35,-IN,IN,MAT.arch),{name:'Arka platform',code:'PLT-01',desc:'Motor bölmesi üstü, 350 mm basamak.'});obst(REAR+0.08,-5.25,-IN,IN,'arch');
-addSeat(-5.6,0,5,0.35,1,{legs:true});
-addSeat(4.85,-1,1,0.08,1,{driver:true,mat:MAT.driverSeat,noHandle:true,kind:'cab',code:'DRV-SEAT',desc:'Havalı süspansiyonlu sürücü koltuğu.'});
+addSeat(-5.52,0,5,0.35,1,{legs:true});
+addSeat(4.85,-1,1,0.08,1,{driver:true,mat:MAT.driverSeat,shell:MAT.driverSeat,noHandle:true,kind:'cab',code:'DRV-SEAT',desc:'Havalı süspansiyonlu sürücü koltuğu.'});
 
 /* ================= Durak isteği butonları ================= */
 const stopAction=src=>()=>stopRequest(null,src);
@@ -543,14 +628,16 @@ rows.forEach(r=>{const c=code('BTN-STOP');
 
 /* ================= Engelli alanı (kapı 2 karşısı) ================= */
 const prmFloorTex=tex(256,256,g=>{g.fillStyle='#1f63c6';g.fillRect(0,0,256,256);g.drawImage(ICON.prm,40,40,176,176);});
-const prmFloor=new THREE.Mesh(new THREE.PlaneGeometry(1.8,0.85),new THREE.MeshStandardMaterial({map:prmFloorTex,roughness:0.9,transparent:true,opacity:0.85}));
-prmFloor.rotation.x=-Math.PI/2;prmFloor.position.set(0.95,0.004,-IN+0.43);scene.add(prmFloor);
+const prmFloor=new THREE.Mesh(new THREE.PlaneGeometry(1.6,0.85),new THREE.MeshStandardMaterial({map:prmFloorTex,roughness:0.9,transparent:true,opacity:0.85}));
+prmFloor.rotation.x=-Math.PI/2;prmFloor.position.set(0.87,0.004,-IN+0.43);scene.add(prmFloor);
 info(prmFloor,{name:'Tekerlekli sandalye alanı',code:'PRM-01',desc:'Arkaya bakan konum, kapı 2 rampasının karşısında.'});
-info(boxE(1.84,1.96,0.4,1.35,-IN,-0.45,MAT.pad),{name:'Sırt dayama paneli',code:'PRM-02',desc:'Arkaya bakan tekerlekli sandalye için.'});obst(1.84,1.96,-IN,-0.45,'prm');
+info(boxE(1.70,1.82,0.4,1.35,-IN,-0.45,MAT.pad),{name:'Sırt dayama paneli',code:'PRM-02',desc:'Arkaya bakan tekerlekli sandalye için.'});obst(1.70,1.82,-IN,-0.45,'prm');
 info(boxE(0.1,0.96,0.5,0.95,-IN,-IN+0.07,MAT.fabric),{name:'Katlanır koltuk (2)',code:'SEAT-F-01',desc:'Katlı konumda.',tag:'Fonksiyon: sonra'});obst(0.1,0.96,-IN,-IN+0.08,'prm');
-const rail=cyl(0.018,1.75,MAT.pole,0.98,0.85,-IN+0.09);rail.rotation.z=Math.PI/2;info(rail,{name:'Tutunma barı (yatay)',code:'RAIL-PRM',desc:'Yükseklik 850 mm.'});
-info(boxE(1.72,1.8,0.82,0.9,-IN,-IN+0.03,MAT.blue),{name:'Engelli butonu',code:'BTN-PRM-M1',desc:'Engelli alanında, sandalyeden erişim yüksekliğinde.',tag:'Fonksiyon: aktif',action:()=>stopRequest('prm','BTN-PRM-M1')});
-info(boxE(0.05,1.15,0.004,0.014,IN-0.85,IN-0.02,MAT.ramp),{name:'Katlanır rampa · kapı 2',code:'RAMP-01',desc:'Kapalı konumda.',tag:'Fonksiyon: sonra'});
+const rail=cyl(0.018,1.55,MAT.pole,0.88,0.85,-IN+0.09);rail.rotation.z=Math.PI/2;info(rail,{name:'Tutunma barı (yatay)',code:'RAIL-PRM',desc:'Yükseklik 850 mm.'});
+info(boxE(1.55,1.63,0.82,0.9,-IN,-IN+0.03,MAT.blue),{name:'Engelli butonu',code:'BTN-PRM-M1',desc:'Engelli alanında, sandalyeden erişim yüksekliğinde.',tag:'Fonksiyon: aktif',action:()=>stopRequest('prm','BTN-PRM-M1')});
+const rampPivot=new THREE.Group();rampPivot.position.set(0.6,0.006,HW-0.02);scene.add(rampPivot);
+const rampMesh=boxE(-0.55,0.55,-0.006,0.006,-0.83,0,MAT.ramp,rampPivot);boxE(-0.55,0.55,0.006,0.008,-0.83,-0.78,MAT.yellow,rampPivot);
+info(rampMesh,{name:'Katlanır rampa · kapı 2',code:'RAMP-01',desc:'Göstergedeki RAMPA butonuyla açılır. Kapı 2 tam açık olmalı. Açıkken K2 kapanamaz.',tag:'Fonksiyon: aktif'});
 
 /* ================= Arka bölüm: özel istek panelleri ================= */
 const specialMats={stroller:[],prm:[],elderly:[]};
@@ -582,7 +669,7 @@ poles.forEach(([x,z,tagd])=>{
   obst(x-0.03,x+0.03,z-0.03,z+0.03,'pole');
   const zz=z-Math.sign(z)*0.025,c=code('BTN-STOP');
   info(box(0.045,0.07,0.035,MAT.stopBtn,x,1.3,zz),{name:'Durak isteme butonu',code:c,desc:'Direk üstü, 1 300 mm.',tag:'Fonksiyon: aktif',action:stopAction(c)});
-  if((tagd==='d2'&&x>1)||(tagd==='d3'&&x>-4))info(box(0.05,0.07,0.04,MAT.green,x,1.1,zz),{name:'Kapı açma isteği',code:code('BTN-DOOR'),desc:'Yolcu kapı isteği.',tag:'Fonksiyon: sonra'});
+  if((tagd==='d2'&&x>1)||(tagd==='d3'&&x>-4)){const id=tagd==='d2'?2:3,c2=code('BTN-DOOR');info(box(0.05,0.07,0.04,MAT.green,x,1.1,zz),{name:'Kapı açma isteği · K'+id,code:c2,desc:'Türfreigabe aktifken basınca kapı '+id+' açılır ve 5 s sonra kapanır. Serbest değilse istek reddedilir.',tag:'Fonksiyon: aktif',action:()=>doorRequest(id,c2)});}
 });
 [[4.18,'Kapı 1'],[1.27,'Kapı 2'],[-3.53,'Kapı 3']].forEach(([x,n])=>{
   const v=box(0.12,0.2,0.08,MAT.validator,x-0.02,1.0,IN-0.2);box(0.08,0.06,0.005,M('#3fb070',{emissive:'#0e3a20'}),x-0.02,1.05,IN-0.24);
@@ -620,7 +707,10 @@ const REQS=[
   {id:'REQ-001',kind:'stroller',title:'Bebek arabası butonu',text:'Arka bölümde (kapı 3 çevresi) bebek arabası butonu bulunmalıdır. Basıldığında StopReq=1 ve StopReq_Stroller=1 olmalı, cluster’da bebek arabası lambası yanmalı. Kapı açıldığında istek sıfırlanmalıdır.',go:[-4.1,-0.02,null,0.1,-0.3]},
   {id:'REQ-002',kind:'prm',title:'Engelli butonu',text:'Arka bölümde engelli butonu bulunmalıdır. Basıldığında StopReq=1 ve StopReq_PRM=1 olmalı, cluster’da engelli ve RAMPA lambaları yanmalı. Kapı açıldığında istek sıfırlanmalıdır.',go:[-4.1,-0.02,null,0.1,-0.3]},
   {id:'REQ-003',kind:'elderly',title:'Yaşlı yolcu butonu',text:'Arka bölümde yaşlı yolcu butonu bulunmalıdır. Basıldığında StopReq=1 ve StopReq_Elderly=1 olmalı, cluster’da yaşlı yolcu lambası yanmalı. Kapı açıldığında istek sıfırlanmalıdır.',go:[-4.1,-0.02,null,0.1,-0.3]},
-  {id:'REQ-004',kind:'light',title:'İç aydınlatma (gösterge)',text:'Sürücü, gösterge üzerindeki iç aydınlatma butonuyla yolcu salonu aydınlatmasını açıp kapatabilmelidir. Durum cluster’da lamba ile gösterilmelidir.',go:[4.9,-0.72,1.3,-1.6,-0.3]}
+  {id:'REQ-004',kind:'light',title:'İç aydınlatma (gösterge)',text:'Sürücü, gösterge üzerindeki iç aydınlatma butonuyla yolcu salonu aydınlatmasını açıp kapatabilmelidir. Durum cluster’da lamba ile gösterilmelidir.',go:[4.9,-0.72,1.3,-1.6,-0.3]},
+  {id:'REQ-005',kind:'release',title:'Türfreigabe → otomatik kapı',text:'Türfreigabe butonuna basıldığında kapılar otomatik moda geçmelidir (DoorRelease=1, DoorMode=AUTO). Bekleyen durak isteği varsa K2 ve K3 otomatik açılmalıdır.',go:[4.9,-0.72,1.3,-1.92,-0.55]},
+  {id:'REQ-006',kind:'hold',title:'Özel istekte kapı açık kalır',text:'Otomatik modda bebek arabası veya engelli isteğiyle açılan kapı kendiliğinden kapanmamalı, sürücü kapatana kadar açık kalmalıdır.',go:[-4.1,-0.02,null,0.1,-0.3]},
+  {id:'REQ-007',kind:'autoclose',title:'Normal istekte 5 s sonra kapanma',text:'Otomatik modda normal durak isteğiyle açılan kapı, tam açıldıktan 5 saniye sonra kendiliğinden kapanmalıdır.',go:[-1.0,0.0,null,0.35,-0.05]}
 ];
 const RS={untested:'Test edilmedi',progress:'Devam ediyor',pass:'Geçti',fail:'Kaldı'};
 REQS.forEach(r=>{r.status='untested';r.ev=[];r.seen={};});
@@ -648,15 +738,48 @@ $('#reqReset').onclick=()=>{REQS.forEach(r=>{r.status='untested';r.ev=[];r.seen=
 renderReqs();
 
 /* ================= Fonksiyonlar ================= */
-function doorToggle(id,src){
-  const s=doorS[id],prev=s.state,d=DOORS[id-1];
-  s.state=(prev==='CLOSED'||prev==='CLOSING')?'OPENING':'CLOSING';s.beepT=0;
-  SFX.click([5.36,0.98,-0.32]);if(s.state==='OPENING')SFX.hiss(doorPos(d));
-  log(`${src} → Kapı ${id}: ${prev} → ${s.state}`);
+const AUTO_T=5;
+const doorBlockedOpen=id=>V.doorLock?'Kapı kilidi aktif':null;
+const doorBlockedClose=id=>(id===2&&(V.ramp||V.rampPos>0.01))?'Rampa açık':null;
+function openDoor(id,src,auto){
+  const s=doorS[id],d=DOORS[id-1],b=doorBlockedOpen(id);
+  if(b){log(`${src} → Kapı ${id} açılamadı: ${b}`,'warn');SFX.buzz(doorPos(d));return false;}
+  const prev=s.state;s.auto=!!auto;if(!auto){s.hold=false;s.timer=0;}
+  if(prev==='OPEN'||prev==='OPENING')return true;
+  s.state='OPENING';SFX.hiss(doorPos(d));log(`${src} → Kapı ${id}: ${prev} → OPENING`+(auto?' (otomatik)':''));return true;
 }
+function closeDoor(id,src,reason){
+  const s=doorS[id],d=DOORS[id-1],b=doorBlockedClose(id);
+  if(b){log(`${src} → Kapı ${id} kapanamadı: ${b}`,'warn');SFX.buzz(doorPos(d));return false;}
+  const prev=s.state;if(prev==='CLOSED'||prev==='CLOSING')return true;
+  if(s.hold&&prev==='OPEN'){const dur=(performance.now()-s.openAt)/1000,r=reqFor('hold');
+    if(dur>=AUTO_T+0.5)setReq(r,'pass',`Kapı ${id} ${dur.toFixed(1)} s açık kaldı, kendiliğinden kapanmadı; sürücü kapattı`);
+    else setReq(r,r.status==='pass'?'pass':'progress',`Kapı ${id} ${dur.toFixed(1)} s sonra kapatıldı. Doğrulama için 5 s'den uzun bekle`);}
+  s.state='CLOSING';s.beepT=0;s.timer=0;s.hold=false;log(`${src} → Kapı ${id}: ${prev} → CLOSING`+(reason?` (${reason})`:''));return true;
+}
+function doorToggle(id,src){SFX.click([5.36,0.98,-0.32]);const s=doorS[id];if(s.state==='CLOSED'||s.state==='CLOSING')openDoor(id,src,false);else closeDoor(id,src);}
+const holdNow=()=>V.req.stroller||V.req.prm;
+function autoOpen(ids,src){
+  const hold=holdNow();
+  ids.forEach(id=>{const s=doorS[id];
+    if(s.state==='OPEN'||s.state==='OPENING'){
+      if(hold){if(!s.hold)log(`Kapı ${id} açık tutuluyor (özel istek) → sürücü kapatmalı`);s.hold=true;s.timer=0;s.auto=true;}
+      else if(s.auto&&!s.hold&&s.state==='OPEN'){s.timer=AUTO_T;log(`Kapı ${id} otomatik kapanma sayacı yeniden başladı (${AUTO_T} s)`);}
+      return;}
+    if(openDoor(id,src,true))s.hold=hold;});
+}
+function setRelease(on,src){
+  V.release=on;log(`${src} → DoorRelease=${on?1:0}, DoorMode=${on?'AUTO':'MANUAL'}`);
+  if(on){const pending=V.stopReq;if(pending)autoOpen([2,3],'Türfreigabe');
+    const ok=!pending||V.doorLock||[2,3].every(id=>doorS[id].state==='OPENING'||doorS[id].state==='OPEN');
+    setReq(reqFor('release'),ok?'pass':'fail',`${src} → DoorMode=AUTO`+(pending?', bekleyen istek için K2+K3 açılıyor':' (bekleyen istek yok)'));}
+  else DOORS.forEach(d=>{const s=doorS[d.id];if(s.auto&&(s.state==='OPEN'||s.state==='OPENING')){s.hold=false;closeDoor(d.id,'Türfreigabe kapatıldı');}s.auto=false;s.timer=0;});
+}
+function doorRequest(id,src){SFX.click(camera.position.toArray());
+  if(!V.release){log(`${src} → Kapı ${id} isteği reddedildi (Türfreigabe yok)`,'warn');SFX.buzz(doorPos(DOORS[id-1]));return;}
+  log(`${src} → Kapı ${id} açma isteği`);autoOpen([id],src);}
 function stopRequest(kind,src){
-  const p=camera.position.toArray();SFX.click(p);
-  const firstStop=!V.stopReq;
+  SFX.click(camera.position.toArray());const firstStop=!V.stopReq;
   if(kind&&!V.req[kind]){V.req[kind]=true;log(`${src} → ${KIND[kind].sig}=1`);SFX.chime();}
   if(firstStop){V.stopReq=true;log(`${src} → StopReq=1`);if(!kind)SFX.ding();}
   else if(!kind)log(`${src} → StopReq zaten 1`);
@@ -664,7 +787,9 @@ function stopRequest(kind,src){
   if(kind){const r=reqFor(kind),rear=src.indexOf('BTN-')===0&&src!=='BTN-PRM-M1';
     if(V.stopReq&&V.req[kind])setReq(r,r.status==='pass'?'pass':'progress',`${src} basıldı → StopReq=1, ${KIND[kind].sig}=1, lamba yandı`+(rear?' (arka panel)':''));
     else setReq(r,'fail',`${src} basıldı ama sinyal set edilmedi`);}
+  if(V.release)autoOpen([2,3],src);
 }
+function resetStop(src){const any=V.stopReq||Object.values(V.req).some(Boolean);V.stopReq=false;Object.keys(V.req).forEach(k=>V.req[k]=false);refreshStop();log(`${src} → StopReq=0`+(any?' (tüm istekler sıfırlandı)':' (zaten 0)'));}
 function refreshStop(){
   MAT.stopBtn.emissive.set(V.stopReq?'#ff2a14':'#300000');MAT.blue.emissive.set(V.req.prm?'#2d7bff':'#001438');
   Object.keys(specialMats).forEach(k=>specialMats[k].forEach(m=>m.emissiveIntensity=V.req[k]?0.85:0.12));drawPIS();
@@ -675,40 +800,86 @@ function onDoorOpened(id){
     log(`Kapı ${id} açıldı → StopReq=0`+(cleared.length?', '+cleared.map(k=>KIND[k].sig+'=0').join(', '):'')+' (sıfırlandı)');}
   cleared.forEach(k=>{const r=reqFor(k);if(r.status==='progress'){if(!V.stopReq&&!V.req[k])setReq(r,'pass',`Kapı ${id} açıldı → ${KIND[k].sig}=0, lamba söndü`);else setReq(r,'fail',`Kapı ${id} açıldı ama istek sıfırlanmadı`);}});
 }
+const stripColor=()=>V.intLight?(V.dim?'#b9b3a2':'#fffdf2'):'#6f7376';
 function setIntLight(on,src){
   V.intLight=on;applyLighting();SFX.relay();log(`${src} → IntLight=${on?1:0}`);
-  const r=reqFor('light');r.seen[on?'on':'off']=true;if(src==='Gösterge')r.seen.cluster=true;
-  const ok=(MAT.light.color.getHexString()===(on?'fffdf2':'6f7376'));
-  if(!ok)setReq(r,'fail',`${src}: aydınlatma durumu sinyalle uyuşmuyor`);
+  const r=reqFor('light');r.seen[on?'on':'off']=true;if(src.indexOf('Gösterge')===0)r.seen.cluster=true;
+  if('#'+MAT.light.color.getHexString()!==stripColor())setReq(r,'fail',`${src}: aydınlatma durumu sinyalle uyuşmuyor`);
   else if(r.seen.on&&r.seen.off&&r.seen.cluster)setReq(r,'pass',`${src} → IntLight=${on?1:0}, şeritler ve cluster lambası ${on?'yandı':'söndü'} (aç + kapa doğrulandı)`);
   else setReq(r,'progress',`${src} → IntLight=${on?1:0}, şeritler ${on?'yandı':'söndü'}`+(r.seen.cluster?'':' (göstergeden de dene)'));
 }
 function applyLighting(){
-  const on=V.intLight,n=V.night;
-  MAT.light.color.set(on?'#fffdf2':'#6f7376');
-  intLights.forEach(p=>p.intensity=on?(n?0.85:0.32):0);
-  lightBtnMat.emissiveIntensity=on?0.6:0;
+  const on=V.intLight,n=V.night,f=V.dim?0.45:1;
+  MAT.light.color.set(stripColor());
+  intLights.forEach(p=>p.intensity=on?(n?0.85:0.32)*f:0);
   hemi.intensity=n?0.1:0.9;sun.intensity=n?0.03:0.75;streetLight.intensity=n?0.9:0;
   lampHead.material.color.set(n?'#ffe6b0':'#5f5a50');
   scene.background.set(n?SKY_NIGHT:SKY_DAY);scene.fog.color.set(n?SKY_NIGHT:SKY_DAY);
-  MAT.head.color.set(n?'#ffffff':'#e8e6da');
-  $('#hLight').setAttribute('aria-pressed',on);
+  MAT.head.color.set(V.head?'#ffffff':(n?'#4a4843':'#cfcdc4'));MAT.drl.color.set(V.engine?'#eaf6ff':'#7d8186');
 }
+function setRamp(on,src){
+  if(on){if(doorS[2].state!=='OPEN'){log(`${src} → Rampa açılamadı: Kapı 2 tam açık değil`,'warn');return false;}
+    V.ramp=true;doorS[2].hold=true;doorS[2].timer=0;log(`${src} → Ramp=DEPLOYING (K2 açık tutuluyor)`);}
+  else{V.ramp=false;log(`${src} → Ramp=STOWING`);}
+  SFX.motor();return true;
+}
+function announce(src){log(`${src} → Anons: Sonraki durak Belediye Meydanı`);SFX.chime();
+  try{if(window.speechSynthesis&&AU.on){const u=new SpeechSynthesisUtterance('Sonraki durak, Belediye Meydanı');u.lang='tr-TR';u.rate=0.95;setTimeout(()=>speechSynthesis.speak(u),900);}}catch(e){}}
+
+/* ---------- Butonlar sekmesi ---------- */
+let curBtn=BTN[0];
+function pressBtn(b,src){
+  SFX.click([5.45,0.98,-0.3]);b.presses=(b.presses||0)+1;
+  if(b.type==='toggle'){const next=!b.get();
+    if(b.impl){if(b.fn(next,src)===false)SFX.buzz([5.4,1,-0.5]);}
+    else{b.state=next;log(`${src} ${b.name} → ${next?1:0} (fonksiyon henüz tanımlı değil)`);}}
+  else{if(b.impl)b.fn(src);else log(`${src} ${b.name} → basıldı (fonksiyon henüz tanımlı değil)`);}
+  curBtn=b;renderBtnCard();refreshBtns();
+}
+const bgrid=$('#bgrid');
+bgrid.innerHTML=BTN.map((b,i)=>`<button class="bchip${b.impl?'':' todo'}" role="tab" data-b="${i}" aria-selected="false" title="${esc(b.name)}"><span class="top"><i class="led"></i>${b.id}</span><b>${esc(b.label)}</b></button>`).join('');
+$('#btnCnt').textContent=BTN.filter(b=>b.impl).length+' / '+BTN.length+' tanımlı';
+bgrid.addEventListener('click',e=>{const c=e.target.closest('.bchip');if(!c)return;curBtn=BTN[+c.dataset.b];renderBtnCard();});
+function renderBtnCard(){const b=curBtn;[...bgrid.children].forEach((c,i)=>c.setAttribute('aria-selected',BTN[i]===b));
+  $('#bcard').innerHTML=`<div class="code">${b.id} · DASH-${b.id}</div><h4>${esc(b.name)}</h4><p>${esc(b.desc||'Fonksiyon henüz tanımlı değil. Kuralı yazınca eklenecek.')}</p>
+  <dl><dt>Tip</dt><dd>${b.type==='toggle'?'Aç / kapa':'Anlık'}</dd><dt>Durum</dt><dd id="bState"></dd><dt>Fonksiyon</dt><dd>${b.impl?'Tanımlı':'Tanımsız'}</dd><dt>Konum</dt><dd>${b.where}</dd><dt>Basılma sayısı</dt><dd id="bPress"></dd></dl>
+  <div class="brow"><button class="pbtn" id="bPressBtn">Bas</button><button class="pbtn ghost" id="bShow">Kokpitte göster</button></div>`;
+  $('#bPressBtn').onclick=()=>pressBtn(b,'Panel '+b.id);
+  $('#bShow').onclick=()=>{teleport(4.9,-0.72,1.3,-1.92,-0.55);select(b.mesh,true);};updBtnCard();}
+function updBtnCard(){const b=curBtn,s=$('#bState'),p=$('#bPress');if(s)s.textContent=b.type==='toggle'?(b.get()?'AÇIK (1)':'KAPALI (0)'):'—';if(p)p.textContent=String(b.presses||0);}
+function refreshBtns(){
+  BTN.forEach((b,i)=>{const on=b.type==='toggle'&&b.get();b.ledM.color.set(on?'#3ddc84':'#1a2024');bgrid.children[i].classList.toggle('on',on);});
+  updBtnCard();$('#hLight').setAttribute('aria-pressed',V.intLight);$('#hRelease').setAttribute('aria-pressed',V.release);
+}
+renderBtnCard();
+
 function playerInDoor(d){return st.mode==='walk'&&st.x>d.x0-0.05&&st.x<d.x1+0.05&&st.z>IN-0.6&&st.z<HW+0.5;}
-let blink=0;
+let blink=0,hazOn=false,hazPrev=false;
 function updateDoors(dt){
   blink+=dt;const bl=(blink%0.6)<0.3;
+  hazOn=V.hazard&&(blink%0.8)<0.4;if(hazOn!==hazPrev){hazPrev=hazOn;MAT.ind.color.set(hazOn?'#ffa31a':'#3a2a10');if(V.hazard)SFX.tick();}
+  const rt=V.ramp?1:0;
+  if(V.rampPos!==rt){V.rampPos=rt>V.rampPos?Math.min(1,V.rampPos+dt/3):Math.max(0,V.rampPos-dt/3);if(V.rampPos===1)log('Ramp=DEPLOYED');if(V.rampPos===0)log('Ramp=STOWED');}
+  rampPivot.rotation.x=V.rampPos*(Math.PI+0.225);
   DOORS.forEach(d=>{const s=doorS[d.id];
     if(s.state==='CLOSING'&&playerInDoor(d)){s.state='OPENING';log(`Sıkışma algılandı → Kapı ${d.id} yeniden açılıyor`,'warn');SFX.buzz(doorPos(d));SFX.hiss(doorPos(d));}
-    if(s.state==='OPENING'){s.pos=Math.min(1,s.pos+dt/DOOR_T);if(s.pos>=1){s.state='OPEN';log(`Kapı ${d.id}: OPEN`);SFX.thunk(doorPos(d));onDoorOpened(d.id);}}
+    if(s.state==='OPENING'){s.pos=Math.min(1,s.pos+dt/DOOR_T);
+      if(s.pos>=1){s.state='OPEN';s.openAt=performance.now();log(`Kapı ${d.id}: OPEN`);SFX.thunk(doorPos(d));
+        if(s.auto){if(s.hold||holdNow()){s.hold=true;s.timer=0;log(`Kapı ${d.id} açık tutuluyor (bebek arabası / engelli) → sürücü kapatmalı`);}
+          else{s.timer=AUTO_T;log(`Kapı ${d.id} ${AUTO_T} s sonra otomatik kapanacak`);}}
+        onDoorOpened(d.id);}}
+    else if(s.state==='OPEN'&&s.auto&&!s.hold&&s.timer>0){s.timer-=dt;
+      if(s.timer<=0){s.timer=0;if(doorBlockedClose(d.id))s.timer=1;
+        else{const dur=(performance.now()-s.openAt)/1000;closeDoor(d.id,'Otomatik kapanma',dur.toFixed(1)+' s');
+          setReq(reqFor('autoclose'),Math.abs(dur-AUTO_T)<0.4?'pass':'fail',`Kapı ${d.id} tam açıldıktan ${dur.toFixed(1)} s sonra kendiliğinden kapandı`);}}}
     else if(s.state==='CLOSING'){s.beepT-=dt;if(s.beepT<=0){s.beepT=0.5;SFX.beep(doorPos(d));}
-      s.pos=Math.max(0,s.pos-dt/DOOR_T);if(s.pos<=0){s.state='CLOSED';log(`Kapı ${d.id}: CLOSED`);SFX.thunk(doorPos(d));}}
+      s.pos=Math.max(0,s.pos-dt/DOOR_T);if(s.pos<=0){s.state='CLOSED';s.auto=false;s.hold=false;s.timer=0;log(`Kapı ${d.id}: CLOSED`);SFX.thunk(doorPos(d));}}
     const p=s.pos,e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
     s.pivots.forEach(q=>q.pv.rotation.y=q.dir*e*Math.PI/2*0.94);
     s.btnMat.emissive.set(s.state==='CLOSED'?'#300000':s.state==='OPEN'?'#ff2a14':(bl?'#ff2a14':'#400000'));
   });
-  const sb=DOORS.some(d=>doorS[d.id].state!=='CLOSED');
-  if(sb!==V.stopBrake){V.stopBrake=sb;log(`BusStopBrake=${sb?1:0}`+(sb?' (kapı açık, hareket engeli)':''));}
+  const sb=V.stopBrakeMan||DOORS.some(d=>doorS[d.id].state!=='CLOSED');
+  if(sb!==V.stopBrake){V.stopBrake=sb;log(`BusStopBrake=${sb?1:0}`+(sb?' (hareket engeli aktif)':''));}
 }
 
 /* ================= Cluster ================= */
@@ -738,6 +909,7 @@ function drawCluster(g,w,h){
   g.fillStyle='#0a1014';rr(g,318,20,244,262,14);g.fill();g.strokeStyle='#1f282e';g.lineWidth=2;g.stroke();
   const d=new Date();g.fillStyle='#e8edf0';g.font=`600 20px ${F}`;g.textAlign='left';g.fillText(V.temp+' °C',332,46);
   g.textAlign='right';g.fillText(String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'),548,46);
+  g.textAlign='center';g.fillStyle='#8f9aa3';g.font=`500 15px ${F}`;g.fillText(V.odo.toLocaleString('tr-TR')+' km',440,45);
   g.strokeStyle='#1f282e';g.beginPath();g.moveTo(330,58);g.lineTo(550,58);g.stroke();
   // ikon lambalar
   [['stroller',V.req.stroller,'#2f7dff'],['prm',V.req.prm,'#2f7dff'],['elderly',V.req.elderly,'#2f7dff'],['lamp',V.intLight,'#2fb36b']].forEach(([k,on,c],i)=>{
@@ -748,9 +920,10 @@ function drawCluster(g,w,h){
     const col=s.state==='CLOSED'?'#3ddc84':s.state==='OPEN'?'#ff3b22':'#ffb000';
     g.fillStyle=col;g.fillRect(bx+bw-3,y0,7,y1-y0);if(s.state!=='CLOSED'){const e=s.pos*14;g.fillRect(bx+bw+4,y0,e,4);g.fillRect(bx+bw+4,y1-4,e,4);}
     g.textAlign='left';g.font=`700 16px ${F}`;g.fillStyle='#e8edf0';g.fillText('K'+dd.id,bx+bw+24,(y0+y1)/2-1);
-    g.font=`500 12px ${F}`;g.fillStyle=col;g.fillText(s.state==='CLOSED'?'KAPALI':s.state==='OPEN'?'AÇIK':s.state==='OPENING'?'AÇILIYOR':'KAPANIYOR',bx+bw+24,(y0+y1)/2+13);});
+    g.font=`500 12px ${F}`;g.fillStyle=col;g.fillText(s.state==='CLOSED'?'KAPALI':s.state==='OPEN'?(s.hold?'AÇIK · BEKLE':(s.auto&&s.timer>0?'AÇIK · '+Math.ceil(s.timer)+' s':'AÇIK')):s.state==='OPENING'?'AÇILIYOR':'KAPANIYOR',bx+bw+24,(y0+y1)/2+13);});
   g.fillStyle='#8f9aa3';g.font=`500 12px ${F}`;g.textAlign='center';g.fillText('ÖN',bx+bw/2,by-4);
-  g.fillStyle='#c9d1d6';g.font=`500 17px ${F}`;g.fillText(V.odo.toLocaleString('tr-TR')+' km',440,272);
+  [['AUTO',V.release,'#3ddc84'],['P',V.park,'#ff3b22'],['◀ ▶',hazOn,'#3ddc84'],['DİZ',V.kneel,'#ffb000']].forEach(([t,on,c],i)=>{const x=331+i*57;rr(g,x,254,51,24,5);g.fillStyle=on?c:'#151b20';g.fill();
+    g.fillStyle=on?'#0b0e10':'#3c464e';g.font=`700 14px ${F}`;g.textAlign='center';g.fillText(t,x+25.5,271);});
   const tt=[['DURAK FRENİ',V.stopBrake,'#ffb000'],['DURAK İSTEĞİ',V.stopReq,'#ffb000'],['RAMPA',V.req.prm,'#4d9bff'],['KAPI AÇIK',DOORS.some(x=>doorS[x.id].state!=='CLOSED'),'#ff3b22']];
   const pos=[[168,262],[168,296],[712,262],[712,296]];
   tt.forEach(([t,on,c],i)=>{const [x,y]=pos[i];g.font=`700 14px ${F}`;const tw=g.measureText(t).width+18;
@@ -758,13 +931,19 @@ function drawCluster(g,w,h){
 }
 const hudG=$('#cluster').getContext('2d'),c3G=clusterTex.image.getContext('2d');
 function renderCluster(){drawCluster(hudG,880,330);drawCluster(c3G,880,330);clusterTex.needsUpdate=true;}
-$('#hLight').onclick=()=>setIntLight(!V.intLight,'Gösterge');
+$('#hLight').onclick=()=>pressBtn(BTN[4],'Gösterge HUD');$('#hRelease').onclick=()=>pressBtn(BTN[0],'Gösterge HUD');
+(()=>{const g=$('#hRelIcon').getContext('2d');g.strokeStyle='#fff';g.lineWidth=3;g.strokeRect(9,6,26,32);g.beginPath();g.moveTo(22,6);g.lineTo(22,38);g.stroke();g.fillStyle='#3ddc84';g.font='bold 13px sans-serif';g.textAlign='center';g.fillText('A',22,26);})();
 
 /* ================= Sinyaller ================= */
-const bit=(v)=>`<span class="st ${v?'on':''}">${v?1:0}</span>`;
+const bit=v=>`<span class="st ${v?'on':''}">${v?1:0}</span>`;
+const rampState=()=>V.rampPos===0?'STOWED':V.rampPos===1?'DEPLOYED':V.ramp?'DEPLOYING':'STOWING';
 const SIG=[['VehSpeed',()=>V.speed.toFixed(1)+' km/h'],['EngineSpeed',()=>Math.round(V.rpm)+' rpm'],['Gear',()=>V.gear],
+  ['DoorRelease',()=>bit(V.release)],['DoorMode',()=>`<span class="st ${V.release?'on':''}">${V.release?'AUTO':'MANUAL'}</span>`],['DoorLock',()=>bit(V.doorLock)],
   ...DOORS.map(d=>['DoorState_K'+d.id,()=>{const s=doorS[d.id];const cls=s.state==='CLOSED'?'ok':s.state==='OPEN'?'open':'move';return `<span class="st ${cls}">${s.state}${s.state.endsWith('ING')?' '+Math.round(s.pos*100)+'%':''}</span>`;}]),
-  ['BusStopBrake',()=>bit(V.stopBrake)],['StopReq',()=>bit(V.stopReq)],['StopReq_Stroller',()=>bit(V.req.stroller)],['StopReq_PRM',()=>bit(V.req.prm)],['StopReq_Elderly',()=>bit(V.req.elderly)],['IntLight',()=>bit(V.intLight)]];
+  ...[2,3].map(id=>['DoorHold_K'+id,()=>bit(doorS[id].hold)]),
+  ...[2,3].map(id=>['AutoCloseTimer_K'+id,()=>doorS[id].timer>0?doorS[id].timer.toFixed(1)+' s':'—']),
+  ['BusStopBrake',()=>bit(V.stopBrake)],['StopReq',()=>bit(V.stopReq)],['StopReq_Stroller',()=>bit(V.req.stroller)],['StopReq_PRM',()=>bit(V.req.prm)],['StopReq_Elderly',()=>bit(V.req.elderly)],
+  ['Ramp_K2',()=>`<span class="st ${V.rampPos>0?'on':''}">${rampState()}</span>`],['Kneel',()=>bit(V.kneel)],['IntLight',()=>bit(V.intLight)],['Hazard',()=>bit(V.hazard)],['ParkBrake',()=>bit(V.park)]];
 $('#sig').innerHTML=SIG.map(([n],i)=>`<tr><td>${n}</td><td id="sg${i}"></td></tr>`).join('');
 const sigCells=SIG.map((_,i)=>$('#sg'+i));
 function renderSignals(){SIG.forEach(([,f],i)=>{const v=f();if(sigCells[i].innerHTML!==v)sigCells[i].innerHTML=v;});}
@@ -812,7 +991,7 @@ new MutationObserver(readCss).observe(document.documentElement,{attributes:true,
 function drawMap(){
   const w=map.width,h=map.height;mg.clearRect(0,0,w,h);
   mg.fillStyle=css['--panel'];mg.fillRect(mx(REAR),mz(-HW),mx(FRONT)-mx(REAR),mz(HW)-mz(-HW));
-  mg.fillStyle=css['--prm'];mg.globalAlpha=0.25;mg.fillRect(mx(0.05),mz(-IN),mx(1.84)-mx(0.05),mz(-0.32)-mz(-IN));mg.globalAlpha=1;
+  mg.fillStyle=css['--prm'];mg.globalAlpha=0.25;mg.fillRect(mx(0.05),mz(-IN),mx(1.7)-mx(0.05),mz(-0.32)-mz(-IN));mg.globalAlpha=1;
   obstacles.forEach(o=>{mg.fillStyle=o.kind==='seat'?css['--seat']:o.kind==='prm'?css['--prm']:o.kind==='pole'?css['--accent']:css['--obst'];
     if(o.kind==='pole'){mg.beginPath();mg.arc(mx((o.x0+o.x1)/2),mz((o.z0+o.z1)/2),2.5,0,7);mg.fill();return;}
     mg.fillRect(mx(o.x0),mz(o.z0),Math.max(2,mx(o.x1)-mx(o.x0)),Math.max(2,mz(o.z1)-mz(o.z0)));});
@@ -856,7 +1035,7 @@ function setMode(m){
   $('#crosshair').hidden=m!=='walk';if(m!=='walk')$('#hoverLabel').hidden=true;
   roofGroup.visible=m==='walk'?true:st.roof;
   camera.fov=m==='walk'?st.fov:50;camera.updateProjectionMatrix();zoomLabel();
-  $('#hint').innerHTML=m==='walk'?'<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> yürü · <kbd>Shift</kbd> hızlı · sürükle: bak · tekerlek: zoom<br>tıkla ya da <kbd>E</kbd>: bas · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> kapılar · <kbd>L</kbd> iç ışık'
+  $('#hint').innerHTML=m==='walk'?'<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> yürü · <kbd>Shift</kbd> hızlı · sürükle: bak · tekerlek: zoom<br>tıkla ya da <kbd>E</kbd>: bas · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> kapılar · <kbd>F</kbd> Türfreigabe · <kbd>L</kbd> ışık'
     :'sürükle: döndür · tekerlek: yakınlaş<br>tıkla: bas / incele · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> kapılar · <kbd>L</kbd> iç ışık';
 }
 $('#mWalk').onclick=()=>setMode('walk');$('#mOrbit').onclick=()=>setMode('orbit');
@@ -866,7 +1045,7 @@ $('#mSound').onclick=()=>{AU.on=!AU.on;$('#mSound').setAttribute('aria-pressed',
 function setPanel(open){$('#panel').classList.toggle('collapsed',!open);$('#panelToggle').setAttribute('aria-expanded',open);$('#panelToggle').textContent=open?'Kapat':'Aç';}
 $('#panelToggle').onclick=()=>setPanel($('#panel').classList.contains('collapsed'));
 if(!matchMedia('(max-width:760px)').matches)setPanel(true);
-const TABS={tReq:'pReq',tSig:'pSig',tNav:'pNav'};
+const TABS={tReq:'pReq',tBtn:'pBtn',tSig:'pSig',tNav:'pNav'};
 function showTab(pid){Object.entries(TABS).forEach(([t,p])=>{$('#'+t).setAttribute('aria-selected',p===pid);$('#'+p).hidden=p!==pid;});}
 Object.entries(TABS).forEach(([t,p])=>$('#'+t).onclick=()=>{showTab(p);setPanel(true);});
 
@@ -888,7 +1067,8 @@ cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endP
 cv.addEventListener('wheel',e=>{e.preventDefault();zoomBy(Math.exp(e.deltaY*0.0012));},{passive:false});
 addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,textarea'))return;const k=e.key.toLowerCase();
   if(['1','2','3'].includes(k)&&!e.repeat){doorToggle(+k,'Klavye '+k);return;}
-  if(k==='l'&&!e.repeat){setIntLight(!V.intLight,'Klavye L');return;}
+  if(k==='l'&&!e.repeat){pressBtn(BTN[4],'Klavye L');return;}
+  if(k==='f'&&!e.repeat){pressBtn(BTN[0],'Klavye F');return;}
   if((k==='+'||k==='=')){zoomBy(1/1.15);return;} if(k==='-'){zoomBy(1.15);return;} if(k==='0'){zoomReset();return;}
   if((k==='e'||k==='enter')&&!e.repeat&&st.mode==='walk'&&!(e.target.closest&&e.target.closest('button'))){const p=pickAt(0,0);if(p&&p.dist<4)activate(p.obj);return;}
   st.keys[k]=true;if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)&&document.activeElement===cv)e.preventDefault();});
@@ -908,7 +1088,7 @@ let last=performance.now(),hoverT=0,slowT=0;const fwd=new THREE.Vector3();
 setMode('walk');applyLighting();
 function frame(now){
   const dt=Math.min(0.05,(now-last)/1000);last=now;const k=st.keys;
-  updateDoors(dt);V.rpm=620+Math.sin(now/310)*6+Math.sin(now/97)*3;
+  updateDoors(dt);V.rpm+=((V.engine?620+Math.sin(now/310)*6+Math.sin(now/97)*3:0)-V.rpm)*Math.min(1,dt*(V.engine?3:1.5));
   if(st.mode==='walk'){
     st.yaw+=((k.arrowleft?1:0)-(k.arrowright?1:0))*1.9*dt;
     let f=(k.w||k.arrowup?1:0)-(k.s||k.arrowdown?1:0)-st.joy.y,s=(k.d?1:0)-(k.a?1:0)+st.joy.x;
@@ -925,7 +1105,7 @@ function frame(now){
   if(AU.ctx){const l=AU.ctx.listener,p=camera.position;camera.getWorldDirection(fwd);
     if(l.positionX){l.positionX.value=p.x;l.positionY.value=p.y;l.positionZ.value=p.z;l.forwardX.value=fwd.x;l.forwardY.value=fwd.y;l.forwardZ.value=fwd.z;l.upX.value=0;l.upY.value=1;l.upZ.value=0;}
     else{l.setPosition(p.x,p.y,p.z);l.setOrientation(fwd.x,fwd.y,fwd.z,0,1,0);}}
-  slowT-=dt;if(slowT<=0){slowT=0.08;renderCluster();renderSignals();}
+  slowT-=dt;if(slowT<=0){slowT=0.08;renderCluster();renderSignals();refreshBtns();}
   if(selHelper)selHelper.update();
   renderer.render(scene,camera);drawMap();
   requestAnimationFrame(frame);
