@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev D)
+# Otobüs Tasarım Stüdyosu (konsept, Rev E)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -26,3 +26,11 @@ Not: `index.html`, yayın sırasında HTML iskeletiyle sarılan bir artifact gö
 - Türfreigabe (B01): DoorMode=AUTO. Durak isteği → K2+K3 açılır, 5 s sonra kendiliğinden kapanır. Bebek arabası/engelli isteği → kapı açık kalır, sürücü kapatır. Yeşil kapı isteği butonları da otomatik modda çalışır.
 - Ek fonksiyonlar: rampa (K2 açıkken, açıkken K2 kapanmaz), kapı kilidi, motor, dörtlü flaşör, far, korna, anons, park freni, manuel durak freni, %50 ışık, diz çöktürme.
 - REQ-005..007: Türfreigabe, özel istekte açık kalma, 5 s otomatik kapanma.
+
+## Rev E
+- Bölgeleme: K1 (x > 2.9 m), K2 (−1.8…2.9 m), K3 (< −1.8 m). Her buton kendi bölgesine istek yazar; Türfreigabe açıkken yalnızca o bölgenin kapısı açılır, o kapı açılınca yalnızca o bölge sıfırlanır. Zeminde renkli bölge gösterimi ("Bölgeler").
+- STOP butonları: üzerinde STOP yazan kırmızı buton, krom halka, direk kelepçesi; istek varken hepsi parlar.
+- Kapı kanatlarında iç ve dış Öffnung (AÇ) butonu. Türfreigabe yoksa istek kaydedilir (buton yanıp söner), verilince kapı açılır.
+- Engelli + bebek arabası paneli kapı 2 karşısında (K2) ve kapı 3 direğinde (K3). Yaşlı yolcu butonu kapı 1–2 arasında (K2).
+- Kapı üstü durum tabelaları (DURACAK, KAPI SERBEST, KAPANIYOR 3, AÇIK · BEKLE) ve kapı LED'i. Cluster'da bölge sütunu.
+- REQ-008 bölgeleme, REQ-009 Öffnung.
