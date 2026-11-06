@@ -129,6 +129,9 @@ table.sig td:last-child{text-align:right}
 .kreis{display:grid;grid-template-columns:auto minmax(0,1fr) 46px;gap:8px 10px;align-items:center;font-size:13px}
 .kreis output{font:500 12px var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
 .kreis input{width:100%;accent-color:var(--accent)}
+#demo{top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 32px));padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;z-index:40;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+#demo .dtag{grid-column:1/-1;font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+#demo b{font:700 16px/1.2 var(--f-display);grid-column:1}#demo #demoStep{grid-column:1;font-size:13.5px;line-height:1.4;color:var(--ink)}#demo button{grid-column:2;grid-row:2/4}
 .bgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
 .bchip{appearance:none;display:grid;gap:2px;justify-items:start;text-align:left;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:5px;padding:5px 6px;cursor:pointer;min-width:0}
 .bchip .top{display:flex;align-items:center;gap:4px;font:500 10px var(--f-mono);color:var(--muted)}
@@ -267,7 +270,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev J</div>
+    <div class="eyebrow">Konsept · Rev K</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button></nav>
   </div>
@@ -289,10 +292,14 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hud">
     <div id="hudBar">
       <button class="hbtn" id="hRelease" aria-pressed="false"><canvas width="44" height="44" id="hRelIcon"></canvas>Türfreigabe<span class="lamp"></span></button>
+      <button class="hbtn" id="hDrive" aria-pressed="false"><canvas width="44" height="44" id="hDrvIcon"></canvas>Sür<span class="lamp"></span></button>
+      <button class="hbtn" id="hHome" hidden>Durağa dön</button>
       <button class="hbtn" id="hLight" aria-pressed="true"><canvas width="44" height="44" id="hLightIcon"></canvas>İç aydınlatma<span class="lamp"></span></button>
     </div>
     <canvas id="cluster" width="880" height="330" aria-label="Gösterge paneli (cluster)"></canvas>
   </div>
+
+  <div id="demo" class="float" hidden role="status" aria-live="polite"><span class="dtag">Otomatik test</span><b id="demoTitle"></b><span id="demoStep"></span><button id="demoStop" class="pbtn ghost">Durdur</button></div>
 
   <div id="joy" aria-hidden="true"><div id="knob"></div></div>
 
@@ -722,7 +729,7 @@ const doorIconTex=tex(128,128,g=>{g.strokeStyle='#fff';g.fillStyle='#fff';g.line
 
 /* ---------- 30 gösterge butonu ---------- */
 const BTN=[
- {label:'SERBEST',name:'Türfreigabe (kapı serbest)',type:'toggle',impl:true,get:()=>V.release,fn:(on,src)=>setRelease(on,src),desc:'Kapıları otomatik moda alır (DoorMode=AUTO). Bekleyen isteği olan bölgenin kapısı açılır (bölgeleme: K1, K2, K3 ayrı). Normal istekte kapı, açık kalma süresi (parametre, varsayılan 3 s) dolunca kendiliğinden kapanır; ışık bariyeri süreyi yeniden başlatır. Bebek arabası, engelli veya yaşlı yolcu isteğinde kapı açık kalır, sürücü K butonuyla kapatır. Kapatınca otomatik açılmış kapılar kapanır.'},
+ {label:'SERBEST',name:'Türfreigabe (kapı serbest)',type:'toggle',impl:true,get:()=>V.release,fn:(on,src)=>setRelease(on,src),desc:'Kapıları otomatik moda alır (DoorMode=AUTO). Bekleyen (önceden saklanmış) isteği olan bölgenin kapısı açılır (bölgeleme: K1, K2, K3 ayrı). Türfreigabe aktifken STOP butonları kapı açmaz (Vorspeicherung); kapı üstü AÇ butonları her zaman açar. Türfreigabe aktifken durak freni devrededir. Normal istekte kapı, açık kalma süresi (parametre, varsayılan 3 s) dolunca kendiliğinden kapanır; ışık bariyeri süreyi yeniden başlatır. Bebek arabası, engelli veya yaşlı yolcu isteğinde kapı açık kalır, sürücü K butonuyla kapatır. Kapatınca otomatik açılmış kapılar kapanır.'},
  {label:'DİZ',name:'Diz çöktürme (kneeling)',type:'toggle',impl:true,get:()=>V.kneel,fn:(on,src)=>{V.kneel=on;SFX.hiss([2,0,HW]);SFX.motor();log(`${src} → Kneel=${on?1:0} (${on?'sağ taraf alçalıyor':'normal seviyeye dönüyor'})`);},desc:'Aracın kapı tarafını (sağ) yaklaşık 70 mm alçaltır; gövde sağa yatar. Tekrar basınca normal seviyeye döner. Cluster’da DİZ lambası yanar.'},
  {label:'RAMPA',name:'Rampa · kapı 2',type:'toggle',impl:true,get:()=>V.ramp,fn:(on,src)=>setRamp(on,src),desc:'Kapı 2 tamamen açıkken rampayı kaldırıma açar, tekrar basınca toplar. Rampa açıkken K2 kapanamaz.'},
  {label:'İSTEK ↺',name:'Durak isteği sıfırla',type:'momentary',impl:true,fn:src=>resetStop(src),desc:'StopReq ve tüm özel istekleri sıfırlar.'},
@@ -912,7 +919,7 @@ function stopButton(x,y,z,rotY,zone,where,clamp){
   const f=new THREE.Mesh(new THREE.PlaneGeometry(0.066,0.099),MAT.stopFace);f.position.z=0.0135;g.add(f);
   const ring=new THREE.Mesh(STOP_RING,MAT.chrome);ring.position.set(0,0.0093,0.0145);g.add(ring);
   const c=code('BTN-STOP');
-  info(g,{name:'Durak butonu (STOP) · bölge K'+zone,code:c,desc:where+'. Basınca StopReq_K'+zone+'=1, tüm STOP butonları yanar. Türfreigabe açıksa yalnızca K'+zone+' açılır ve açık kalma süresi (parametre) dolunca kapanır.',tag:'Fonksiyon: aktif',action:()=>stopRequest(null,c,zone)});
+  info(g,{name:'Durak butonu (STOP) · bölge K'+zone,code:c,desc:where+'. Basınca StopReq_K'+zone+'=1, tüm STOP butonları yanar. Türfreigabe aktifken STOP kapıyı açmaz (Vorspeicherung); istek saklanır ve Türfreigabe verildiğinde K'+zone+' açılır.',tag:'Fonksiyon: aktif',action:()=>stopRequest(null,c,zone)});
   return g;
 }
 rows.forEach(r=>{const x=r.x+0.1*r.face,zn=zoneOf(x);
@@ -1002,6 +1009,7 @@ drawPIS();
 // gölge ayarları
 const busGroup=new THREE.Group();scene.add(busGroup);
 scene.children.slice(BUS_START).forEach(o=>{if(o===busGroup||o.userData.noBus||o.isLight)return;busGroup.add(o);});busGroup.add(roofGroup);
+const rig=new THREE.Group();scene.add(rig);rig.add(busGroup);const WHEELS=scene.children.filter(o=>o.userData.noBus);WHEELS.forEach(o=>rig.add(o));const camV=new THREE.Vector3();
 scene.traverse(o=>{if(!o.isMesh)return;const ms=Array.isArray(o.material)?o.material:[o.material];const basic=ms.some(m=>m.isMeshBasicMaterial),tr=ms.some(m=>m.transparent);
   o.castShadow=!basic&&!tr;o.receiveShadow=!basic;});
 ground.castShadow=false;
@@ -1091,10 +1099,10 @@ const REQS=[
   desc_en:'Request a stop, then press Door Release. DoorMode must become AUTO and the door of the requesting zone must open.',
   signals:['DoorRelease','DoorMode','StopReq'],go:[4.9,-0.72,1.3,-1.92,-0.55]},
  {id:'REQ-007',group:'door',kind:'autoclose',title_tr:'Normal istekte otomatik kapanma',title_en:'Auto-close after normal request',
-  en:'In automatic door mode, a door opened by a normal stop request shall close automatically once the hold open time (parameter, default 3 s) has elapsed after reaching the fully open position.',
+  en:'In automatic door mode, a door opened by a normal (pre-stored) stop request shall close automatically once the hold open time (parameter, default 3 s) has elapsed after reaching the fully open position.',
   tr:'Otomatik kapı modunda normal durak isteğiyle açılan kapı, tam açık konuma geldikten sonra açık kalma süresi (parametre, varsayılan 3 s) dolunca kendiliğinden kapanmalıdır.',
-  desc_tr:'Türfreigabe açıkken bir STOP butonuna bas. Kapı tam açıldıktan sonra kapanma, parametredeki süre ± 0,4 s içinde başlamalı.',
-  desc_en:'With Door Release active, press a STOP button. Closing must start within the parameter time ± 0.4 s after the door is fully open.',
+  desc_tr:'Önce bir STOP butonuna bas (istek saklanır), sonra Türfreigabe ver. Kapı tam açıldıktan sonra kapanma, parametredeki süre ± 0,4 s içinde başlamalı.',
+  desc_en:'First press a STOP button (the request is stored), then activate Door Release. Closing must start within the parameter time ± 0.4 s after the door is fully open.',
   signals:['DoorRelease','DoorState_K2','AutoCloseTimer_K2','AutoCloseTimer_K3','DoorHoldOpenTime_P'],go:[-1.0,0.0,null,0.35,-0.05]},
  {id:'2021.19178',rev:'BASE; 1',src:'list',group:'door',kind:'oeffnung',title_tr:'Kapı açma butonu: isteği sakla ya da doğrudan aç',title_en:'Door opening button: store request or open directly',
   en:'If the doors are closed and door release is disabled, door opening buttons shall send a stop request signal that is stored by the system to open the doors upon activation of door release; if door release is enabled, the opening buttons shall directly open the doors without generating a request.',
@@ -1105,9 +1113,15 @@ const REQS=[
  {id:'2021.18647',rev:'BASE; 4',src:'list',group:'door',kind:'barrier',title_tr:'Açık kalma süresi ve ışık bariyeri',title_en:'Hold open time and light barrier',
   en:'The standard hold open time is 3 seconds. If one of the detection of light barrier or safety edge is active, the time shall be restarted.',
   tr:'Standart açık kalma süresi 3 saniyedir. Işık bariyeri veya emniyet kenarı algılamalarından biri aktifse süre yeniden başlatılmalıdır.',
-  desc_tr:'Türfreigabe açıkken bir STOP butonuna bas. Kapı tam açılınca kapı boşluğunda dur (ışık bariyeri). Sayaç sen çekilene kadar başa dönmeli; çekildikten sonra süre dolunca kapı kapanmalı. Emniyet kenarı simülatörde henüz yok; süre bu bölümdeki parametreden değişir (2021.18637).',
-  desc_en:'With Door Release active, press a STOP button. When the door is fully open, stand in the doorway (light barrier). The timer must keep restarting until you step away; the door must close once the time has elapsed. The safety edge is not modelled yet; the time comes from the parameter in this section (2021.18637).',
+  desc_tr:'Türfreigabe açıkken kapı kanadındaki AÇ butonuna bas. Kapı tam açılınca kapı boşluğunda dur (ışık bariyeri). Sayaç sen çekilene kadar başa dönmeli; çekildikten sonra süre dolunca kapı kapanmalı. Emniyet kenarı simülatörde henüz yok; süre bu bölümdeki parametreden değişir (2021.18637).',
+  desc_en:'With Door Release active, press the OPEN button on the door leaf. When the door is fully open, stand in the doorway (light barrier). The timer must keep restarting until you step away; the door must close once the time has elapsed. The safety edge is not modelled yet; the time comes from the parameter in this section (2021.18637).',
   signals:['LightBarrier_K2','LightBarrier_K3','AutoCloseTimer_K2','DoorHoldOpenTime_P'],go:[0.6,0.2,null,Math.PI,-0.1]},
+ {id:'REQ-011',group:'door',kind:'vorsp',title_tr:'Vorspeicherung: Türfreigabe aktifken STOP kapı açmaz',title_en:'Pre-storage: STOP does not open the door while Door Release is active',
+  en:'While Door Release is active and the vehicle is stationary, pressing a STOP button shall not open the door; the request shall only be stored (Vorspeicherung). The door opening (Öffnung) buttons on the door leaves shall open their door whenever Door Release is active.',
+  tr:'Türfreigabe aktifken ve araç duruyorken STOP butonuna basılması kapıyı açmamalı, istek yalnızca saklanmalıdır (Vorspeicherung). Kapı kanatlarındaki açma (Öffnung) butonları ise Türfreigabe aktif olduğu her durumda kendi kapısını açmalıdır.',
+  desc_tr:'Türfreigabe’yi aç. Bir STOP butonuna bas: kapı kapalı kalmalı. Kapı kanadındaki AÇ butonuna bas: kapı açılmalı.',
+  desc_en:'Activate Door Release. Press a STOP button: the door must stay closed. Press the OPEN button on the door leaf: the door must open.',
+  signals:['DoorRelease','StopReq_K2','DoorState_K2','DoorOpenReq_K2'],go:[-0.12,0.4,null,0,-0.15]},
  {id:'REQ-008',group:'zone',kind:'zone',title_tr:'Özel istek yalnızca kendi bölgesini etkiler',title_en:'Special request affects only its own zone',
   en:'A special request button shall affect only its own door zone. For example, with Door Release active, the wheelchair button in zone K3 shall open and hold only door 3; doors 1 and 2 shall remain unchanged.',
   tr:'Özel istek butonu yalnızca kendi kapı bölgesini etkilemelidir. Örneğin Türfreigabe aktifken K3 bölgesindeki engelli butonu yalnızca kapı 3’ü açmalı ve açık tutmalı; kapı 1 ve kapı 2 değişmemelidir.',
@@ -1186,7 +1200,7 @@ function reqCard(r){
       <dl class="rmeta">${r.src==='list'?'<dt>Kaynak</dt><dd>Gereksinim listesi (orijinal metin)</dd>':''}${grpSel}<dt>Doğrulama</dt><dd>${r.verify==='auto'?'Otomatik test · simülatör':r.verify==='list'?'Simülatörde karşılığı henüz yok · durumu elle işaretle':'Manuel'}</dd>
         ${sigs?`<dt>Sinyaller</dt><dd class="chips">${sigs}</dd>`:''}
         ${r.verify==='auto'?`<dt>Kanıt</dt><dd class="evl">${r.ev.length?r.ev.slice(-4).map(esc).join('<br>'):'Henüz yok'}</dd>`:''}</dl>
-      <div class="ractions">${r.go?`<button class="pbtn" data-try="${esc(r.id)}">Simülatörde dene</button>`:''}${r.manual?`<button class="pbtn ghost" data-del="${r.mi}">Sil</button>`:''}</div>
+      <div class="ractions">${r.go?`<button class="pbtn" data-try="${esc(r.id)}">Simülatörde dene</button>`:''}${r.go&&DEMOS[r.kind]?`<button class="pbtn ghost" data-demo="${esc(r.id)}">▶ Otomatik test</button>`:''}${r.manual?`<button class="pbtn ghost" data-del="${r.mi}">Sil</button>`:''}</div>
     </div></details>`;
 }
 let OPEN_G=new Set(['door']);
@@ -1267,6 +1281,7 @@ $('#dmain').addEventListener('change',e=>{const s=e.target.closest('select[data-
 $('#dmain').addEventListener('click',e=>{
   const t=e.target.closest('button,a');if(!t)return;
   if(t.dataset.sig){e.preventDefault();setView('sigs',t.dataset.sig);}
+  if(t.dataset.demo){const r=REQS.find(x=>x.id===t.dataset.demo);if(r)runDemo(r);return;}
   if(t.dataset.try){const r=REQS.find(x=>x.id===t.dataset.try);if(r){setView('sim');const g=r.go;teleport(g[0],g[1],g[2],g[3],g[4]);}}
   if(t.dataset.cyc!==undefined){const m=manual[+t.dataset.cyc],o=['untested','progress','pass','fail'];m.status=o[(o.indexOf(m.status)+1)%4];saveManual();renderDocReqs();}
   if(t.dataset.lcyc){e.preventDefault();const r=IMPORTED.find(x=>x.id===t.dataset.lcyc);if(r){const o=['untested','progress','pass','fail'];r.status=o[(o.indexOf(r.status)+1)%4];
@@ -1293,7 +1308,7 @@ $('#dtoc').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)retu
 
 /* ================= Fonksiyonlar ================= */
 let AUTO_T=3; // DoorHoldOpenTime_P (2021.18637 / 2021.18647: standart 3 s)
-const doorBlockedOpen=id=>V.doorLock?'Kapı kilidi aktif':null;
+const doorBlockedOpen=id=>V.doorLock?'Kapı kilidi aktif':V.speed>3?'araç hareket halinde (>3 km/h, 2023.03864)':null;
 const doorBlockedClose=id=>(id===2&&(V.ramp||V.rampPos>0.01))?'Rampa açık':null;
 const zoneHold=id=>ZR[id].stroller||ZR[id].prm||ZR[id].elderly; // 2025.03465
 const snap=()=>DOORS.map(d=>doorS[d.id].state);
@@ -1323,6 +1338,7 @@ function autoOpen(ids,src,forceHold){
     if(openDoor(id,src,true))s.hold=hold;});
 }
 function setRelease(on,src){
+  if(on&&V.speed>0.5){log(`${src} → Türfreigabe verilemedi: araç duruyor olmalı (2021.18715)`,'warn');return false;}
   V.release=on;log(`${src} → DoorRelease=${on?1:0}, DoorMode=${on?'AUTO':'MANUAL'}`);
   if(on){const pend=[1,2,3].filter(z=>ZR[z].stop||doorS[z].reqOpen),hadOeff=[1,2,3].filter(z=>doorS[z].reqOpen);
     if(pend.length)autoOpen(pend,'Türfreigabe');
@@ -1338,10 +1354,11 @@ function doorRequest(id,src){
     r.seen.pending=true;setReq(r,r.seen.opened?'pass':'progress',`${src} → Türfreigabe yokken istek kaydedildi, kapı kapalı kaldı`+(r.seen.opened?'':' (şimdi Türfreigabe ver)'));return;}
   const before=snap();log(`${src} → Kapı ${id} açma isteği`);autoOpen([id],src);
   const only=DOORS.every((d,i)=>d.id===id||doorS[d.id].state===before[i]);r.seen.opened=only;
+  {const r2=reqFor('vorsp');if(doorS[id].state==='OPENING'||doorS[id].state==='OPEN'){r2.seen.oeff=true;setReq(r2,r2.seen.noopen?'pass':'progress',`${src} → Türfreigabe aktifken kapı üstü AÇ butonu K${id}'yi açtı`+(r2.seen.noopen?'':' (STOP butonuyla da dene)'));}}
   setReq(r,!only?'fail':(r.seen.pending?'pass':'progress'),only?`${src} → Türfreigabe açıkken yalnızca K${id} açıldı`+(r.seen.pending?'':' (Türfreigabe kapalıyken de dene)'):`${src} → başka kapılar da etkilendi`);
 }
 function stopRequest(kind,src,zone){
-  if(doorS[zone].state!=='CLOSED'){SFX.click(camera.position.toArray());log(`${src} → Kapı ${zone} kapalı değil, istek saklanmadı (2021.19171)`+(V.release?'; otomatik kapı mantığı uygulandı':''));if(V.release)autoOpen([zone],src,!!kind);return;}
+  if(doorS[zone].state!=='CLOSED'){SFX.click(camera.position.toArray());log(`${src} → Kapı ${zone} kapalı değil, istek saklanmadı (2021.19171)`+(V.release&&kind?'; otomatik kapı mantığı uygulandı':''));if(V.release&&kind)autoOpen([zone],src,true);return;}
   SFX.click(camera.position.toArray());const Z=ZR[zone],firstStop=!V.stopReq;
   if(kind&&!Z[kind]){Z[kind]=true;log(`${src} → ${KIND[kind].sig}_K${zone}=1`);SFX.chime();}
   if(!Z.stop){Z.stop=true;log(`${src} → StopReq_K${zone}=1`);}else if(!kind)log(`${src} → StopReq_K${zone} zaten 1`);
@@ -1351,7 +1368,9 @@ function stopRequest(kind,src,zone){
   if(kind){const r=reqFor(kind);
     if(V.stopReq&&V.req[kind])setReq(r,r.status==='pass'?'pass':'progress',`${src} (bölge K${zone}) → StopReq=1, ${KIND[kind].sig}=1, lamba yandı`);
     else setReq(r,'fail',`${src} basıldı ama sinyal set edilmedi`);}
-  if(V.release){const before=snap();autoOpen([zone],src);
+  if(V.release&&!kind){log(`${src} → Vorspeicherung: Türfreigabe aktif ve araç duruyor; STOP kapıyı açmaz, istek K${zone} için saklandı`);
+    const r=reqFor('vorsp');r.seen.noopen=doorS[zone].state==='CLOSED';setReq(r,r.seen.noopen?(r.seen.oeff?'pass':'progress'):'fail',r.seen.noopen?`${src} → Türfreigabe aktifken STOP basıldı, K${zone} kapalı kaldı`+(r.seen.oeff?'':' (şimdi kapı üstü AÇ butonunu dene)'):'STOP kapıyı açtı');}
+  else if(V.release){const before=snap();autoOpen([zone],src);
     if(kind&&kind!=='elderly'){const only=DOORS.every((d,i)=>d.id===zone||doorS[d.id].state===before[i]);
       setReq(reqFor('zone'),only&&doorS[zone].hold?'pass':'fail',only?`${src} → yalnızca K${zone} açıldı ve açık tutuluyor; diğer kapılar değişmedi`:`${src} → bölge dışı kapılar etkilendi`);}}
   else if(kind&&kind!=='elderly'){const r=reqFor('zone');if(r.status==='untested')setReq(r,'progress',`${src} (bölge K${zone}) istek kaydedildi. Bölge testi için Türfreigabe açıkken tekrarla`);}
@@ -1440,6 +1459,90 @@ function updateCab(dt){
     if(!CAB.buzzOn){CAB.buzzOn=true;log('DriverBuzzer=1: kabin kapısı açık, park freni çekili değil','warn');setReq(reqFor('cabbuzz'),'pass','Kabin kapısı açıkken park freni indirildi → sürücü buzzer’ı çaldı');}}
   else if(CAB.buzzOn){CAB.buzzOn=false;log('DriverBuzzer=0');}
 }
+/* ---------- Sürüş ---------- */
+const DRV={steer:0,warnT:0,eng:null};
+function toggleDrive(src){
+  if(st.driving){if(V.speed>0.5){log('Sürüş modundan çıkmak için önce dur (S / boşluk)','warn');return;}st.driving=false;log(`${src} → Sürüş modu kapalı`);}
+  else{teleport(4.9,-0.72,1.3,-Math.PI/2,-0.1);st.driving=true;log(`${src} → Sürüş modu: W gaz · S/boşluk fren · A/D direksiyon. Hareket için el freni inik, kapılar kapalı, Türfreigabe kapalı olmalı.`);}
+  $('#hDrive').setAttribute('aria-pressed',!!st.driving);
+}
+function updateDrive(dt,k){
+  let acc=0;
+  if(st.driving){
+    const th=Math.max(0,(k.w||k.arrowup?1:0)-st.joy.y),br=(k.s||k.arrowdown||k[' ']?1:0)||(st.joy.y>0.3?1:0);
+    const si=(k.a||k.arrowleft?1:0)-(k.d||k.arrowright?1:0)-st.joy.x;DRV.steer+=(si*0.5-DRV.steer)*Math.min(1,dt*3);
+    const blocked=!V.engine?'motor çalışmıyor':V.park?'el freni çekili (PARK tuşu ya da el freni kolu)':V.stopBrake?'durak freni aktif (kapı açık ya da Türfreigabe açık)':null;
+    if(th>0.05){if(blocked){DRV.warnT-=dt;if(DRV.warnT<=0){DRV.warnT=3;log('Sürüş engellendi: '+blocked,'warn');SFX.buzz([5,1,-0.7]);}}else acc=1.4*th;}
+    if(br)acc-=3.8;
+  }
+  let v=V.speed/3.6;v+=acc*dt;if(v>0)v-=(0.22+0.0025*v*v)*dt;if(V.park||V.stopBrake)v-=6*dt;v=Math.max(0,Math.min(50/3.6,v));
+  V.speed=v*3.6<0.05?0:v*3.6;
+  if(v>0){rig.rotation.y+=v/5.9*Math.tan(DRV.steer)*dt;rig.position.x+=Math.cos(rig.rotation.y)*v*dt;rig.position.z-=Math.sin(rig.rotation.y)*v*dt;WHEELS.forEach(w=>w.rotateY(-v*dt/0.48));}
+  V.gear=V.speed>0.3?'D':'N';
+  sun.position.set(rig.position.x+9,15,rig.position.z+11);sun.target.position.copy(rig.position);
+  $('#hHome').hidden=Math.hypot(rig.position.x,rig.position.z)<1&&Math.abs(rig.rotation.y)<0.05;
+  if(ready()&&V.engine){if(!DRV.eng){const c=AU.ctx,o=c.createOscillator(),f=c.createBiquadFilter(),g=c.createGain();o.type='sawtooth';f.type='lowpass';f.frequency.value=320;g.gain.value=0;o.connect(f);f.connect(g);g.connect(AU.master);o.start();DRV.eng={o,g};}
+    DRV.eng.o.frequency.value=28+V.rpm/22;DRV.eng.g.gain.value=st.mode==='walk'&&inFoot(st.x,st.z)?0.018+V.speed*0.0009:0.008;}
+  else if(DRV.eng)DRV.eng.g.gain.value=0;
+}
+function goHome(){if(V.speed>0.5){log('Önce dur','warn');return;}rig.position.set(0,0,0);rig.rotation.y=0;log('Araç durağa geri alındı');}
+
+/* ---------- Otomatik test (demo) ---------- */
+let DEMO=null;
+const BB=l=>BTN.find(b=>b.label===l);
+const CAMS={drv:[4.9,-0.72,1.3,-1.92,-0.45],door2:[0.6,-0.2,null,Math.PI,-0.08],k2p:[1.2,0.1,null,0,-0.25],pole2:[-0.12,0.4,null,0,-0.15],eld:[2.3,0.0,null,-2.8,-0.2],
+  k3p:[-4.1,0.6,null,2.33,-0.25],door3:[-4.1,-0.2,null,Math.PI,-0.08],cab:[4.85,0.65,null,0,-0.22],light:[-5.3,0,1.57,-Math.PI/2,0.18]};
+const cam=n=>{const c=CAMS[n];teleport(c[0],c[1],c[2],c[3],c[4]);};
+const TF=on=>{if(V.release!==on)pressBtn(BTN[0],'Demo · Gösterge B01');};
+const HOLDW=()=>2400+AUTO_T*1000;
+function resetSim(){
+  st.driving=false;$('#hDrive').setAttribute('aria-pressed',false);V.speed=0;rig.position.set(0,0,0);rig.rotation.y=0;
+  DOORS.forEach(d=>{Object.assign(doorS[d.id],{state:'CLOSED',pos:0,auto:false,hold:false,timer:0,reqOpen:false,lb:false,lbHit:false});doorS[d.id].pivots.forEach(q=>q.pv.rotation.y=0);});
+  [1,2,3].forEach(z=>Object.keys(ZR[z]).forEach(k=>ZR[z][k]=false));recompute();refreshStop();
+  Object.assign(V,{release:false,ramp:false,rampPos:0,doorLock:false,park:true,engine:true,intLight:true,dim:false,night:false,kneel:false});
+  Object.assign(CAB,{lock:true,timer:0,open:false,pos:0});applyLighting();refreshBtns();
+}
+const DEMOS={
+  stop:[['Kapı 2 bölgesindeki direkte STOP butonuna basılıyor',()=>{cam('pole2');stopRequest(null,'Demo · STOP',2);},2400],
+    ['Sürücü K2 butonuyla kapıyı açıyor; kapı açılmaya başlayınca istek silinmeli',()=>{cam('door2');doorToggle(2,'Demo · Sürücü K2');},3200],['Kapı kapatılıyor',()=>doorToggle(2,'Demo · Sürücü K2'),2800]],
+  stroller:[['Kapı 2 karşısındaki panelde bebek arabası butonuna basılıyor',()=>{cam('k2p');stopRequest('stroller','Demo · BTN-STR',2);},2600],
+    ['Sürücü kapı 2’yi açıyor',()=>{cam('door2');doorToggle(2,'Demo · Sürücü K2');},3200],['Kapı kapatılıyor',()=>doorToggle(2,'Demo · Sürücü K2'),2800]],
+  prm:[['Kapı 2 karşısındaki panelde engelli butonuna basılıyor',()=>{cam('k2p');stopRequest('prm','Demo · BTN-PRM',2);},2600],
+    ['Sürücü kapı 2’yi açıyor',()=>{cam('door2');doorToggle(2,'Demo · Sürücü K2');},3200],['Kapı kapatılıyor',()=>doorToggle(2,'Demo · Sürücü K2'),2800]],
+  elderly:[['Kapı 1–2 arasındaki yaşlı yolcu butonuna basılıyor',()=>{cam('eld');stopRequest('elderly','Demo · BTN-ELD',2);},2600],
+    ['Sürücü kapı 2’yi açıyor',()=>{cam('door2');doorToggle(2,'Demo · Sürücü K2');},3200],['Kapı kapatılıyor',()=>doorToggle(2,'Demo · Sürücü K2'),2800]],
+  release:[['Kapı 3 bölgesinde STOP isteği veriliyor (araç duruyor, Türfreigabe kapalı)',()=>{cam('door3');stopRequest(null,'Demo · STOP',3);},2200],
+    ['Sürücü Türfreigabe’ye basıyor → bekleyen K3 otomatik açılmalı',()=>TF(true),3600],['Türfreigabe kapatılıyor',()=>TF(false),3000]],
+  autoclose:[['STOP isteği önceden saklanıyor (Vorspeicherung)',()=>{cam('door2');stopRequest(null,'Demo · STOP',2);},2000],
+    ['Türfreigabe veriliyor → K2 açılıyor',()=>TF(true),2600],['Bekleniyor: açık kalma süresi dolunca kapı kendiliğinden kapanmalı',null,AUTO_T*1000+3200],['Türfreigabe kapatılıyor',()=>TF(false),1500]],
+  hold:[['Sürücü Türfreigabe’yi açıyor',()=>{cam('k2p');TF(true);},1800],['Bebek arabası butonuna basılıyor → K2 açılıp açık kalmalı',()=>stopRequest('stroller','Demo · BTN-STR',2),2200],
+    ['Bekleniyor: kapı açık kalma süresi geçse de kapanmamalı',()=>cam('door2'),HOLDW()],['Sürücü K2 ile kapatıyor',()=>doorToggle(2,'Demo · Sürücü K2'),3000],['Türfreigabe kapatılıyor',()=>TF(false),1200]],
+  oeffnung:[['Türfreigabe kapalıyken kapı kanadındaki AÇ butonuna basılıyor → istek saklanmalı, kapı kapalı kalmalı',()=>{cam('door2');doorRequest(2,'Demo · Öffnung K2');},2800],
+    ['Türfreigabe veriliyor → yalnızca K2 açılmalı',()=>TF(true),2800],['Kapı otomatik kapanıyor',null,AUTO_T*1000+3000],['Türfreigabe kapatılıyor',()=>TF(false),1200]],
+  barrier:[['Türfreigabe açılıyor ve AÇ butonuyla K2 açılıyor',()=>{cam('door2');TF(true);doorRequest(2,'Demo · Öffnung K2');},3000],
+    ['Yolcu kapı boşluğunda duruyor (ışık bariyeri) → sayaç başa dönmeli',()=>teleport(0.6,0.95,null,0,-0.1),3800],
+    ['Yolcu çekildi → süre dolunca kapı kapanmalı',()=>teleport(0.6,-0.1,null,Math.PI,-0.08),AUTO_T*1000+3000],['Türfreigabe kapatılıyor',()=>TF(false),1200]],
+  zone:[['Türfreigabe açılıyor',()=>{cam('k3p');TF(true);},1600],['Kapı 3 direğindeki engelli butonuna basılıyor → yalnızca K3 açılıp açık kalmalı',()=>stopRequest('prm','Demo · BTN-PRM',3),3400],
+    ['Sürücü K3’ü kapatıyor',()=>{cam('door3');doorToggle(3,'Demo · Sürücü K3');},3000],['Türfreigabe kapatılıyor',()=>TF(false),1200]],
+  light:[['Gece görünümü, yolcu salonu',()=>{V.night=true;applyLighting();cam('light');},1600],['Göstergedeki IŞIK butonuyla aydınlatma kapatılıyor',()=>pressBtn(BB('IŞIK'),'Gösterge demo'),2200],
+    ['Aydınlatma yeniden açılıyor',()=>pressBtn(BB('IŞIK'),'Gösterge demo'),2200],['Gündüz görünümüne dönülüyor',()=>{V.night=false;applyLighting();},800]],
+  cablock:[['El freni indiriliyor',()=>{cam('cab');if(V.park)pressBtn(BB('PARK'),'Demo · El freni');},1600],['KABİN butonuna basılıyor → kapı kilitli kalmalı',()=>pressBtn(BB('KABİN'),'Demo · Gösterge B07'),2200],
+    ['El freni çekiliyor',()=>pressBtn(BB('PARK'),'Demo · El freni'),1600],['KABİN butonuna basılıyor → mıknatıs 5 s bırakılmalı, kapı açılmalı',()=>pressBtn(BB('KABİN'),'Demo · Gösterge B07'),7000]],
+  cabbuzz:[['El freni çekiliyken KABİN ile kapı açılıyor',()=>{cam('cab');pressBtn(BB('KABİN'),'Demo · Gösterge B07');},1800],['El freni indiriliyor → sürücü buzzer’ı çalmalı',()=>pressBtn(BB('PARK'),'Demo · El freni'),2600],
+    ['El freni yeniden çekiliyor → buzzer susmalı',()=>pressBtn(BB('PARK'),'Demo · El freni'),5000]],
+  vorsp:[['Türfreigabe açılıyor (araç duruyor)',()=>{cam('pole2');TF(true);},1600],['STOP butonuna basılıyor → kapı AÇILMAMALI (Vorspeicherung)',()=>stopRequest(null,'Demo · STOP',2),2800],
+    ['Kapı kanadındaki AÇ butonuna basılıyor → kapı açılmalı',()=>{cam('door2');doorRequest(2,'Demo · Öffnung K2');},2800],['Kapı otomatik kapanıyor',null,AUTO_T*1000+3000],['Türfreigabe kapatılıyor',()=>TF(false),1200]]
+};
+const sleep=ms=>new Promise((res,rej)=>{const t0=performance.now();const tick=()=>{if(!DEMO||DEMO.cancel)return rej('cancel');if(performance.now()-t0>=ms)return res();requestAnimationFrame(tick);};tick();});
+async function runDemo(r){
+  if(DEMO)return;const sc=DEMOS[r.kind];if(!sc)return;
+  DEMO={r,cancel:false};ensureAudio();resetSim();setView('sim');log(`Otomatik test başladı: ${r.id}`,'req');
+  $('#demo').hidden=false;$('#demoTitle').textContent=r.id+' · '+r.title_tr;
+  let ok=true;
+  try{for(let i=0;i<sc.length;i++){const [cap,fn,ms]=sc[i];$('#demoStep').textContent=`Adım ${i+1}/${sc.length} · ${cap}`;if(fn)fn();await sleep(typeof ms==='function'?ms():ms);}
+    $('#demoStep').textContent='Tamamlandı → sonuç: '+RS[r.status];await sleep(1600);}catch(e){ok=false;}
+  DEMO=null;$('#demo').hidden=true;log(`Otomatik test ${ok?'bitti':'durduruldu'}: ${r.id} → ${RS[r.status]}`,'req');if(ok)openReq(r.id);
+}
 /* ---------- Butonlar sekmesi ---------- */
 let curBtn=BTN[0];
 function pressBtn(b,src){
@@ -1498,7 +1601,7 @@ function updateDoors(dt){
     s.pivots.forEach(q=>q.pv.rotation.y=q.dir*e*Math.PI/2*0.94);
     s.btnMat.emissive.set(s.state==='CLOSED'?'#300000':s.state==='OPEN'?'#ff2a14':(bl?'#ff2a14':'#400000'));
   });
-  const sb=V.stopBrakeMan||DOORS.some(d=>doorS[d.id].state!=='CLOSED');
+  const sb=V.stopBrakeMan||V.release||DOORS.some(d=>doorS[d.id].state!=='CLOSED');
   if(sb!==V.stopBrake){V.stopBrake=sb;log(`BusStopBrake=${sb?1:0}`+(sb?' (hareket engeli aktif)':''));}
 }
 
@@ -1563,6 +1666,8 @@ function drawCluster(g,w,h){
 const hudG=$('#cluster').getContext('2d'),c3G=clusterTex.image.getContext('2d');
 function renderCluster(){drawCluster(hudG,880,330);drawCluster(c3G,880,330);clusterTex.needsUpdate=true;}
 [1,2,3].forEach(k=>{const el=document.getElementById('kr'+k);el.addEventListener('input',()=>{KREIS[k].set=+el.value;applyLighting();});el.addEventListener('change',()=>log(`IntLight_Kreis${k}_Set = ${KREIS[k].set} %`));});
+$('#hDrive').onclick=()=>toggleDrive('Gösterge HUD');$('#hHome').onclick=()=>goHome();$('#demoStop').onclick=()=>{if(DEMO)DEMO.cancel=true;};
+(()=>{const g=$('#hDrvIcon').getContext('2d');g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();g.arc(22,22,15,0,7);g.stroke();g.beginPath();g.arc(22,22,4,0,7);g.fill();g.fillStyle='#fff';g.fill();[0,2.1,4.2].forEach(a=>{g.beginPath();g.moveTo(22,22);g.lineTo(22+15*Math.cos(a+1.57),22+15*Math.sin(a+1.57));g.stroke();});})();
 $('#hLight').onclick=()=>pressBtn(BTN[4],'Gösterge HUD');$('#hRelease').onclick=()=>pressBtn(BTN[0],'Gösterge HUD');
 (()=>{const g=$('#hRelIcon').getContext('2d');g.strokeStyle='#fff';g.lineWidth=3;g.strokeRect(9,6,26,32);g.beginPath();g.moveTo(22,6);g.lineTo(22,38);g.stroke();g.fillStyle='#3ddc84';g.font='bold 13px sans-serif';g.textAlign='center';g.fillText('A',22,26);})();
 
@@ -1604,6 +1709,7 @@ const SIG_DB=[
   ...[1,2,3].map(z=>sB('StopReq_Elderly_K'+z,'Durak istekleri',`Bölge K${z} yaşlı yolcu isteği`,`Elderly request, zone K${z}`,()=>ZR[z].elderly)),
   sB('IntLight','Aydınlatma','İç aydınlatma','Interior lighting',()=>V.intLight),
   ...[1,2,3].map(k=>sN('IntLight_Kreis'+k+'_Pct','Aydınlatma',KREIS[k].name+' parlaklığı',['Circuit 1 · front','Circuit 2 · passenger left','Circuit 3 · passenger right'][k-1]+' brightness',()=>KREIS[k].eff,'%')),
+  sB('Driving','Araç','Sürüş modu','Driving mode',()=>!!st.driving),sN('SteerAngle','Araç','Direksiyon açısı','Steering angle',()=>Math.round(DRV.steer*57.3),'°'),
   sB('FogLights','Araç','Sis farları','Fog lights',()=>V.fog),sB('Wiper','Araç','Silecek','Windscreen wiper',()=>V.wiper),sN('KneelLevel','Araç','Diz çöktürme seviyesi','Kneeling level',()=>Math.round(V.kneelPos*70),'mm'),
   sB('IntLightDim','Aydınlatma','İç aydınlatma %50','Interior lighting 50 %',()=>V.dim)
 ];
@@ -1697,7 +1803,7 @@ const QUICK=[['Sürücü yeri','Kapı + gösterge butonları',4.9,-0.72,1.3,-1.9
   ['Dışarı · kaldırım','Kapı 2 önü',0.6,3.4,null,0,-0.1]];
 $('#quick').innerHTML=QUICK.map((q,i)=>`<button class="qbtn" data-i="${i}"><b>${q[0]}</b><span>${q[1]}</span></button>`).join('');
 $('#quick').addEventListener('click',e=>{const b=e.target.closest('.qbtn');if(!b)return;const q=QUICK[+b.dataset.i];teleport(q[2],q[3],q[4],q[5],q[6]);});
-function teleport(x,z,eye,yaw,pitch){setMode('walk');st.x=x;st.z=z;st.seated=eye!=null;st.seatEye=eye||0;st.eye=eye!=null?eye:floorAt(x,z)+STAND;st.yaw=yaw;st.pitch=pitch==null?-0.06:pitch;$('#view').focus({preventScroll:true});}
+function teleport(x,z,eye,yaw,pitch){setMode('walk');st.driving=false;if($('#hDrive'))$('#hDrive').setAttribute('aria-pressed',false);st.x=x;st.z=z;st.seated=eye!=null;st.seatEye=eye||0;st.eye=eye!=null?eye:floorAt(x,z)+STAND;st.yaw=yaw;st.pitch=pitch==null?-0.06:pitch;$('#view').focus({preventScroll:true});}
 
 /* ================= Plan ================= */
 const map=$('#map'),mg=map.getContext('2d'),MP={pad:16};
@@ -1753,7 +1859,7 @@ function setMode(m){
   $('#crosshair').hidden=m!=='walk';if(m!=='walk')$('#hoverLabel').hidden=true;
   roofGroup.visible=m==='walk'?true:st.roof;
   camera.fov=m==='walk'?st.fov:50;camera.updateProjectionMatrix();zoomLabel();
-  $('#hint').innerHTML=m==='walk'?'<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> yürü · <kbd>Shift</kbd> hızlı · sürükle: bak · tekerlek: zoom<br>tıkla ya da <kbd>E</kbd>: bas · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> kapılar · <kbd>F</kbd> Türfreigabe · <kbd>L</kbd> ışık'
+  $('#hint').innerHTML=m==='walk'?'<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> yürü · <kbd>Shift</kbd> hızlı · sürükle: bak · tekerlek: zoom<br>tıkla ya da <kbd>E</kbd>: bas · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> kapılar · <kbd>F</kbd> Türfreigabe · <kbd>L</kbd> ışık · <kbd>G</kbd> sür'
     :'sürükle: döndür · tekerlek: yakınlaş<br>tıkla: bas / incele · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> kapılar · <kbd>L</kbd> iç ışık';
 }
 $('#mWalk').onclick=()=>setMode('walk');$('#mOrbit').onclick=()=>setMode('orbit');
@@ -1788,6 +1894,7 @@ addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,text
   if(['1','2','3'].includes(k)&&!e.repeat){doorToggle(+k,'Klavye '+k);return;}
   if(k==='l'&&!e.repeat){pressBtn(BTN[4],'Klavye L');return;}
   if(k==='f'&&!e.repeat){pressBtn(BTN[0],'Klavye F');return;}
+  if(k==='g'&&!e.repeat){toggleDrive('Klavye G');return;}
   if((k==='+'||k==='=')){zoomBy(1/1.15);return;} if(k==='-'){zoomBy(1.15);return;} if(k==='0'){zoomReset();return;}
   if((k==='e'||k==='enter')&&!e.repeat&&st.mode==='walk'&&!(e.target.closest&&e.target.closest('button'))){const p=pickAt(0,0);if(p&&p.dist<4)activate(p.obj);return;}
   st.keys[k]=true;if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)&&document.activeElement===cv)e.preventDefault();});
@@ -1808,23 +1915,24 @@ setMode('walk');applyLighting();
 const hashView=()=>{const h=location.hash;if(h==='#gereksinimler')setView('reqs');else if(h==='#sinyaller')setView('sigs');};hashView();addEventListener('hashchange',hashView);
 function frame(now){
   const dt=Math.min(0.05,(now-last)/1000);last=now;const k=st.keys;
-  updateDoors(dt);updateCab(dt);
+  updateDoors(dt);updateCab(dt);updateDrive(dt,k);
   {const kt=V.kneel?1:0;if(V.kneelPos!==kt){V.kneelPos=kt>V.kneelPos?Math.min(1,V.kneelPos+dt/2.2):Math.max(0,V.kneelPos-dt/2.2);if(V.kneelPos===kt)log(kt?'Kneel: alçak seviye':'Kneel: normal seviye');}
    const kp=V.kneelPos;busGroup.rotation.x=kp*0.0275;busGroup.position.y=-kp*0.035;}
   {const ws=V.wiper||WIPERS.wph>0.02;if(ws){WIPERS.wph=(WIPERS.wph||0)+dt/1.5;if(!V.wiper&&WIPERS.wph%1<0.02)WIPERS.wph=0;}const a=(1-Math.cos((WIPERS.wph||0)*Math.PI*2))/2*1.6;WIPERS.forEach(w=>w.rotation.x=-a);}
-  BTN.forEach(b=>{if(b.pressT>0)b.pressT-=dt;if(b.flashT>0)b.flashT-=dt;const pz=b.pressT>0?-0.006:0;b.mesh.position.z=0.012+pz;b.top.position.z=0.0205+pz;b.led.position.z=0.0208+pz;});V.rpm+=((V.engine?620+Math.sin(now/310)*6+Math.sin(now/97)*3:0)-V.rpm)*Math.min(1,dt*(V.engine?3:1.5));
+  BTN.forEach(b=>{if(b.pressT>0)b.pressT-=dt;if(b.flashT>0)b.flashT-=dt;const pz=b.pressT>0?-0.006:0;b.mesh.position.z=0.012+pz;b.top.position.z=0.0205+pz;b.led.position.z=0.0208+pz;});V.rpm+=((V.engine?620+V.speed*30+Math.sin(now/310)*6+Math.sin(now/97)*3:0)-V.rpm)*Math.min(1,dt*(V.engine?3:1.5));
   if(st.mode==='walk'){
-    st.yaw+=((k.arrowleft?1:0)-(k.arrowright?1:0))*1.9*dt;
-    let f=(k.w||k.arrowup?1:0)-(k.s||k.arrowdown?1:0)-st.joy.y,s=(k.d?1:0)-(k.a?1:0)+st.joy.x;
+    if(!st.driving)st.yaw+=((k.arrowleft?1:0)-(k.arrowright?1:0))*1.9*dt;
+    let f=st.driving?0:(k.w||k.arrowup?1:0)-(k.s||k.arrowdown?1:0)-st.joy.y,s=st.driving?0:(k.d?1:0)-(k.a?1:0)+st.joy.x;
     const m=Math.hypot(f,s);if(m>1){f/=m;s/=m;}
     if(m>0.05){st.seated=false;const sp=(k.shift?2.6:1.35)*dt,sy=Math.sin(st.yaw),cy=Math.cos(st.yaw);tryMove((-sy*f+cy*s)*sp,(-cy*f-sy*s)*sp);}
     const target=st.seated?st.seatEye:floorAt(st.x,st.z)+STAND;st.eye+=(target-st.eye)*Math.min(1,dt*6);
     if(m>0.05&&!st.seated)st.bobT=(st.bobT||0)+dt*(k.shift?12:8.5);
-    camera.position.set(st.x,st.eye+(st.seated?0:Math.sin(st.bobT||0)*0.012)-((inFoot(st.x,st.z)&&Math.abs(st.z)<HW)?V.kneelPos*(0.035+0.0275*st.z):0),st.z);camera.rotation.set(st.pitch,st.yaw,0);
+    rig.updateMatrixWorld();camV.set(st.x,st.eye+(st.seated?0:Math.sin(st.bobT||0)*0.012)-((inFoot(st.x,st.z)&&Math.abs(st.z)<HW)?V.kneelPos*(0.035+0.0275*st.z):0),st.z).applyMatrix4(rig.matrixWorld);
+    camera.position.copy(camV);camera.rotation.set(st.pitch,st.yaw+rig.rotation.y,0);
     hoverT-=dt;if(hoverT<=0){hoverT=0.15;const p=pickAt(0,0),hl=$('#hoverLabel');
       if(p&&p.dist<4){const d=p.obj.userData.info;hl.textContent=d.name+'  ·  '+(d.dyn?d.dyn()[0][1]:d.code);if(d.action){const b=document.createElement('b');b.textContent='  ·  E: bas';hl.append(b);}hl.hidden=false;}else hl.hidden=true;}
   }else{
-    const o=st.orbit,t=new THREE.Vector3(0,0.9,0);
+    const o=st.orbit,t=new THREE.Vector3(rig.position.x,0.9,rig.position.z);
     camera.position.set(t.x+o.r*Math.sin(o.phi)*Math.cos(o.theta),t.y+o.r*Math.cos(o.phi),t.z+o.r*Math.sin(o.phi)*Math.sin(o.theta));camera.lookAt(t);
   }
   if(AU.ctx){const l=AU.ctx.listener,p=camera.position;camera.getWorldDirection(fwd);

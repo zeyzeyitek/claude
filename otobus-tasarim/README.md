@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev J)
+# Otobüs Tasarım Stüdyosu (konsept, Rev K)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -82,3 +82,8 @@ Sinyaller: DoorRelease, DoorState_K2
 - Diz çöktürme animasyonu: gövde sağa ~70 mm yatar ve alçalır (tekerlekler yerinde kalır); içerideyken kamera da birlikte iner. Sinyal: KneelLevel.
 - Silecekler (SİLECEK) çalışır, kapatınca park konumuna döner. Sis farları (SİS) yanar. Sinyaller: Wiper, FogLights.
 - Kabin kapısı dışarıya (giriş alanına) doğru açılır; menteşe ön uçta.
+
+## Rev K
+- Sürüş: HUD'daki "Sür" ya da `G`. W gaz, S/boşluk fren, A/D direksiyon. Hareket için motor açık, el freni inik, kapılar kapalı ve Türfreigabe kapalı olmalı (durak freni). Hız, devir, vites (D/N) cluster'da; tekerlekler döner, motor sesi. "Durağa dön" aracı başlangıç noktasına alır. 3 km/h üstünde kapılar açılmaz (2023.03864), araç hareketliyken Türfreigabe verilemez (2021.18715).
+- Otomatik test: simülatöre bağlı her gereksinimin kartında "▶ Otomatik test". Simülasyonu sıfırlar, adımları kendisi yapar (ekranda adım açıklaması), sonunda kılavuza dönüp sonucu gösterir. "Durdur" ile kesilebilir.
+- Vorspeicherung (REQ-011): Türfreigabe aktifken ve araç duruyorken STOP butonları kapıyı açmaz, istek saklanır; Türfreigabe verildiğinde (yükselen kenar) saklanan bölgeler açılır. Kapı üstü AÇ (Öffnung) butonları Türfreigabe aktif olduğu sürece her zaman açar. Türfreigabe aktifken durak freni devrededir (2025.13674).
