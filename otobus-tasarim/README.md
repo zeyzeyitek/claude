@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev I)
+# Otobüs Tasarım Stüdyosu (konsept, Rev J)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -75,3 +75,10 @@ Sinyaller: DoorRelease, DoorState_K2
 - Kabin kapısı: mıknatıslı kilit, B07 KABİN butonu (5 s bırakma), el freni kolu. Park freni inikken kilit açılmaz (2022.05043); kapı açıkken el freni inerse sürücü buzzer'ı çalar (2023.05022). İkisi de otomatik test.
 - Dış görünüm: yuvarlatılmış köşeler, krom bar ve kurgusal "Şahin" amblemi, LED far grupları, sis farları, silecekler, yan işaret lambaları, motor ızgarası.
 - Çevre: durak sığınağı ve hat panosu, binalar, ağaçlar. Yürürken hafif kafa sallanması.
+
+## Rev J
+- Tüm gereksinimler Türkçeye çevrildi (833 madde + 74 iptal; simülatöre bağlı 4 madde zaten çevrili). EN metnin altında TR; "Remark" kısmı "Not:" olarak açıklamaya ayrılır. `data/requirements_tr.json`.
+- İç aydınlatma 3 devreye bölündü: Kreis 1 ön bölge (iki taraf), Kreis 2 yolcu bölgesi sol, Kreis 3 yolcu bölgesi sağ. Her devre ayrı % ile çalışır (Sinyal sekmesindeki kaydırıcılar); IŞIK ½ yarıya indirir. Şeride tıklayınca / bakınca o anki % görünür. Sinyaller: IntLight_Kreis1..3_Pct.
+- Diz çöktürme animasyonu: gövde sağa ~70 mm yatar ve alçalır (tekerlekler yerinde kalır); içerideyken kamera da birlikte iner. Sinyal: KneelLevel.
+- Silecekler (SİLECEK) çalışır, kapatınca park konumuna döner. Sis farları (SİS) yanar. Sinyaller: Wiper, FogLights.
+- Kabin kapısı dışarıya (giriş alanına) doğru açılır; menteşe ön uçta.
