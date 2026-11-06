@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev K)
+# Otobüs Tasarım Stüdyosu (konsept, Rev L)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -87,3 +87,9 @@ Sinyaller: DoorRelease, DoorState_K2
 - Sürüş: HUD'daki "Sür" ya da `G`. W gaz, S/boşluk fren, A/D direksiyon. Hareket için motor açık, el freni inik, kapılar kapalı ve Türfreigabe kapalı olmalı (durak freni). Hız, devir, vites (D/N) cluster'da; tekerlekler döner, motor sesi. "Durağa dön" aracı başlangıç noktasına alır. 3 km/h üstünde kapılar açılmaz (2023.03864), araç hareketliyken Türfreigabe verilemez (2021.18715).
 - Otomatik test: simülatöre bağlı her gereksinimin kartında "▶ Otomatik test". Simülasyonu sıfırlar, adımları kendisi yapar (ekranda adım açıklaması), sonunda kılavuza dönüp sonucu gösterir. "Durdur" ile kesilebilir.
 - Vorspeicherung (REQ-011): Türfreigabe aktifken ve araç duruyorken STOP butonları kapıyı açmaz, istek saklanır; Türfreigabe verildiğinde (yükselen kenar) saklanan bölgeler açılır. Kapı üstü AÇ (Öffnung) butonları Türfreigabe aktif olduğu sürece her zaman açar. Türfreigabe aktifken durak freni devrededir (2025.13674).
+
+## Rev L
+- Gereksinim listesinden 15 madde daha simülatöre bağlandı (otomatik doğrulama + animasyonlu senaryo): 2021.19182, 2021.19171, 2021.18644, 2023.03864, 2021.18715, 2025.13674, 2021.18762, 2021.19560, 2023.03870, 2021.19027, 2021.19032, 2021.29327, 2023.04582, 2021.18637, 2021.18646. Toplam 29 otomatik test.
+- Kılavuzda "▶ Tüm otomatik testleri çalıştır": 29 senaryoyu sırayla çalıştırır, sonra özet ile kılavuza döner.
+- Her gereksinim kartında "Test senaryosu": otomatik testlerde adımlar, diğerlerinde metinden üretilmiş taslak (başlangıç, koşullar, beklenen sonuç, negatif test, Not kontrolü; parametre ve test senaryosu tipleri için ayrı şablon).
+- Sürücü kapı butonu ve otomatik açma 1 km/h üstünde engellenir (2021.19027).
