@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev E)
+# Otobüs Tasarım Stüdyosu (konsept, Rev F)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -34,3 +34,19 @@ Not: `index.html`, yayın sırasında HTML iskeletiyle sarılan bir artifact gö
 - Engelli + bebek arabası paneli kapı 2 karşısında (K2) ve kapı 3 direğinde (K3). Yaşlı yolcu butonu kapı 1–2 arasında (K2).
 - Kapı üstü durum tabelaları (DURACAK, KAPI SERBEST, KAPANIYOR 3, AÇIK · BEKLE) ve kapı LED'i. Cluster'da bölge sütunu.
 - REQ-008 bölgeleme, REQ-009 Öffnung.
+
+## Rev F
+- Üç sayfa: Simülatör · Gereksinimler · Sinyaller (adres: `#gereksinimler`, `#sinyaller`).
+- Gereksinimler teknik kılavuz olarak: fonksiyon gruplarına ayrılmış (Durak butonları, Engelli/bebek, Yaşlı yolcu, Kapı açma/Türfreigabe, Bölgeleme, İç aydınlatma, Eklenenler). Her gereksinim önce İngilizce, altında Türkçe, ardından açıklama (doğrulama adımı), bağlı sinyaller ve kanıt. Arama, tümünü aç/kapat, "Simülatörde dene".
+- Sinyal kataloğu: tüm sinyaller TR/EN açıklama, tip, canlı değer, son değişim; arama, grup ve filtre (aktif, son 10 s değişen, bağlı değil). Satır detayında değişim geçmişi ve bağlı gereksinimler.
+- REQ-010: STOP butonu bölge isteği.
+
+## Gereksinim gönderme şablonu
+```
+ID: REQ-0xx
+Grup: Kapı Açma ve Türfreigabe
+EN: The system shall ...
+TR: Sistem ... yapmalıdır.
+Açıklama: nasıl doğrulanır
+Sinyaller: DoorRelease, DoorState_K2
+```

@@ -34,7 +34,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 h1{margin:0;font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1.1;letter-spacing:.01em;text-wrap:balance}
 h1 .led{color:var(--accent)}
 
-#modebar{top:calc(84px + env(safe-area-inset-top,0px));left:calc(12px + env(safe-area-inset-left,0px));padding:4px;display:flex;gap:4px;flex-wrap:wrap;align-items:center;max-width:calc(100vw - 400px)}
+#modebar{top:calc(124px + env(safe-area-inset-top,0px));left:calc(12px + env(safe-area-inset-left,0px));padding:4px;display:flex;gap:4px;flex-wrap:wrap;align-items:center;max-width:calc(100vw - 400px)}
 .seg{appearance:none;border:0;background:transparent;color:var(--ink);font:600 13px/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase;padding:9px 11px;border-radius:5px;cursor:pointer}
 .seg[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .seg:disabled{opacity:.4;cursor:default}
@@ -44,7 +44,7 @@ h1 .led{color:var(--accent)}
 #zoomVal{appearance:none;border:0;background:var(--chip);color:var(--ink);font:500 12px var(--f-mono);padding:7px 8px;border-radius:4px;min-width:52px;cursor:pointer;font-variant-numeric:tabular-nums}
 button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-#hint{top:calc(136px + env(safe-area-inset-top,0px));left:calc(12px + env(safe-area-inset-left,0px));padding:7px 12px;font:400 12px/1.6 var(--f-mono);color:var(--muted);max-width:360px}
+#hint{top:calc(176px + env(safe-area-inset-top,0px));left:calc(12px + env(safe-area-inset-left,0px));padding:7px 12px;font:400 12px/1.6 var(--f-mono);color:var(--muted);max-width:360px}
 #hint kbd{font:500 11px var(--f-mono);color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:3px;padding:0 4px}
 
 #crosshair{position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;pointer-events:none}
@@ -147,13 +147,95 @@ table.sig td:last-child{text-align:right}
 #fail{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;background:var(--bg)}
 
 @media (max-width:760px){
-  #brand,#hint{display:none}
-  #modebar{top:calc(8px + env(safe-area-inset-top,0px));left:calc(8px + env(safe-area-inset-left,0px));max-width:calc(100vw - 16px)}
-  #hud{left:calc(8px + env(safe-area-inset-left,0px));bottom:auto;top:calc(104px + env(safe-area-inset-top,0px));width:min(400px,calc(100vw - 16px));min-width:0}
+  #hint{display:none}
+  #brand{top:calc(8px + env(safe-area-inset-top,0px));left:calc(8px + env(safe-area-inset-left,0px));padding:4px} #brand .eyebrow,#brand h1{display:none} #brand .views{margin:0}
+  #modebar{top:calc(52px + env(safe-area-inset-top,0px));left:calc(8px + env(safe-area-inset-left,0px));max-width:calc(100vw - 16px)}
+  #hud{left:calc(8px + env(safe-area-inset-left,0px));bottom:auto;top:calc(148px + env(safe-area-inset-top,0px));width:min(400px,calc(100vw - 16px));min-width:0}
   #panel{top:auto;left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));width:auto;max-height:52%}
   #panelToggle{display:inline-block}
   #panel.collapsed .pbody{display:none}
   #panel.collapsed #panelHead{border-bottom:0}
+}
+.views{display:flex;gap:2px;margin-top:6px;background:var(--chip);border-radius:6px;padding:3px;flex-wrap:wrap}
+.vbtn{appearance:none;border:0;background:transparent;color:var(--muted);font:600 12px/1 var(--f-display);letter-spacing:.05em;text-transform:uppercase;padding:7px 9px;border-radius:4px;cursor:pointer}
+.vbtn[aria-current="page"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.mgrp{display:grid;gap:4px}
+.mgh{font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.mini{appearance:none;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:5px;padding:6px 8px;cursor:pointer;font:500 12.5px/1.25 var(--f-body)}
+.mini code{font:500 11px var(--f-mono);color:var(--accent)} .mini span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .mini i{font-style:normal}
+.mini:hover{border-color:var(--accent)}
+#reqMini{display:grid;gap:8px}
+#docs{position:absolute;inset:0;z-index:60;background:var(--bg);display:grid;grid-template-rows:auto minmax(0,1fr)}
+.dhead{display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--panel)}
+.dhead h2{margin:0;font:700 22px/1.1 var(--f-display)}
+.dhead .views{margin:0}
+#docSearch{flex:1 1 220px;max-width:440px;margin-left:auto;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:6px;padding:9px 12px;font:400 14px var(--f-body);min-width:0}
+.dbody{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:0}
+.dtoc{border-right:1px solid var(--line);overflow:auto;padding:16px 12px;background:var(--panel);display:flex;flex-direction:column;gap:2px}
+.tochead{font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 6px 6px}
+.tocg{display:flex;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:5px;color:var(--ink);text-decoration:none;font:600 14px/1.2 var(--f-display);margin-top:6px}
+.tocg em{font:500 11px var(--f-mono);font-style:normal;color:var(--muted)} .tocg:hover,.tocg.cur{background:var(--chip)}
+.tocr{display:flex;align-items:center;gap:8px;padding:3px 8px 3px 22px;color:var(--muted);text-decoration:none;font:500 12px var(--f-mono)} .tocr:hover{color:var(--ink)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}
+.dot.pass{background:var(--ok)} .dot.progress{background:var(--accent)} .dot.fail{background:var(--warn)}
+.tocnote{margin:14px 6px 0}
+.dmain{overflow:auto;padding-block:20px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.dwrap{max-width:860px;margin:0 auto;display:grid;gap:22px} .dwrap.wide{max-width:1100px}
+.dsum{display:grid;gap:12px;border-bottom:1px solid var(--line);padding-bottom:18px}
+.dsum h3{margin:2px 0 6px;font:700 26px/1.15 var(--f-display);text-wrap:balance}
+.dsum p{margin:0;color:var(--muted);line-height:1.5;max-width:65ch}
+.sumchips,.dtools,.sfilters{display:flex;flex-wrap:wrap;gap:8px;align-items:center} .dtools{gap:16px}
+.dgroup{display:grid;gap:10px;scroll-margin-top:12px}
+.dgroup>header{display:flex;gap:12px;align-items:flex-start}
+.gno{flex:none;width:32px;height:32px;border-radius:6px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font:700 16px var(--f-display)}
+.dgroup h3{margin:0;font:700 21px/1.15 var(--f-display)} .gen{font:500 13px var(--f-mono);color:var(--muted);margin-top:2px}
+.gintro{margin:0;line-height:1.55;max-width:70ch} .gintro.en,.en{color:var(--muted)}
+.glist{display:grid;gap:8px;margin-top:4px}
+.dreq{border:1px solid var(--line);border-left:4px solid var(--line);border-radius:6px;background:var(--panel);scroll-margin-top:12px}
+.dreq.pass{border-left-color:var(--ok)} .dreq.progress{border-left-color:var(--accent)} .dreq.fail{border-left-color:var(--warn)}
+.dreq summary{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 14px;cursor:pointer;list-style:none}
+.dreq summary::-webkit-details-marker{display:none}
+.dreq summary code{font:500 12px var(--f-mono);color:var(--accent)}
+.rt{display:grid;gap:2px;min-width:0} .rt b{font:600 15.5px/1.2 var(--f-display)} .rt i{font:400 12.5px/1.2 var(--f-body);font-style:normal;color:var(--muted)}
+.rbody{padding:2px 14px 14px;display:grid;gap:12px;border-top:1px solid var(--line);padding-top:12px}
+.lang{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start}
+.lang p{margin:0;line-height:1.55}
+.lbl{font:600 10.5px var(--f-mono);letter-spacing:.06em;padding:3px 0;text-align:center;border-radius:3px;background:var(--chip);color:var(--muted)}
+.desc{background:var(--chip);border-radius:6px;padding:10px 12px;display:grid;gap:4px}
+.desc p{margin:0;line-height:1.5;font-size:13.5px}
+.dlbl{font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.rmeta{margin:0;display:grid;grid-template-columns:110px minmax(0,1fr);gap:6px 12px;font-size:13px}
+.rmeta dt{color:var(--muted)} .rmeta dd{margin:0} .evl{font:400 12px/1.5 var(--f-mono);color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.sigchip{appearance:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:4px;padding:2px 7px;font:500 11.5px var(--f-mono);cursor:pointer}
+.sigchip:hover{border-color:var(--accent);color:var(--accent)}
+.ractions{display:flex;gap:8px;flex-wrap:wrap}
+.rform{display:grid;gap:6px;max-width:640px}
+.rform label{font:600 12px var(--f-mono);color:var(--muted);margin-top:4px}
+.rform textarea,.rform select{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);font:400 14px/1.4 var(--f-body);padding:8px}
+.rform textarea{min-height:58px;resize:vertical}
+.sfb{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:20px;padding:6px 12px;font:600 12px var(--f-display);letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+.sfb[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.stable-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.stable{width:100%;border-collapse:collapse;min-width:720px;font-size:13px}
+.stable th{text-align:left;font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel)}
+.stable td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.srow.on td:first-child{box-shadow:inset 3px 0 0 var(--ok)}
+.sname{appearance:none;border:0;background:none;padding:0;cursor:pointer;color:var(--ink);text-align:left} .sname code{font:500 12.5px var(--f-mono)}
+.sname:hover code{color:var(--accent)}
+.sg{font:400 11px var(--f-mono);color:var(--muted);margin-top:2px}
+.stype{font:400 12px var(--f-mono);color:var(--muted);white-space:nowrap}
+.sval{white-space:nowrap} .schg{font:400 12px var(--f-mono);color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.sv{display:inline-block;min-width:34px;text-align:center;padding:3px 8px;border-radius:4px;background:var(--chip);color:var(--muted);font:600 12px var(--f-mono);font-variant-numeric:tabular-nums}
+.sv.on{background:var(--ok-soft);color:var(--ok)} .sv.nosim{font-weight:400;font-style:italic}
+.sdet td{background:var(--chip)}
+.sdet-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.shist{font:400 12px/1.6 var(--f-mono);margin-top:4px} .shist time{color:var(--muted)}
+@media (max-width:760px){
+  .dbody{grid-template-columns:minmax(0,1fr)} .dtoc{display:none}
+  .dhead h2{font-size:18px} #docSearch{max-width:none;margin-left:0}
+  .dreq summary{grid-template-columns:minmax(0,1fr) auto} .dreq summary code{grid-column:1/-1}
+  .rmeta{grid-template-columns:minmax(0,1fr)}
 }
 @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
 </style>
@@ -164,8 +246,9 @@ table.sig td:last-child{text-align:right}
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev E</div>
+    <div class="eyebrow">Konsept · Rev F</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
+    <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button></nav>
   </div>
 
   <div id="modebar" class="float" role="toolbar" aria-label="Görünüm">
@@ -205,18 +288,9 @@ table.sig td:last-child{text-align:right}
 
     <div class="pbody" id="pReq" role="tabpanel">
       <section>
-        <h3>Gereksinimler <button class="linkbtn" id="reqReset">Testleri sıfırla</button></h3>
-        <ul class="reqs" id="reqs"></ul>
-        <p class="note">Otomatik gereksinimler sen aracı kullandıkça kendiliğinden doğrulanır. Kanıt satırı, testin hangi anda geçtiğini gösterir.</p>
-      </section>
-      <section>
-        <h3>Gereksinim ekle</h3>
-        <form id="reqForm">
-          <label for="reqText">Metin</label>
-          <textarea id="reqText" placeholder="Örn. Araç 3 km/h üzerindeyken kapılar açılmamalıdır."></textarea>
-          <button class="pbtn" type="submit">Listeye ekle</button>
-        </form>
-        <p class="note">Elle eklenenler el ile işaretlenir: durum etiketine tıkla. Otomatik test istersen metni bana gönder. Kayıtlar yalnızca bu tarayıcıda tutulur.</p>
+        <h3>Gereksinimler <button class="linkbtn" id="openManual">Kılavuzu aç →</button></h3>
+        <div id="reqMini"></div>
+        <p class="note">İngilizce ve Türkçe tam metinler, açıklamalar ve kanıtlar kılavuzda. Durumlar sen simülatörü kullandıkça güncellenir.</p>
       </section>
     </div>
 
@@ -234,7 +308,7 @@ table.sig td:last-child{text-align:right}
 
     <div class="pbody" id="pSig" role="tabpanel" hidden>
       <section>
-        <h3>Sinyaller</h3>
+        <h3>Sinyaller <button class="linkbtn" data-goview="sigs">Tüm sinyaller →</button></h3>
         <table class="sig"><tbody id="sig"></tbody></table>
         <p class="note">Kapılar: sürücü panelindeki kırmızı butonlar veya <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>. Durak isteği: kırmızı butonlar. Özel istekler: kapı 2 karşısı ve kapı 3 direğindeki mavi paneller, yaşlı butonu kapı 1–2 arası. Kapı kanatlarındaki yeşil AÇ butonu: Öffnung. Türfreigabe: <kbd>F</kbd>. İç aydınlatma: <kbd>L</kbd>.</p>
       </section>
@@ -266,6 +340,15 @@ table.sig td:last-child{text-align:right}
       </section>
     </div>
   </aside>
+
+  <div id="docs" hidden>
+    <header class="dhead">
+      <h2 id="docTitle">Gereksinimler</h2>
+      <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="false">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button></nav>
+      <input type="search" id="docSearch" placeholder="Ara…" aria-label="Ara">
+    </header>
+    <div class="dbody"><nav class="dtoc" id="dtoc" aria-label="İçindekiler"></nav><main class="dmain" id="dmain"></main></div>
+  </div>
 
   <div id="fail" hidden><p>3D görünüm açılamadı. Tarayıcında WebGL kapalı olabilir.</p></div>
 </div>
@@ -750,42 +833,207 @@ scene.traverse(o=>{if(!o.isMesh)return;const ms=Array.isArray(o.material)?o.mate
   o.castShadow=!basic&&!tr;o.receiveShadow=!basic;});
 ground.castShadow=false;
 
-/* ================= Gereksinimler ================= */
+/* ================= Gereksinimler (teknik kılavuz) ================= */
+const REQ_GROUPS=[
+ {id:'stop',tr:'Durak (STOP) Butonları',en:'Stop Request Buttons',
+  introTr:'Yolcular durak isteğini direklerdeki ve pencere altlarındaki kırmızı STOP butonlarıyla verir. Her buton bağlı olduğu kapı bölgesine istek yazar.',
+  introEn:'Passengers request a stop with the red STOP buttons on the stanchions and below the windows. Each button writes the request to its door zone.'},
+ {id:'special',tr:'Engelli ve Bebek Arabası Butonları',en:'Wheelchair and Stroller Buttons',
+  introTr:'Engelli ve bebek arabası butonları kapı 2 karşısında (K2) ve kapı 3 direğinde (K3) bulunur. Bu istekler otomatik modda kapının açık tutulmasını sağlar.',
+  introEn:'Wheelchair and stroller buttons are located opposite door 2 (K2) and on the door 3 stanchion (K3). In automatic mode these requests keep the door held open.'},
+ {id:'elderly',tr:'Yaşlı Yolcu Butonu',en:'Elderly Passenger Button',
+  introTr:'Yaşlı yolcu butonu kapı 1 ile kapı 2 arasında, sağ duvarda ve koridor direğinde bulunur. Bölgesi K2’dir.',
+  introEn:'The elderly passenger button is located between door 1 and door 2, on the right side wall and on the aisle stanchion. It belongs to zone K2.'},
+ {id:'door',tr:'Kapı Açma ve Türfreigabe',en:'Door Opening and Door Release',
+  introTr:'Sürücü kapıları K1–K3 butonlarıyla elle ya da Türfreigabe ile otomatik modda yönetir. Otomatik modda kapılar yolcu isteğiyle açılır ve kurallara göre kapanır.',
+  introEn:'The driver operates the doors manually with the K1–K3 buttons or in automatic mode via Door Release. In automatic mode the doors open on passenger request and close according to the rules.'},
+ {id:'zone',tr:'Bölgeleme',en:'Zoning',
+  introTr:'Araç üç kapı bölgesine ayrılır: K1 ön, K2 orta, K3 arka. Bir bölgedeki istek yalnızca o bölgenin kapısını etkiler.',
+  introEn:'The vehicle is divided into three door zones: K1 front, K2 middle, K3 rear. A request in one zone affects only that zone’s door.'},
+ {id:'light',tr:'İç Aydınlatma',en:'Interior Lighting',
+  introTr:'Yolcu salonu aydınlatması gösterge üzerindeki IŞIK butonuyla açılıp kapatılır. %50 modu ayrı bir butondadır.',
+  introEn:'Passenger compartment lighting is switched with the LIGHT button on the dashboard. The 50 % mode has its own button.'},
+ {id:'other',tr:'Eklenen Gereksinimler',en:'Added Requirements',
+  introTr:'Bu tarayıcıda elle eklenen gereksinimler. Otomatik test için metni Claude’a gönder.',
+  introEn:'Requirements added manually in this browser. Send the text to Claude to get an automated test.'}
+];
 const REQS=[
-  {id:'REQ-001',kind:'stroller',title:'Bebek arabası butonu · K2',text:'Kapı 2 karşısında (engelli alanı) bebek arabası butonu bulunmalıdır. Basıldığında StopReq=1 ve kendi bölgesinde StopReq_Stroller=1 olmalı, cluster’da lamba yanmalı. Bölge kapısı açıldığında istek sıfırlanmalıdır.',go:[1.2,0.1,null,0,-0.25]},
-  {id:'REQ-002',kind:'prm',title:'Engelli butonu · K2',text:'Kapı 2 karşısında engelli butonu bulunmalıdır. Basıldığında StopReq=1 ve kendi bölgesinde StopReq_PRM=1 olmalı, cluster’da engelli ve RAMPA lambaları yanmalı. Bölge kapısı açıldığında istek sıfırlanmalıdır.',go:[1.2,0.1,null,0,-0.25]},
-  {id:'REQ-003',kind:'elderly',title:'Yaşlı yolcu butonu · K1–K2 arası',text:'Kapı 1 ile kapı 2 arasında yaşlı yolcu butonu bulunmalıdır. Basıldığında StopReq=1 ve StopReq_Elderly=1 olmalı, cluster’da lamba yanmalı. Bölge kapısı açıldığında istek sıfırlanmalıdır.',go:[2.3,0.0,null,-2.8,-0.2]},
-  {id:'REQ-004',kind:'light',title:'İç aydınlatma (gösterge)',text:'Sürücü, gösterge üzerindeki iç aydınlatma butonuyla yolcu salonu aydınlatmasını açıp kapatabilmelidir. Durum cluster’da lamba ile gösterilmelidir.',go:[4.9,-0.72,1.3,-1.6,-0.3]},
-  {id:'REQ-005',kind:'release',title:'Türfreigabe → otomatik kapı',text:'Türfreigabe butonuna basıldığında kapılar otomatik moda geçmelidir (DoorRelease=1, DoorMode=AUTO). İsteği bekleyen bölgelerin kapıları otomatik açılmalıdır.',go:[4.9,-0.72,1.3,-1.92,-0.55]},
-  {id:'REQ-006',kind:'hold',title:'Özel istekte kapı açık kalır',text:'Otomatik modda bebek arabası veya engelli isteğiyle açılan kapı kendiliğinden kapanmamalı, sürücü kapatana kadar açık kalmalıdır.',go:[1.2,0.1,null,0,-0.25]},
-  {id:'REQ-007',kind:'autoclose',title:'Normal istekte 5 s sonra kapanma',text:'Otomatik modda normal durak isteğiyle açılan kapı, tam açıldıktan 5 saniye sonra kendiliğinden kapanmalıdır.',go:[-1.0,0.0,null,0.35,-0.05]},
-  {id:'REQ-008',kind:'zone',title:'Bölgeleme',text:'Özel istek butonu yalnızca kendi kapı bölgesini etkilemelidir. Örneğin kapı 3 bölgesindeki engelli butonu Türfreigabe açıkken yalnızca K3’ü açmalı ve açık tutmalı; K1 ve K2 değişmemelidir.',go:[-4.1,0.6,null,2.33,-0.25]},
-  {id:'REQ-009',kind:'oeffnung',title:'Kapı üstü açma butonu (Öffnung)',text:'Kapı kanadındaki açma butonu Türfreigabe yokken isteği kaydetmeli ve kapıyı açmamalıdır. Türfreigabe açıkken ya da verildiğinde yalnızca kendi kapısını açmalıdır.',go:[0.6,0.2,null,Math.PI,-0.1]}
+ {id:'REQ-010',group:'stop',kind:'stop',title_tr:'STOP butonu bölge isteği',title_en:'STOP button zone request',
+  en:'When a passenger presses a STOP button, the system shall set the stop request of the button’s door zone (StopReq_Kx = 1) and illuminate all STOP buttons. The request shall be cleared when the door of that zone opens.',
+  tr:'Yolcu bir STOP butonuna bastığında sistem, butonun bağlı olduğu kapı bölgesinin durak isteğini set etmeli (StopReq_Kx = 1) ve tüm STOP butonlarını yakmalıdır. İstek, o bölgenin kapısı açıldığında sıfırlanmalıdır.',
+  desc_tr:'Herhangi bir STOP butonuna bas. StopReq_Kx = 1 olmalı ve tüm STOP butonları yanmalı. Sonra o bölgenin kapısını aç; istek sıfırlanmalı.',
+  desc_en:'Press any STOP button. StopReq_Kx must be 1 and all STOP buttons must light up. Then open the zone door; the request must clear.',
+  signals:['StopReq','StopReq_K1','StopReq_K2','StopReq_K3'],go:[-1.0,0.0,null,0.35,-0.05]},
+ {id:'REQ-001',group:'special',kind:'stroller',title_tr:'Bebek arabası butonu · K2',title_en:'Stroller button · K2',
+  en:'A stroller button shall be provided opposite door 2 (wheelchair area). When it is pressed, the system shall set StopReq = 1 and StopReq_Stroller = 1 for its zone and show the stroller telltale on the cluster. The request shall be cleared when the zone door opens.',
+  tr:'Kapı 2 karşısında (engelli alanı) bebek arabası butonu bulunmalıdır. Basıldığında sistem StopReq = 1 ve kendi bölgesi için StopReq_Stroller = 1 set etmeli, cluster’da bebek arabası lambasını yakmalıdır. İstek, bölge kapısı açıldığında sıfırlanmalıdır.',
+  desc_tr:'Kapı 2 karşısındaki paneldeki bebek arabası butonuna bas, cluster lambasını kontrol et, ardından kapı 2’yi aç.',
+  desc_en:'Press the stroller button on the panel opposite door 2, check the cluster telltale, then open door 2.',
+  signals:['StopReq','StopReq_Stroller_K2','DoorState_K2'],go:[1.2,0.1,null,0,-0.25]},
+ {id:'REQ-002',group:'special',kind:'prm',title_tr:'Engelli butonu · K2',title_en:'Wheelchair button · K2',
+  en:'A wheelchair button shall be provided opposite door 2. When it is pressed, the system shall set StopReq = 1 and StopReq_PRM = 1 for its zone and show the wheelchair and RAMP telltales on the cluster. The request shall be cleared when the zone door opens.',
+  tr:'Kapı 2 karşısında engelli butonu bulunmalıdır. Basıldığında sistem StopReq = 1 ve kendi bölgesi için StopReq_PRM = 1 set etmeli, cluster’da engelli ve RAMPA lambalarını yakmalıdır. İstek, bölge kapısı açıldığında sıfırlanmalıdır.',
+  desc_tr:'Kapı 2 karşısındaki paneldeki engelli butonuna bas, cluster’da engelli ve RAMPA lambalarını kontrol et, ardından kapı 2’yi aç.',
+  desc_en:'Press the wheelchair button on the panel opposite door 2, check the wheelchair and RAMP telltales, then open door 2.',
+  signals:['StopReq','StopReq_PRM_K2','DoorState_K2'],go:[1.2,0.1,null,0,-0.25]},
+ {id:'REQ-006',group:'special',kind:'hold',title_tr:'Özel istekte kapı açık kalır',title_en:'Door held open on special request',
+  en:'In automatic door mode, a door opened by a stroller or wheelchair request shall not close automatically. It shall stay open until the driver closes it.',
+  tr:'Otomatik kapı modunda bebek arabası veya engelli isteğiyle açılan kapı kendiliğinden kapanmamalıdır. Sürücü kapatana kadar açık kalmalıdır.',
+  desc_tr:'Türfreigabe’yi aç, bebek arabası veya engelli butonuna bas. Kapı açılınca 5 s’den uzun bekle; kapı açık kalmalı. Ardından sürücü K butonuyla kapat.',
+  desc_en:'Activate Door Release and press the stroller or wheelchair button. After the door opens, wait more than 5 s; it must stay open. Then close it with the driver’s K button.',
+  signals:['DoorRelease','DoorHold_K2','DoorHold_K3','AutoCloseTimer_K2'],go:[1.2,0.1,null,0,-0.25]},
+ {id:'REQ-003',group:'elderly',kind:'elderly',title_tr:'Yaşlı yolcu butonu · K1–K2 arası',title_en:'Elderly passenger button · between K1 and K2',
+  en:'An elderly passenger button shall be provided between door 1 and door 2. When it is pressed, the system shall set StopReq = 1 and StopReq_Elderly = 1 and show the elderly telltale on the cluster. The request shall be cleared when the zone door opens.',
+  tr:'Kapı 1 ile kapı 2 arasında yaşlı yolcu butonu bulunmalıdır. Basıldığında sistem StopReq = 1 ve StopReq_Elderly = 1 set etmeli, cluster’da yaşlı yolcu lambasını yakmalıdır. İstek, bölge kapısı açıldığında sıfırlanmalıdır.',
+  desc_tr:'Kapı 1–2 arasındaki yaşlı yolcu butonuna bas, cluster lambasını kontrol et, ardından kapı 2’yi aç.',
+  desc_en:'Press the elderly passenger button between door 1 and door 2, check the cluster telltale, then open door 2.',
+  signals:['StopReq','StopReq_Elderly_K2','DoorState_K2'],go:[2.3,0.0,null,-2.8,-0.2]},
+ {id:'REQ-005',group:'door',kind:'release',title_tr:'Türfreigabe → otomatik kapı',title_en:'Door Release → automatic door mode',
+  en:'When the driver presses the Door Release button, the doors shall switch to automatic mode (DoorRelease = 1, DoorMode = AUTO). The doors of zones with a pending request shall open automatically.',
+  tr:'Sürücü Türfreigabe butonuna bastığında kapılar otomatik moda geçmelidir (DoorRelease = 1, DoorMode = AUTO). İsteği bekleyen bölgelerin kapıları otomatik açılmalıdır.',
+  desc_tr:'Bir durak isteği ver, sonra Türfreigabe’ye bas. DoorMode = AUTO olmalı ve isteği olan bölgenin kapısı açılmalı.',
+  desc_en:'Request a stop, then press Door Release. DoorMode must become AUTO and the door of the requesting zone must open.',
+  signals:['DoorRelease','DoorMode','StopReq'],go:[4.9,-0.72,1.3,-1.92,-0.55]},
+ {id:'REQ-007',group:'door',kind:'autoclose',title_tr:'Normal istekte 5 s sonra kapanma',title_en:'Auto-close 5 s after normal request',
+  en:'In automatic door mode, a door opened by a normal stop request shall close automatically 5 s after reaching the fully open position.',
+  tr:'Otomatik kapı modunda normal durak isteğiyle açılan kapı, tam açık konuma geldikten 5 s sonra kendiliğinden kapanmalıdır.',
+  desc_tr:'Türfreigabe açıkken bir STOP butonuna bas. Kapı tam açıldıktan sonra kapanma 5,0 s ± 0,4 s içinde başlamalı.',
+  desc_en:'With Door Release active, press a STOP button. Closing must start 5.0 s ± 0.4 s after the door is fully open.',
+  signals:['DoorRelease','DoorState_K2','AutoCloseTimer_K2','AutoCloseTimer_K3'],go:[-1.0,0.0,null,0.35,-0.05]},
+ {id:'REQ-009',group:'door',kind:'oeffnung',title_tr:'Kapı üstü açma butonu (Öffnung)',title_en:'Door leaf opening button',
+  en:'The opening button on the door leaf shall store the request without opening the door while Door Release is inactive. When Door Release is active, or becomes active, only its own door shall open.',
+  tr:'Kapı kanadındaki açma butonu, Türfreigabe aktif değilken isteği kaydetmeli ve kapıyı açmamalıdır. Türfreigabe aktifken ya da aktif olduğunda yalnızca kendi kapısını açmalıdır.',
+  desc_tr:'Türfreigabe kapalıyken kapı kanadındaki AÇ butonuna bas: kapı açılmamalı, buton yanıp sönmeli. Sonra Türfreigabe’yi ver; yalnızca o kapı açılmalı.',
+  desc_en:'With Door Release inactive, press the OPEN button on the door leaf: the door must stay closed and the button must flash. Then activate Door Release; only that door must open.',
+  signals:['DoorRelease','DoorOpenReq_K1','DoorOpenReq_K2','DoorOpenReq_K3'],go:[0.6,0.2,null,Math.PI,-0.1]},
+ {id:'REQ-008',group:'zone',kind:'zone',title_tr:'Özel istek yalnızca kendi bölgesini etkiler',title_en:'Special request affects only its own zone',
+  en:'A special request button shall affect only its own door zone. For example, with Door Release active, the wheelchair button in zone K3 shall open and hold only door 3; doors 1 and 2 shall remain unchanged.',
+  tr:'Özel istek butonu yalnızca kendi kapı bölgesini etkilemelidir. Örneğin Türfreigabe aktifken K3 bölgesindeki engelli butonu yalnızca kapı 3’ü açmalı ve açık tutmalı; kapı 1 ve kapı 2 değişmemelidir.',
+  desc_tr:'Türfreigabe açıkken kapı 3 direğindeki engelli butonuna bas. Yalnızca K3 açılmalı ve açık kalmalı.',
+  desc_en:'With Door Release active, press the wheelchair button on the door 3 stanchion. Only door 3 must open and stay open.',
+  signals:['StopReq_PRM_K3','DoorState_K1','DoorState_K2','DoorState_K3','DoorHold_K3'],go:[-4.1,0.6,null,2.33,-0.25]},
+ {id:'REQ-004',group:'light',kind:'light',title_tr:'İç aydınlatma (gösterge)',title_en:'Interior lighting (dashboard)',
+  en:'The driver shall be able to switch the passenger compartment lighting on and off with the interior light button on the dashboard. The state shall be shown on the cluster with a telltale.',
+  tr:'Sürücü, gösterge üzerindeki iç aydınlatma butonuyla yolcu salonu aydınlatmasını açıp kapatabilmelidir. Durum cluster’da bir lamba ile gösterilmelidir.',
+  desc_tr:'Göstergedeki IŞIK butonuyla aydınlatmayı kapat ve tekrar aç. LED şeritler ve cluster lambası her seferinde değişmeli.',
+  desc_en:'Switch the lighting off and on again with the LIGHT button on the dashboard. The LED strips and the cluster telltale must change each time.',
+  signals:['IntLight','IntLightDim'],go:[4.9,-0.72,1.3,-1.6,-0.3]}
 ];
 const RS={untested:'Test edilmedi',progress:'Devam ediyor',pass:'Geçti',fail:'Kaldı'};
-REQS.forEach(r=>{r.status='untested';r.ev=[];r.seen={};});
-let manual=[];try{manual=JSON.parse(localStorage.getItem('bus-reqs-v1')||'[]');}catch(e){manual=[];}
-const saveManual=()=>{try{localStorage.setItem('bus-reqs-v1',JSON.stringify(manual));}catch(e){}};
-function setReq(r,status,ev){if(ev)r.ev.push(now_s()+' · '+ev);if(r.status!==status){r.status=status;if(status==='pass')log(`${r.id} ${r.title} → GEÇTİ`,'req');if(status==='fail')log(`${r.id} ${r.title} → KALDI`,'warn');}renderReqs();}
+REQS.forEach(r=>{r.title=r.title_tr;r.status='untested';r.ev=[];r.seen={};r.verify='auto';});
+let manual=[];
+try{manual=JSON.parse(localStorage.getItem('bus-reqs-v2')||'null');
+  if(!manual){manual=(JSON.parse(localStorage.getItem('bus-reqs-v1')||'[]')).map(r=>({id:r.id,group:'other',tr:r.text,en:'',desc:'',status:r.status||'untested'}));}}catch(e){manual=[];}
+const saveManual=()=>{try{localStorage.setItem('bus-reqs-v2',JSON.stringify(manual));}catch(e){}};
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const reqFor=k=>REQS.find(r=>r.kind===k);
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function renderReqs(){
-  const auto=REQS.map((r,i)=>`<li class="req ${r.status}"><div class="rh"><code>${r.id}</code><b>${esc(r.title)}</b><span class="rs ${r.status}">${RS[r.status]}</span></div>
-    <p>${esc(r.text)}</p><div class="ev">${r.ev.slice(-3).map(esc).join('<br>')}</div>
-    <div class="racts"><button class="linkbtn" data-go="${i}">Yerine git</button><span class="note" style="margin:0">Otomatik test</span></div></li>`).join('');
-  const man=manual.map((r,i)=>`<li class="req ${r.status}"><div class="rh"><code>${esc(r.id)}</code><b>Elle eklenen</b><button class="rs ${r.status}" data-cyc="${i}" title="Durumu değiştir">${RS[r.status]}</button></div>
-    <p>${esc(r.text)}</p><div class="racts"><button class="linkbtn" data-del="${i}">Sil</button><span class="note" style="margin:0">Manuel test</span></div></li>`).join('');
-  $('#reqs').innerHTML=auto+man;
-  const all=[...REQS,...manual],ok=all.filter(r=>r.status==='pass').length;$('#reqCnt').textContent=ok+'/'+all.length;
+function setReq(r,status,ev){if(ev)r.ev.push(now_s()+' · '+ev);if(r.status!==status){r.status=status;if(status==='pass')log(`${r.id} ${r.title} → GEÇTİ`,'req');if(status==='fail')log(`${r.id} ${r.title} → KALDI`,'warn');}renderReqs(r);}
+const allReqs=()=>[...REQS,...manual.map((m,i)=>({...m,manual:true,mi:i,title_tr:(m.tr||m.en||'').slice(0,60)+((m.tr||m.en||'').length>60?'…':''),title_en:'',verify:'manual',ev:[]}))];
+function counts(list){const c={pass:0,progress:0,untested:0,fail:0};list.forEach(r=>c[r.status]++);return c;}
+
+/* ---------- yan panel özeti ---------- */
+function renderReqMini(){
+  const list=allReqs();
+  $('#reqMini').innerHTML=REQ_GROUPS.map(g=>{const rs=list.filter(r=>r.group===g.id);if(!rs.length)return'';
+    return `<div class="mgrp"><div class="mgh">${esc(g.tr)}</div>${rs.map(r=>`<button class="mini" data-open="${esc(r.id)}"><code>${esc(r.id)}</code><span>${esc(r.title_tr)}</span><i class="rs ${r.status}">${RS[r.status]}</i></button>`).join('')}</div>`;}).join('');
+  const c=counts(list);$('#reqCnt').textContent=c.pass+'/'+list.length;
 }
-$('#reqs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
-  if(b.dataset.go!==undefined){const g=REQS[+b.dataset.go].go;teleport(g[0],g[1],g[2],g[3],g[4]);}
-  if(b.dataset.cyc!==undefined){const r=manual[+b.dataset.cyc],o=['untested','progress','pass','fail'];r.status=o[(o.indexOf(r.status)+1)%4];saveManual();renderReqs();}
-  if(b.dataset.del!==undefined){manual.splice(+b.dataset.del,1);saveManual();renderReqs();}});
-$('#reqForm').addEventListener('submit',e=>{e.preventDefault();const t=$('#reqText').value.trim();if(!t)return;
-  const n=REQS.length+manual.length+1;manual.push({id:'REQ-'+String(n).padStart(3,'0'),text:t,status:'untested'});saveManual();$('#reqText').value='';renderReqs();});
-$('#reqReset').onclick=()=>{REQS.forEach(r=>{r.status='untested';r.ev=[];r.seen={};});renderReqs();log('Gereksinim testleri sıfırlandı');};
-renderReqs();
+$('#reqMini').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)openReq(b.dataset.open);});
+
+/* ---------- kılavuz ---------- */
+function reqCard(r){
+  const sigs=(r.signals||[]).map(n=>`<button class="sigchip" data-sig="${esc(n)}">${esc(n)}</button>`).join('');
+  const st=r.manual?`<button class="rs ${r.status}" data-cyc="${r.mi}" title="Durumu değiştir">${RS[r.status]}</button>`:`<span class="rs ${r.status}">${RS[r.status]}</span>`;
+  return `<details class="dreq ${r.status}" data-rid="${esc(r.id)}" data-q="${esc((r.id+' '+r.title_tr+' '+r.title_en+' '+r.en+' '+r.tr+' '+(r.signals||[]).join(' ')+' '+(r.desc_tr||r.desc||'')).toLowerCase())}">
+    <summary><code>${esc(r.id)}</code><span class="rt"><b>${esc(r.title_tr)}</b>${r.title_en?`<i>${esc(r.title_en)}</i>`:''}</span>${st}</summary>
+    <div class="rbody">
+      ${r.en?`<div class="lang"><span class="lbl">EN</span><p>${esc(r.en)}</p></div>`:''}
+      ${r.tr?`<div class="lang"><span class="lbl">TR</span><p>${esc(r.tr)}</p></div>`:''}
+      <div class="desc"><div class="dlbl">Açıklama / Description</div>${r.desc_tr||r.desc?`<p>${esc(r.desc_tr||r.desc)}</p>`:'<p>—</p>'}${r.desc_en?`<p class="en">${esc(r.desc_en)}</p>`:''}</div>
+      <dl class="rmeta"><dt>Doğrulama</dt><dd>${r.verify==='auto'?'Otomatik test · simülatör':'Manuel'}</dd>
+        ${sigs?`<dt>Sinyaller</dt><dd class="chips">${sigs}</dd>`:''}
+        <dt>Kanıt</dt><dd class="evl">${r.ev.length?r.ev.slice(-4).map(esc).join('<br>'):'Henüz yok'}</dd></dl>
+      <div class="ractions">${r.go?`<button class="pbtn" data-try="${esc(r.id)}">Simülatörde dene</button>`:''}${r.manual?`<button class="pbtn ghost" data-del="${r.mi}">Sil</button>`:''}</div>
+    </div></details>`;
+}
+function renderDocReqs(){
+  const list=allReqs(),c=counts(list);
+  $('#dtoc').innerHTML=`<div class="tochead">İçindekiler</div>`+REQ_GROUPS.map((g,i)=>{const rs=list.filter(r=>r.group===g.id);if(!rs.length&&g.id!=='other')return'';const cc=counts(rs);
+    return `<a class="tocg" href="#g-${g.id}" data-toc="${g.id}"><span>${i+1}. ${esc(g.tr)}</span><em>${cc.pass}/${rs.length}</em></a>`+rs.map(r=>`<a class="tocr" href="#r-${esc(r.id)}" data-tocr="${esc(r.id)}"><i class="dot ${r.status}"></i>${esc(r.id)}</a>`).join('');}).join('');
+  $('#dmain').innerHTML=`<div class="dwrap">
+    <div class="dsum"><div><div class="eyebrow">Teknik kılavuz · Technical manual</div><h3>Solo otobüs 12M · Gereksinimler</h3>
+      <p>Her gereksinim önce İngilizce, altında Türkçe yazılır; açıklama satırı nasıl doğrulanacağını anlatır. Otomatik testler sen simülatörü kullandıkça güncellenir.</p></div>
+      <div class="sumchips"><span class="rs pass">Geçti ${c.pass}</span><span class="rs progress">Devam ${c.progress}</span><span class="rs untested">Test edilmedi ${c.untested}</span><span class="rs fail">Kaldı ${c.fail}</span></div>
+      <div class="dtools"><button class="linkbtn" id="expAll">Tümünü aç</button><button class="linkbtn" id="colAll">Tümünü kapat</button><button class="linkbtn" id="resetTests">Testleri sıfırla</button></div></div>
+    ${REQ_GROUPS.map((g,i)=>{const rs=list.filter(r=>r.group===g.id);if(!rs.length&&g.id!=='other')return'';
+      return `<section class="dgroup" id="g-${g.id}"><header><span class="gno">${i+1}</span><div><h3>${esc(g.tr)}</h3><div class="gen">${esc(g.en)}</div></div></header>
+        <p class="gintro">${esc(g.introTr)}</p><p class="gintro en">${esc(g.introEn)}</p>
+        <div class="glist">${rs.map(reqCard).join('')||'<p class="note">Henüz eklenmiş gereksinim yok.</p>'}</div></section>`;}).join('')}
+    <section class="dgroup addreq"><header><span class="gno">+</span><div><h3>Gereksinim ekle</h3><div class="gen">Add a requirement</div></div></header>
+      <form id="reqForm2" class="rform">
+        <label for="rfGroup">Fonksiyon grubu</label><select id="rfGroup">${REQ_GROUPS.map(g=>`<option value="${g.id}"${g.id==='other'?' selected':''}>${esc(g.tr)}</option>`).join('')}</select>
+        <label for="rfEn">Requirement (EN)</label><textarea id="rfEn" placeholder="The system shall …"></textarea>
+        <label for="rfTr">Gereksinim (TR)</label><textarea id="rfTr" placeholder="Sistem … yapmalıdır."></textarea>
+        <label for="rfDesc">Açıklama / Description</label><textarea id="rfDesc" placeholder="Nasıl doğrulanır?"></textarea>
+        <button class="pbtn" type="submit">Kılavuza ekle</button>
+        <p class="note">Elle eklenenler bu tarayıcıda saklanır ve elle işaretlenir. Otomatik test için metni bana gönder.</p>
+      </form></section></div>`;
+  applyDocSearch();
+}
+function renderReqs(r){
+  renderReqMini();
+  if(VIEW!=='reqs')return;
+  if(!r){renderDocReqs();return;}
+  const el=document.querySelector(`.dreq[data-rid="${r.id}"]`);
+  if(el){el.className='dreq '+r.status+(el.hidden?'':'');const chip=el.querySelector('summary .rs');if(chip){chip.className='rs '+r.status;chip.textContent=RS[r.status];}
+    const evl=el.querySelector('.evl');if(evl)evl.innerHTML=r.ev.length?r.ev.slice(-4).map(esc).join('<br>'):'Henüz yok';}
+  const t=document.querySelector(`[data-tocr="${r.id}"] .dot`);if(t)t.className='dot '+r.status;
+}
+function openReq(id){setView('reqs');requestAnimationFrame(()=>{const el=document.querySelector(`.dreq[data-rid="${id}"]`);if(el){el.open=true;el.scrollIntoView({block:'start',behavior:'smooth'});}});}
+
+/* ---------- sayfa görünümleri ---------- */
+let VIEW='sim',SIG_SEL=-1;
+function setView(v,query){
+  VIEW=v;document.querySelectorAll('.vbtn').forEach(b=>b.setAttribute('aria-current',b.dataset.view===v?'page':'false'));
+  $('#docs').hidden=v==='sim';
+  const s=$('#docSearch');s.value=query||'';
+  if(v==='reqs'){$('#docTitle').textContent='Gereksinimler';s.placeholder='Ara: REQ no, metin, sinyal…';renderDocReqs();}
+  if(v==='sigs'){$('#docTitle').textContent='Sinyaller';s.placeholder='Ara: sinyal adı, açıklama…';renderSigView();}
+  if(v!=='sim'){$('#dmain').scrollTop=0;}else $('#view').focus({preventScroll:true});
+  try{const h=v==='reqs'?'#gereksinimler':v==='sigs'?'#sinyaller':'';if(location.hash!==h)history.replaceState(null,'',h||location.pathname+location.search);}catch(e){}
+}
+function applyDocSearch(){
+  const q=$('#docSearch').value.trim().toLowerCase();
+  if(VIEW==='reqs'){document.querySelectorAll('.dgroup').forEach(g=>{if(g.classList.contains('addreq')){g.hidden=!!q;return;}let any=false;
+      g.querySelectorAll('.dreq').forEach(d=>{const m=!q||d.dataset.q.includes(q);d.hidden=!m;if(m)any=true;if(q&&m)d.open=true;});g.hidden=!!q&&!any;});}
+  if(VIEW==='sigs')updateSigView(true);
+}
+$('#docSearch').addEventListener('input',applyDocSearch);
+document.addEventListener('click',e=>{const b=e.target.closest('.vbtn');if(b)setView(b.dataset.view);const g=e.target.closest('[data-goview]');if(g)setView(g.dataset.goview);});
+$('#openManual').onclick=()=>setView('reqs');
+$('#dmain').addEventListener('click',e=>{
+  const t=e.target.closest('button,a');if(!t)return;
+  if(t.dataset.sig){e.preventDefault();setView('sigs',t.dataset.sig);}
+  if(t.dataset.try){const r=REQS.find(x=>x.id===t.dataset.try);if(r){setView('sim');const g=r.go;teleport(g[0],g[1],g[2],g[3],g[4]);}}
+  if(t.dataset.cyc!==undefined){const m=manual[+t.dataset.cyc],o=['untested','progress','pass','fail'];m.status=o[(o.indexOf(m.status)+1)%4];saveManual();renderDocReqs();renderReqMini();}
+  if(t.dataset.del!==undefined){manual.splice(+t.dataset.del,1);saveManual();renderDocReqs();renderReqMini();}
+  if(t.id==='expAll')document.querySelectorAll('.dreq').forEach(d=>d.open=true);
+  if(t.id==='colAll')document.querySelectorAll('.dreq').forEach(d=>d.open=false);
+  if(t.id==='resetTests'){REQS.forEach(r=>{r.status='untested';r.ev=[];r.seen={};});renderDocReqs();renderReqMini();log('Gereksinim testleri sıfırlandı');}
+  if(t.dataset.sigrow!==undefined){SIG_SEL=SIG_SEL===+t.dataset.sigrow?-1:+t.dataset.sigrow;renderSigTable();}
+  if(t.dataset.sf){SIG_F=t.dataset.sf;renderSigView();}
+  if(t.dataset.sg!==undefined){SIG_G=t.dataset.sg;renderSigView();}
+  if(t.dataset.openreq){openReq(t.dataset.openreq);}
+});
+$('#dmain').addEventListener('submit',e=>{if(e.target.id!=='reqForm2')return;e.preventDefault();
+  const en=$('#rfEn').value.trim(),tr=$('#rfTr').value.trim();if(!en&&!tr)return;
+  const used=new Set(allReqs().map(r=>r.id));let n=11;while(used.has('REQ-'+String(n).padStart(3,'0')))n++;
+  manual.push({id:'REQ-'+String(n).padStart(3,'0'),group:$('#rfGroup').value,en,tr,desc:$('#rfDesc').value.trim(),status:'untested'});saveManual();renderDocReqs();renderReqMini();
+  const el=document.querySelector(`.dreq[data-rid="REQ-${String(n).padStart(3,'0')}"]`);if(el){el.open=true;el.scrollIntoView({block:'center'});}});
+$('#dtoc').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();
+  if(a.dataset.tocr)openReq(a.dataset.tocr);else{const el=document.getElementById('g-'+a.dataset.toc);if(el)el.scrollIntoView({block:'start',behavior:'smooth'});}
+  if(a.dataset.tsg!==undefined){SIG_G=a.dataset.tsg;renderSigView();}});
+renderReqMini();
 
 /* ================= Fonksiyonlar ================= */
 const AUTO_T=5;
@@ -842,6 +1090,7 @@ function stopRequest(kind,src,zone){
   if(!Z.stop){Z.stop=true;log(`${src} → StopReq_K${zone}=1`);}else if(!kind)log(`${src} → StopReq_K${zone} zaten 1`);
   recompute();if(firstStop&&!kind)SFX.ding();
   refreshStop();
+  if(!kind){const r=reqFor('stop');if(ZR[zone].stop&&MAT.stopFace.emissiveIntensity>0.5)setReq(r,r.status==='pass'?'pass':'progress',`${src} (bölge K${zone}) → StopReq_K${zone}=1, STOP butonları yandı`);else setReq(r,'fail',`${src} basıldı ama istek veya aydınlatma yok`);}
   if(kind){const r=reqFor(kind);
     if(V.stopReq&&V.req[kind])setReq(r,r.status==='pass'?'pass':'progress',`${src} (bölge K${zone}) → StopReq=1, ${KIND[kind].sig}=1, lamba yandı`);
     else setReq(r,'fail',`${src} basıldı ama sinyal set edilmedi`);}
@@ -857,8 +1106,10 @@ function refreshStop(){
 }
 function onDoorOpened(id){
   const Z=ZR[id],cleared=['stroller','prm','elderly'].filter(k=>Z[k]),had=Z.stop||cleared.length;doorS[id].reqOpen=false;
+  const hadStop=Z.stop;
   if(had){Object.keys(Z).forEach(k=>Z[k]=false);recompute();refreshStop();
     log(`Kapı ${id} açıldı → bölge K${id} sıfırlandı`+(cleared.length?' ('+cleared.map(k=>KIND[k].sig).join(', ')+')':'')+`, StopReq=${V.stopReq?1:0}`);}
+  if(hadStop){const r=reqFor('stop');if(r.status==='progress')setReq(r,ZR[id].stop?'fail':'pass',`Kapı ${id} açıldı → StopReq_K${id}=${ZR[id].stop?1:0}`);}
   cleared.forEach(k=>{const r=reqFor(k);if(r.status==='progress'){if(!ZR[id][k])setReq(r,'pass',`Kapı ${id} açıldı → bölge isteği sıfırlandı, lamba söndü`);else setReq(r,'fail',`Kapı ${id} açıldı ama istek sıfırlanmadı`);}});
 }
 function drawDoorSigns(){
@@ -1020,21 +1271,92 @@ function renderCluster(){drawCluster(hudG,880,330);drawCluster(c3G,880,330);clus
 $('#hLight').onclick=()=>pressBtn(BTN[4],'Gösterge HUD');$('#hRelease').onclick=()=>pressBtn(BTN[0],'Gösterge HUD');
 (()=>{const g=$('#hRelIcon').getContext('2d');g.strokeStyle='#fff';g.lineWidth=3;g.strokeRect(9,6,26,32);g.beginPath();g.moveTo(22,6);g.lineTo(22,38);g.stroke();g.fillStyle='#3ddc84';g.font='bold 13px sans-serif';g.textAlign='center';g.fillText('A',22,26);})();
 
-/* ================= Sinyaller ================= */
-const bit=v=>`<span class="st ${v?'on':''}">${v?1:0}</span>`;
+/* ================= Sinyal kataloğu ================= */
 const rampState=()=>V.rampPos===0?'STOWED':V.rampPos===1?'DEPLOYED':V.ramp?'DEPLOYING':'STOWING';
-const SIG=[['VehSpeed',()=>V.speed.toFixed(1)+' km/h'],['EngineSpeed',()=>Math.round(V.rpm)+' rpm'],['Gear',()=>V.gear],
-  ['DoorRelease',()=>bit(V.release)],['DoorMode',()=>`<span class="st ${V.release?'on':''}">${V.release?'AUTO':'MANUAL'}</span>`],['DoorLock',()=>bit(V.doorLock)],
-  ...DOORS.map(d=>['DoorState_K'+d.id,()=>{const s=doorS[d.id];const cls=s.state==='CLOSED'?'ok':s.state==='OPEN'?'open':'move';return `<span class="st ${cls}">${s.state}${s.state.endsWith('ING')?' '+Math.round(s.pos*100)+'%':''}</span>`;}]),
-  ...[2,3].map(id=>['DoorHold_K'+id,()=>bit(doorS[id].hold)]),
-  ...[2,3].map(id=>['AutoCloseTimer_K'+id,()=>doorS[id].timer>0?doorS[id].timer.toFixed(1)+' s':'—']),
-  ['BusStopBrake',()=>bit(V.stopBrake)],['StopReq',()=>bit(V.stopReq)],
-  ...[1,2,3].map(z=>['ZoneReq_K'+z,()=>{const Z=ZR[z],a=[Z.stop&&'STOP',Z.stroller&&'BEBEK',Z.prm&&'PRM',Z.elderly&&'YAŞLI'].filter(Boolean);return a.length?`<span class="st on">${a.join(' + ')}</span>`:'<span class="st">—</span>';}]),
-  ...[1,2,3].map(id=>['DoorOpenReq_K'+id,()=>bit(doorS[id].reqOpen)]),
-  ['Ramp_K2',()=>`<span class="st ${V.rampPos>0?'on':''}">${rampState()}</span>`],['Kneel',()=>bit(V.kneel)],['IntLight',()=>bit(V.intLight)],['Hazard',()=>bit(V.hazard)],['ParkBrake',()=>bit(V.park)]];
-$('#sig').innerHTML=SIG.map(([n],i)=>`<tr><td>${n}</td><td id="sg${i}"></td></tr>`).join('');
-const sigCells=SIG.map((_,i)=>$('#sg'+i));
-function renderSignals(){SIG.forEach(([,f],i)=>{const v=f();if(sigCells[i].innerHTML!==v)sigCells[i].innerHTML=v;});}
+const sB=(n,g,tr,en,get,o)=>Object.assign({n,g,t:'bool',tr,en,get},o||{});
+const sE=(n,g,tr,en,get,act,o)=>Object.assign({n,g,t:'enum',tr,en,get,act},o||{});
+const sN=(n,g,tr,en,get,u,o)=>Object.assign({n,g,t:'num',tr,en,get,u},o||{});
+const SIG_DB=[
+  sB('Ignition_KL15','Araç','Kontak açık (KL15)','Ignition on (terminal 15)',null,{sim:false}),
+  sN('VehSpeed','Araç','Araç hızı','Vehicle speed',()=>V.speed,'km/h',{fmt:v=>v.toFixed(1)}),
+  sN('EngineSpeed','Araç','Motor devri','Engine speed',()=>Math.round(V.rpm/100)*100,'rpm'),
+  sB('EngineRun','Araç','Motor çalışıyor','Engine running',()=>V.engine),
+  sE('Gear','Araç','Vites konumu','Gear position',()=>V.gear,v=>v!=='N'),
+  sB('ParkBrake','Araç','Park freni çekili','Parking brake applied',()=>V.park),
+  sB('Hazard','Araç','Dörtlü flaşör','Hazard warning lights',()=>V.hazard),
+  sB('Headlights','Araç','Farlar','Headlights',()=>V.head),
+  sB('Kneel','Araç','Diz çöktürme','Kneeling',()=>V.kneel),
+  sB('DoorRelease','Kapı','Türfreigabe (kapı serbest)','Door release',()=>V.release),
+  sE('DoorMode','Kapı','Kapı modu','Door mode',()=>V.release?'AUTO':'MANUAL',v=>v==='AUTO'),
+  sB('DoorLock','Kapı','Kapı kilidi','Door lock',()=>V.doorLock),
+  ...DOORS.map(d=>sE('DoorState_K'+d.id,'Kapı',`Kapı ${d.id} durumu`,`Door ${d.id} state`,()=>doorS[d.id].state,v=>v!=='CLOSED')),
+  ...DOORS.map(d=>sN('DoorPos_K'+d.id,'Kapı',`Kapı ${d.id} açıklık oranı`,`Door ${d.id} opening`,()=>Math.round(doorS[d.id].pos*100),'%')),
+  ...DOORS.map(d=>sB('DoorOpenReq_K'+d.id,'Kapı',`Kapı ${d.id} açma isteği kayıtlı (Öffnung)`,`Door ${d.id} opening request stored`,()=>doorS[d.id].reqOpen)),
+  ...DOORS.map(d=>sB('DoorHold_K'+d.id,'Kapı',`Kapı ${d.id} açık tutuluyor`,`Door ${d.id} held open`,()=>doorS[d.id].hold)),
+  ...DOORS.map(d=>sN('AutoCloseTimer_K'+d.id,'Kapı',`Kapı ${d.id} otomatik kapanma sayacı`,`Door ${d.id} auto-close timer`,()=>Math.round(doorS[d.id].timer*10)/10,'s',{fmt:v=>v.toFixed(1)})),
+  sB('BusStopBrake','Kapı','Durak freni aktif','Bus stop brake active',()=>V.stopBrake),
+  sE('Ramp_K2','Kapı','Rampa durumu (kapı 2)','Ramp state (door 2)',()=>rampState(),v=>v!=='STOWED'),
+  sB('StopReq','Durak istekleri','Herhangi bir bölgede durak isteği','Stop requested (any zone)',()=>V.stopReq),
+  ...[1,2,3].map(z=>sB('StopReq_K'+z,'Durak istekleri',`Bölge K${z} durak isteği`,`Stop request, zone K${z}`,()=>ZR[z].stop)),
+  ...[1,2,3].map(z=>sB('StopReq_Stroller_K'+z,'Durak istekleri',`Bölge K${z} bebek arabası isteği`,`Stroller request, zone K${z}`,()=>ZR[z].stroller)),
+  ...[1,2,3].map(z=>sB('StopReq_PRM_K'+z,'Durak istekleri',`Bölge K${z} engelli isteği`,`Wheelchair request, zone K${z}`,()=>ZR[z].prm)),
+  ...[1,2,3].map(z=>sB('StopReq_Elderly_K'+z,'Durak istekleri',`Bölge K${z} yaşlı yolcu isteği`,`Elderly request, zone K${z}`,()=>ZR[z].elderly)),
+  sB('IntLight','Aydınlatma','İç aydınlatma','Interior lighting',()=>V.intLight),
+  sB('IntLightDim','Aydınlatma','İç aydınlatma %50','Interior lighting 50 %',()=>V.dim)
+];
+SIG_DB.forEach(s=>{if(s.sim===undefined)s.sim=true;s.hist=[];s.changes=0;s.lastT=0;s.prev=undefined;s.cur=undefined;
+  s.reqs=REQS.filter(r=>(r.signals||[]).includes(s.n)).map(r=>r.id);});
+const SIG_GROUPS=[...new Set(SIG_DB.map(s=>s.g))];
+const sigFmt=(s,v)=>v===undefined?'—':s.t==='bool'?(v?'1':'0'):s.t==='num'?(s.fmt?s.fmt(v):String(v))+(s.u?' '+s.u:''):String(v);
+const sigActive=(s,v)=>v===undefined?false:s.t==='bool'?!!v:s.t==='num'?v!==0:(s.act?s.act(v):false);
+function sampleSignals(){
+  const t=performance.now();
+  SIG_DB.forEach(s=>{if(!s.sim)return;const v=s.get(),k=String(v);s.cur=v;
+    if(k!==s.prev){if(s.prev!==undefined){s.changes++;s.lastT=t;if(s.t!=='num'){s.hist.unshift({t:now_s(),v:sigFmt(s,v)});if(s.hist.length>12)s.hist.pop();}}s.prev=k;}});
+}
+/* ---------- yan panel tablosu ---------- */
+const SIDE_SIG=SIG_DB.filter(s=>s.sim&&!/^DoorPos_|^StopReq_(Stroller|PRM|Elderly)_K1$|^DoorHold_K1$|^AutoCloseTimer_K1$/.test(s.n));
+function sideHtml(s){const v=s.cur;if(s.n.startsWith('DoorState_')){const cls=v==='CLOSED'?'ok':v==='OPEN'?'open':'move';return `<span class="st ${cls}">${esc(v)}</span>`;}
+  if(s.t==='num')return esc(sigFmt(s,v));return `<span class="st ${sigActive(s,v)?'on':''}">${esc(sigFmt(s,v))}</span>`;}
+$('#sig').innerHTML=SIDE_SIG.map((s,i)=>`<tr><td>${s.n}</td><td id="sg${i}"></td></tr>`).join('');
+const sigCells=SIDE_SIG.map((_,i)=>$('#sg'+i));
+function renderSignals(){sampleSignals();SIDE_SIG.forEach((s,i)=>{const v=sideHtml(s);if(sigCells[i].innerHTML!==v)sigCells[i].innerHTML=v;});if(VIEW==='sigs')updateSigView(false);}
+/* ---------- tam sayfa sinyal görünümü ---------- */
+let SIG_F='all',SIG_G='';
+function renderSigView(){
+  const act=SIG_DB.filter(s=>sigActive(s,s.cur)).length;
+  $('#dtoc').innerHTML=`<div class="tochead">Gruplar</div><a class="tocg${SIG_G===''?' cur':''}" href="#" data-tsg=""><span>Tümü</span><em>${SIG_DB.length}</em></a>`+
+    SIG_GROUPS.map(g=>`<a class="tocg${SIG_G===g?' cur':''}" href="#" data-tsg="${esc(g)}"><span>${esc(g)}</span><em>${SIG_DB.filter(s=>s.g===g).length}</em></a>`).join('')+
+    `<p class="note tocnote">Tanımlı ama henüz simüle edilmeyen sinyaller “bağlı değil” olarak görünür. Sinyal listeni gönderdiğinde buraya eklerim.</p>`;
+  $('#dmain').innerHTML=`<div class="dwrap wide">
+    <div class="dsum"><div><div class="eyebrow">Sinyal kataloğu · Signal catalogue</div><h3>${SIG_DB.length} sinyal · <span id="sigActN">${act}</span> aktif</h3>
+      <p>Değerler simülatörden canlı okunur. Satıra tıklayınca son değişimler ve bağlı gereksinimler açılır.</p></div>
+      <div class="sfilters" role="group" aria-label="Filtre">${[['all','Tümü'],['active','Yalnızca aktif'],['recent','Son 10 s değişen'],['nosim','Bağlı değil']].map(([k,l])=>`<button class="sfb" data-sf="${k}" aria-pressed="${SIG_F===k}">${l}</button>`).join('')}</div></div>
+    <div class="stable-wrap"><table class="stable"><thead><tr><th>Sinyal</th><th>Açıklama</th><th>Tip</th><th>Değer</th><th>Son değişim</th></tr></thead><tbody id="sigBody"></tbody></table></div></div>`;
+  renderSigTable();
+}
+function renderSigTable(){
+  const tb=$('#sigBody');if(!tb)return;
+  tb.innerHTML=SIG_DB.map((s,i)=>`<tr class="srow${SIG_SEL===i?' sel':''}" data-i="${i}"><td><button class="sname" data-sigrow="${i}" aria-expanded="${SIG_SEL===i}"><code>${esc(s.n)}</code></button><div class="sg">${esc(s.g)}</div></td>
+    <td>${esc(s.tr)}<div class="en">${esc(s.en)}</div></td><td class="stype">${s.t==='bool'?'bool':s.t==='num'?'sayı':'enum'}${s.u?' · '+esc(s.u):''}</td><td class="sval"></td><td class="schg"></td></tr>
+    ${SIG_SEL===i?`<tr class="sdet"><td colspan="5"><div class="sdet-in"><div><div class="dlbl">Son değişimler</div><div class="shist"></div></div>
+      <div><div class="dlbl">Bağlı gereksinimler</div>${s.reqs.length?s.reqs.map(id=>`<button class="sigchip" data-openreq="${id}">${id}</button>`).join(' '):'<span class="note">Yok</span>'}
+      <div class="dlbl" style="margin-top:10px">Kaynak</div><span class="note">${s.sim?'Simülatör (canlı)':'Tanımlı, henüz bağlı değil'}</span></div></div></td></tr>`:''}`).join('');
+  updateSigView(true);
+}
+function updateSigView(force){
+  const tb=$('#sigBody');if(!tb)return;const q=$('#docSearch').value.trim().toLowerCase(),now=performance.now();let act=0;
+  tb.querySelectorAll('tr.srow').forEach(tr=>{const s=SIG_DB[+tr.dataset.i],v=s.cur,a=sigActive(s,v);if(a)act++;
+    const vis=(!SIG_G||s.g===SIG_G)&&(!q||(s.n+' '+s.tr+' '+s.en+' '+s.g).toLowerCase().includes(q))&&
+      (SIG_F==='all'||(SIG_F==='active'&&a)||(SIG_F==='recent'&&s.lastT&&now-s.lastT<10000)||(SIG_F==='nosim'&&!s.sim));
+    tr.hidden=!vis;const det=tr.nextElementSibling&&tr.nextElementSibling.classList.contains('sdet')?tr.nextElementSibling:null;if(det)det.hidden=!vis;
+    tr.classList.toggle('on',a);
+    const vh=s.sim?`<span class="sv ${a?'on':''}">${esc(sigFmt(s,v))}</span>`:'<span class="sv nosim">bağlı değil</span>';
+    const c=tr.querySelector('.sval');if(force||c.innerHTML!==vh)c.innerHTML=vh;
+    const ch=s.lastT?`${((now-s.lastT)/1000).toFixed(1)} s önce · ${s.changes}×`:'—';const cc=tr.querySelector('.schg');if(cc.textContent!==ch)cc.textContent=ch;
+    if(det){const h=det.querySelector('.shist'),hh=s.t==='num'?`<span class="note">Sürekli değer; anlık: ${esc(sigFmt(s,v))}</span>`:(s.hist.length?s.hist.map(x=>`<div><time>${x.t}</time> → <b>${esc(x.v)}</b></div>`).join(''):'<span class="note">Henüz değişim yok</span>');if(h.innerHTML!==hh)h.innerHTML=hh;}});
+  const an=$('#sigActN');if(an)an.textContent=act;
+}
 
 /* ================= Hareket ================= */
 const R=0.22,STAND=1.65,FOV0=70;
@@ -1155,7 +1477,7 @@ const endPtr=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);
   if(ptrs.size===0)drag=null;pinch=0;};
 cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
 cv.addEventListener('wheel',e=>{e.preventDefault();zoomBy(Math.exp(e.deltaY*0.0012));},{passive:false});
-addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,textarea'))return;const k=e.key.toLowerCase();
+addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,textarea,select'))return;if(VIEW!=='sim'){if(e.key==='Escape')setView('sim');return;}const k=e.key.toLowerCase();
   if(['1','2','3'].includes(k)&&!e.repeat){doorToggle(+k,'Klavye '+k);return;}
   if(k==='l'&&!e.repeat){pressBtn(BTN[4],'Klavye L');return;}
   if(k==='f'&&!e.repeat){pressBtn(BTN[0],'Klavye F');return;}
@@ -1176,6 +1498,7 @@ new ResizeObserver(resize).observe(cv);resize();
 /* ================= Döngü ================= */
 let last=performance.now(),hoverT=0,slowT=0;const fwd=new THREE.Vector3();
 setMode('walk');applyLighting();
+const hashView=()=>{const h=location.hash;if(h==='#gereksinimler')setView('reqs');else if(h==='#sinyaller')setView('sigs');};hashView();addEventListener('hashchange',hashView);
 function frame(now){
   const dt=Math.min(0.05,(now-last)/1000);last=now;const k=st.keys;
   updateDoors(dt);V.rpm+=((V.engine?620+Math.sin(now/310)*6+Math.sin(now/97)*3:0)-V.rpm)*Math.min(1,dt*(V.engine?3:1.5));
@@ -1197,7 +1520,7 @@ function frame(now){
     else{l.setPosition(p.x,p.y,p.z);l.setOrientation(fwd.x,fwd.y,fwd.z,0,1,0);}}
   slowT-=dt;if(slowT<=0){slowT=0.08;renderCluster();renderSignals();refreshBtns();drawDoorSigns();}
   if(selHelper)selHelper.update();
-  renderer.render(scene,camera);drawMap();
+  if(VIEW==='sim'){renderer.render(scene,camera);drawMap();}
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
