@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev F)
+# Otobüs Tasarım Stüdyosu (konsept, Rev G)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -50,3 +50,12 @@ TR: Sistem ... yapmalıdır.
 Açıklama: nasıl doğrulanır
 Sinyaller: DoorRelease, DoorState_K2
 ```
+
+## Rev G
+- Gereksinimler yalnızca ayrı sayfada (sağ panelden kaldırıldı).
+- Gereksinim listesinden 3 kapı gereksinimi orijinal ID ve revizyonuyla eklendi, EN + TR + açıklama, otomatik test:
+  - 2021.19178 (BASE; 1): Türfreigabe yokken açma butonu isteği saklar (StopReq_Kx), varken doğrudan açar.
+  - 2021.18647 (BASE; 4): Açık kalma süresi 3 s; ışık bariyeri algılarsa süre yeniden başlar.
+  - 2025.03465 (BASE; 2): Engelli, bebek arabası veya yaşlı butonuyla açılan kapı otomatik kapanmaz.
+- Parametre DoorHoldOpenTime_P (3 / 5 / 10 s, varsayılan 3 s) kılavuzun kapı bölümünde.
+- Yeni sinyaller: LightBarrier_K1..3, DoorHoldOpenTime_P.
