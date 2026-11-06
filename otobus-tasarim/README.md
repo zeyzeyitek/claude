@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev L)
+# Otobüs Tasarım Stüdyosu (konsept, Rev M)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -93,3 +93,10 @@ Sinyaller: DoorRelease, DoorState_K2
 - Kılavuzda "▶ Tüm otomatik testleri çalıştır": 29 senaryoyu sırayla çalıştırır, sonra özet ile kılavuza döner.
 - Her gereksinim kartında "Test senaryosu": otomatik testlerde adımlar, diğerlerinde metinden üretilmiş taslak (başlangıç, koşullar, beklenen sonuç, negatif test, Not kontrolü; parametre ve test senaryosu tipleri için ayrı şablon).
 - Sürücü kapı butonu ve otomatik açma 1 km/h üstünde engellenir (2021.19027).
+
+## Rev M
+- Otomatik test sırasında sağda **adım paneli**: tüm adımlar listelenir (bekliyor / çalışıyor / bitti + süre), altta canlı sinyaller ve sonuç.
+- Eksik testler: ~24 liste gereksinimi mevcut otomatik testlere bağlandı (aynı fonksiyonu test eden gereksinimler sonucu paylaşır) → 51 gereksinim otomatik test kapsamında.
+- **Sinyal grafiği** (Sinyaller sekmesi): 50 ms örnekleme, seçilebilir zaman penceresi, bool/enum/sayısal izler, her sinyal için pencere içindeki aktif süre (s) ve yükselen kenar sayısı.
+- Buton basma darbe sinyalleri: DrvBtn_K1–3, OeffBtn_K1–3, StopBtn_K1–3, SpecBtn_K1–3, DashBtn_*.
+- Her otomatik test kaydedilir; gereksinim kartındaki "Sinyal grafiği" o testin zaman aralığını gösterir.
