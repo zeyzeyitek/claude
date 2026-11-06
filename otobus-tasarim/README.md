@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev H)
+# Otobüs Tasarım Stüdyosu (konsept, Rev I)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -67,3 +67,11 @@ Sinyaller: DoorRelease, DoorState_K2
 - Bölümler açılınca yüklenir; arama tüm listede. Elle durum işaretleme ve bölüm taşıma tarayıcıda saklanır.
 - Gereksinimlerde geçen 185 sinyal/parametre adı sinyal kataloğuna "bağlı değil" olarak eklendi.
 - `data/requirements.json`: ayrıştırılmış liste; `data/parse_requirements.py`: ayrıştırma ve otomatik gruplama betiği.
+
+## Rev I
+- Seçim kutusu (sarı çerçeve) kaldırıldı. Tuşlar basınca içeri gömülür; aç/kapa tuşların LED'i yeşil yanar, anlık tuşların LED'i kısa süre parlar.
+- Gösterge tuşları siyah, ikonlar beyaz.
+- Durak istekleri kapı açılmaya başladığı anda bölge bazında silinir (2021.19182). Kapı kapalı değilken gelen istek saklanmaz (2021.19171).
+- Kabin kapısı: mıknatıslı kilit, B07 KABİN butonu (5 s bırakma), el freni kolu. Park freni inikken kilit açılmaz (2022.05043); kapı açıkken el freni inerse sürücü buzzer'ı çalar (2023.05022). İkisi de otomatik test.
+- Dış görünüm: yuvarlatılmış köşeler, krom bar ve kurgusal "Şahin" amblemi, LED far grupları, sis farları, silecekler, yan işaret lambaları, motor ızgarası.
+- Çevre: durak sığınağı ve hat panosu, binalar, ağaçlar. Yürürken hafif kafa sallanması.
