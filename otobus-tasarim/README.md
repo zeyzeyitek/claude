@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev G)
+# Otobüs Tasarım Stüdyosu (konsept, Rev H)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -59,3 +59,11 @@ Sinyaller: DoorRelease, DoorState_K2
   - 2025.03465 (BASE; 2): Engelli, bebek arabası veya yaşlı butonuyla açılan kapı otomatik kapanmaz.
 - Parametre DoorHoldOpenTime_P (3 / 5 / 10 s, varsayılan 3 s) kılavuzun kapı bölümünde.
 - Yeni sinyaller: LightBarrier_K1..3, DoorHoldOpenTime_P.
+
+## Rev H
+- Kokpit 3D olarak yeniden: cluster kaputu (krom çerçeve, cam), sürücüye dönük eğimli sağ/sol paneller, ikonlu açık gri tuşlar ve LED şeritleri, kapı ikonlu kırmızı yuvarlak K1–K3 butonları, yuvarlak havalandırmalar, takograf ve klima ekranı, ışık döner anahtarı, uydu kumandalı direksiyon.
+- Cluster çizimi: krom kadran çerçeveleri, değer yayı, cam parlaması.
+- Gereksinim listesinin tamamı (911 madde: 776 gereksinim, 74 iptal, 43 parametre, 17 test senaryosu, 1 not) 29 fonksiyon bölümünde. Orijinal EN metin, "Remark" kısmı açıklamaya ayrılmış. TR çeviriler bölüm bölüm eklenecek.
+- Bölümler açılınca yüklenir; arama tüm listede. Elle durum işaretleme ve bölüm taşıma tarayıcıda saklanır.
+- Gereksinimlerde geçen 185 sinyal/parametre adı sinyal kataloğuna "bağlı değil" olarak eklendi.
+- `data/requirements.json`: ayrıştırılmış liste; `data/parse_requirements.py`: ayrıştırma ve otomatik gruplama betiği.
