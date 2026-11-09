@@ -149,6 +149,7 @@ body.demo-on #panel{visibility:hidden}
 .ctools select{border:1px solid var(--line);border-radius:5px;background:var(--chip);color:var(--ink);font:500 12px var(--f-mono);padding:5px 6px;max-width:220px}
 .cchips{display:flex;flex-wrap:wrap;gap:4px}
 .cwrap{position:relative;overflow-x:auto}#chart{display:block;width:100%;min-width:520px;cursor:crosshair}
+#ctip[hidden]{display:none}
 #ctip{position:absolute;top:6px;min-width:180px;background:var(--panel-a);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:400 11px var(--f-mono);pointer-events:none;display:grid;gap:2px;box-shadow:0 4px 12px rgba(0,0,0,.18)}
 #ctip div{display:flex;justify-content:space-between;gap:10px}#ctip code{font:600 11px var(--f-mono)}
 @media (max-width:760px){#demo{top:auto;left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));width:auto;max-height:46%}}
@@ -286,6 +287,29 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
 .dreq summary{grid-template-columns:auto minmax(0,1fr) auto auto}
 @media (max-width:760px){.gbody{padding-left:0}.gcount{display:none}.dreq summary{grid-template-columns:minmax(0,1fr) auto auto}}
 @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+.smodes{display:flex;gap:6px;flex-wrap:wrap}
+.fngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.fncard{appearance:none;border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:14px;display:grid;gap:6px;align-content:start;text-align:left;cursor:pointer;color:var(--ink);font:inherit}
+.fncard:hover{border-color:var(--accent)} .fncard b{font:700 15px/1.25 var(--f-display)} .fncard span{color:var(--muted);font-size:13px;line-height:1.45} .fncard em{font:500 11.5px var(--f-mono);font-style:normal;color:var(--muted)}
+.aswlist{display:grid;gap:10px}
+.aswd{border:1px solid var(--line);border-radius:8px;background:var(--panel)} .aswd>summary{cursor:pointer;padding:12px 14px;display:flex;gap:6px 12px;flex-wrap:wrap;align-items:baseline}
+.aswd>summary code{font:600 14px var(--f-mono)} .aswd>summary em{font:500 11.5px var(--f-mono);font-style:normal;color:var(--muted)} .aswb{padding:0 14px 14px;display:grid;gap:8px;min-width:0}
+.invh{margin:10px 0 0;font:600 13.5px var(--f-display)} .invh em{font:500 11px var(--f-mono);font-style:normal;color:var(--muted)}
+.stable.inv td.wrap{white-space:normal;max-width:220px}
+.chain{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:16px;display:grid;gap:14px;scroll-margin-top:12px}
+.chain h4{margin:0;font:700 18px/1.25 var(--f-display)} .chd{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;align-items:start}
+.csteps{list-style:none;margin:0;padding:0}
+.cst{display:grid;grid-template-columns:28px 1fr;gap:12px;position:relative;padding-bottom:14px}
+.cst:not(:last-child)::before{content:'';position:absolute;left:13px;top:30px;bottom:2px;width:2px;background:var(--line)}
+.cnum{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--chip);font:600 12px var(--f-mono);color:var(--muted)}
+.cst.on .cnum{background:var(--ok);color:#fff} .cbody{min-width:0}
+.ctop{display:flex;gap:8px;flex-wrap:wrap;align-items:center} .ctop code{word-break:break-all}
+.casw{font:500 11px var(--f-mono);color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.ctxt{font-size:14px;margin-top:4px;line-height:1.45} .lk{display:block;margin-top:4px;font:500 11.5px var(--f-mono);color:var(--muted)} .lk.ok{color:var(--ok)} .lk.par{color:var(--accent)}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;border-top:1px solid var(--line);padding-top:12px}
+.cchips2{display:grid;gap:6px;margin-top:6px} .cchip{display:flex;gap:8px;flex-wrap:wrap;align-items:center} .cchip em{font-style:normal;font-size:12.5px;color:var(--muted)}
+.pf{display:flex;gap:10px;flex-wrap:wrap;align-items:end} .pf label{display:grid;gap:4px;font:600 11px var(--f-mono);color:var(--muted);flex:1;min-width:220px}
+.pf input{font:500 13px var(--f-mono);padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
 </style>
 
 <div id="app">
@@ -294,7 +318,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev M</div>
+    <div class="eyebrow">Konsept · Rev N</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button></nav>
   </div>
@@ -1306,7 +1330,7 @@ function setView(v,query){
   $('#docs').hidden=v==='sim';
   const s=$('#docSearch');s.value=query||'';
   if(v==='reqs'){$('#docTitle').textContent='Gereksinimler';s.placeholder='Ara: REQ no, metin, sinyal…';renderDocReqs();}
-  if(v==='sigs'){$('#docTitle').textContent='Sinyaller';s.placeholder='Ara: sinyal adı, açıklama…';renderSigView();}
+  if(v==='sigs'){$('#docTitle').textContent='Sinyaller';s.placeholder='Ara: sinyal adı, açıklama (envanterde 6.082 sinyal)…';loadInv().catch(()=>{});renderSigView();}
   if(v!=='sim'){$('#dmain').scrollTop=0;}else $('#view').focus({preventScroll:true});
   try{const h=v==='reqs'?'#gereksinimler':v==='sigs'?'#sinyaller':'';if(location.hash!==h)history.replaceState(null,'',h||location.pathname+location.search);}catch(e){}
 }
@@ -1318,13 +1342,13 @@ function applyDocSearch(){
       if(gid==='_add'){sec.hidden=!!q;return;}
       if(q){const n=list.filter(r=>r.group===gid&&qOf(r).includes(q)).length;sec.hidden=!n;if(n){d.open=true;fillChapter(gid,q);}}
       else{sec.hidden=false;d.open=OPEN_G.has(gid);const el=sec.querySelector('[data-gl]');if(d.open)fillChapter(gid,'');else{el.innerHTML='';el.dataset.filled='';}}});}
-  if(VIEW==='sigs')updateSigView(true);
+  if(VIEW==='sigs'){if(SIG_MODE==='inv')renderInvMain();else updateSigView(true);}
 }
 let searchT=0;$('#docSearch').addEventListener('input',()=>{clearTimeout(searchT);searchT=setTimeout(applyDocSearch,160);});
 document.addEventListener('click',e=>{const b=e.target.closest('.vbtn');if(b)setView(b.dataset.view);const g=e.target.closest('[data-goview]');if(g)setView(g.dataset.goview);});
 $('#dmain').addEventListener('mousemove',e=>{if(e.target.id!=='chart')return;const r=e.target.getBoundingClientRect();CH.hx=e.clientX-r.left;if(!CH.live)drawChart();});
 $('#dmain').addEventListener('mouseleave',()=>{CH.hx=null;},true);
-$('#dmain').addEventListener('toggle',e=>{const d=e.target;if(!d.classList||!d.classList.contains('gdet')||d.dataset.g==='_add')return;const gid=d.dataset.g;
+$('#dmain').addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classList.contains('aswd')&&d.open)fillAsw(d);if(!d.classList||!d.classList.contains('gdet')||d.dataset.g==='_add')return;const gid=d.dataset.g;
   if(d.open){if(!$('#docSearch').value.trim())OPEN_G.add(gid);const el=d.querySelector('[data-gl]');if(el&&!el.dataset.filled)fillChapter(gid,$('#docSearch').value.trim().toLowerCase());}
   else if(!$('#docSearch').value.trim())OPEN_G.delete(gid);},true);
 $('#dmain').addEventListener('change',e=>{
@@ -1349,6 +1373,15 @@ $('#dmain').addEventListener('click',e=>{
   if(t.id==='resetTests'){REQS.forEach(r=>{r.status='untested';r.ev=[];r.seen={};});renderDocReqs();log('Otomatik testler sıfırlandı');}
   if(t.dataset.sigrow!==undefined){SIG_SEL=SIG_SEL===+t.dataset.sigrow?-1:+t.dataset.sigrow;renderSigTable();}
   if(t.dataset.sf){SIG_F=t.dataset.sf;renderSigView();}
+  if(t.dataset.smode){SIG_MODE=t.dataset.smode;$('#docSearch').value='';renderSigView();$('#dmain').scrollTop=0;return;}
+  if(t.dataset.invfn!==undefined){e.preventDefault();INV_F=+t.dataset.invfn;$('#docSearch').value='';renderInvToc();renderInvMain();$('#dmain').scrollTop=0;return;}
+  if(t.dataset.inv!==undefined){toggleInvDet(t);return;}
+  if(t.dataset.invasw!==undefined){openInvAsw(+t.dataset.invasw);return;}
+  if(t.dataset.invname){openInvSig(t.dataset.invname);return;}
+  if(t.dataset.plot){const n=t.dataset.plot;if(!CH.sel.includes(n))CH.sel.push(n);SIG_MODE='live';CH.live=true;CH.start=null;$('#docSearch').value='';renderSigView();return;}
+  if(t.dataset.chaindemo){const c=CHAINS.find(x=>x.id===t.dataset.chaindemo),r=c&&reqFor(c.demo);if(r)runDemo(r);return;}
+  if(t.dataset.chainplot){const c=CHAINS.find(x=>x.id===t.dataset.chainplot);if(c)chainPlot(c);return;}
+  if(t.id==='pfGo'){runPathFinder();return;}
   if(t.dataset.sg!==undefined){SIG_G=t.dataset.sg;renderSigView();}
   if(t.dataset.openreq){openReq(t.dataset.openreq);}
   if(t.dataset.hold){AUTO_T=+t.dataset.hold;log(`Parametre DoorHoldOpenTime_P = ${AUTO_T} s`);document.querySelectorAll('[data-hold]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.hold===AUTO_T));}
@@ -1359,6 +1392,8 @@ $('#dmain').addEventListener('submit',e=>{if(e.target.id!=='reqForm2')return;e.p
   manual.push({id:nid,group:grp,en,tr,desc:$('#rfDesc').value.trim(),status:'untested'});saveManual();OPEN_G.add(grp);renderDocReqs();openReq(nid);});
 $('#dtoc').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();
   if(a.dataset.tsg!==undefined){SIG_G=a.dataset.tsg;renderSigView();return;}
+  if(a.dataset.invfn!==undefined){INV_F=+a.dataset.invfn;$('#docSearch').value='';renderInvToc();renderInvMain();$('#dmain').scrollTop=0;return;}
+  if(a.dataset.chain){const el=document.getElementById('ch-'+a.dataset.chain);if(el)el.scrollIntoView({block:'start',behavior:'smooth'});return;}
   if(a.dataset.tocr){openReq(a.dataset.tocr);return;}
   const gid=a.dataset.toc,d=document.querySelector(`.gdet[data-g="${gid}"]`);if(d){d.open=true;OPEN_G.add(gid);fillChapter(gid,$('#docSearch').value.trim().toLowerCase());}
   const el=document.getElementById('g-'+gid);if(el)el.scrollIntoView({block:'start',behavior:'smooth'});});
@@ -1851,6 +1886,38 @@ SIG_DB.splice(SIG_DB.findIndex(s=>s.g==='Listeden · sinyal'||s.g==='Listeden ·
   ...[1,2,3].map(z=>sB('OeffBtn_K'+z,'Butonlar',`Kapı ${z} AÇ (Öffnung) butonu basılı`,`Door ${z} opening button pressed`,pulse('OeffBtn_K'+z))),
   ...[1,2,3].map(z=>sB('StopBtn_K'+z,'Butonlar',`Bölge K${z} STOP butonu basılı`,`STOP button zone K${z} pressed`,pulse('StopBtn_K'+z))),
   ...[1,2,3].map(z=>sB('SpecBtn_K'+z,'Butonlar',`Bölge K${z} özel buton basılı`,`Special button zone K${z} pressed`,pulse('SpecBtn_K'+z))));
+/* ---------- gerçek ASW isimleriyle simülatör eşlemesi (B24 envanteri) ---------- */
+{const G='ASW (gerçek isim)',dst=z=>doorS[z].state,BBC={CLOSED:'CLOSED=1',OPEN:'OPEN=2',CLOSING:'CLOSING=3',OPENING:'OPENING=4'};
+ const b=(n,get,note)=>Object.assign(sB(n,G,'ASW sinyali',note||'',get),{note:note||'Simülatör eşlemesi'});
+ const e=(n,get,note)=>Object.assign(sE(n,G,'ASW sinyali',note||'',get,v=>v!=='CLOSED=1'),{note});
+ const L=[b('GW_StClmp15On',()=>true,'Simülatörde kontak (KL15) hep açık kabul edilir'),
+  b('GW_SpdLess1On',()=>V.speed<1,'Araç hızı < 1 km/h'),b('GW_SpdLess3On',()=>V.speed<3,'Araç hızı < 3 km/h'),
+  b('DR_StDoorRelsBtnPosn1_I',pulse('Dash_B01'),'Panodaki TF tuşu (B01) basışı, 300 ms darbe'),
+  b('DR_StDoorRelsActv',()=>V.release,'Simülatördeki Türfreigabe durumu'),
+  ...[1,2,3].map(z=>b('DR_StDoorRelsActvForDoor'+z,()=>V.release,`Türfreigabe, kapı ${z} bölgesi`)),
+  b('DR_StKneeLvlDmnd',()=>V.kneel,'Kneeling talebi'),b('DR_StBstbrkByDoorRels',()=>V.stopBrake&&V.release,'Durak freni + Türfreigabe'),
+  b('DBF_StMinOneDoorOpnd',()=>DOORS.some(d=>doorS[d.id].state!=='CLOSED'),'En az bir kapı kapalı değil'),
+  b('DBF_StAllDoorsOpnd',()=>DOORS.every(d=>doorS[d.id].state==='OPEN'),'Tüm kapılar açık'),
+  ...[1,2,3].flatMap(z=>[b(`D${z}SR_StBtnIntDoor${z}`,pulse('OeffBtn_K'+z),`Kapı ${z} iç AÇ (Öffnung) butonu basışı`),
+    b(`D${z}SR_StDoor${z}StrqBtn`,pulse('StopBtn_K'+z),`Bölge K${z} STOP butonu basışı`),
+    b(`D${z}SR_StStrqDoor${z}Saved`,()=>ZR[z].stop,`Bölge K${z} durak isteği kayıtlı (Vorspeicherung)`),
+    b(`D${z}SR_StDoor${z}StrqDisp`,()=>ZR[z].stop,`Bölge K${z} durak isteği göstergesi`),
+    b(`DBF_StsDoor${z}Open`,()=>dst(z)==='OPEN',`Kapı ${z} açık`),b(`DBF_StsDoor${z}Opg`,()=>dst(z)==='OPENING',`Kapı ${z} açılıyor`),
+    b(`BBC_StDoor${z}Libar`,()=>!!doorS[z].lb,`Kapı ${z} ışık bariyeri`),b(`DOM_StDoor${z}OldMBtn`,()=>ZR[z].elderly,`Bölge K${z} yaşlı yolcu isteği`)]),
+  ...[2,3].flatMap(z=>[b(`D${z}PB_StStrqDoor${z}FromPrmBtn`,()=>ZR[z].stroller,`Kapı ${z} bebek arabası isteği`),
+    b(`D${z}W_StStrqDoor${z}FromWhlchrBtn`,()=>ZR[z].prm,`Kapı ${z} tekerlekli sandalye isteği`),
+    b(`D${z}A_StDoorOpngRqst`,()=>V.release&&dst(z)==='OPENING',`Kapı ${z} otomatik modda açılma isteği`),
+    b(`D${z}A_StDoorClsngRqst`,()=>V.release&&dst(z)==='CLOSING',`Kapı ${z} otomatik modda kapanma isteği`),
+    b(`D${z}A_StDoorClsngBlkgRqst`,()=>!!doorS[z].hold,`Kapı ${z} kapanma bloklama (açık tutma)`),
+    b(`DBF_StDoor${z}OpgRqst`,()=>dst(z)==='OPENING',`Kapı ${z} ana açılma isteği`),
+    b(`BD${z<3?12:34}_ReqDoor${z}Opg_OC`,()=>dst(z)==='OPENING',`Kapı ${z} açılma isteği, gövde CAN çıkışı`),
+    b(`D${z}M_StDrvrBtnOpgDoor${z}`,pulse('DrvBtn_K'+z),`Sürücü kapı ${z} butonu basışı`),
+    e(`BBC_StDoor${z}`,()=>BBC[dst(z)],`Kapı ${z} durumu (CAN): CLOSED=1, OPEN=2, CLOSING=3, OPENING=4`)]),
+  b('D1A_StDoorWngfrOpngRqst',()=>V.release&&dst(1)==='OPENING','Kapı 1 ön kanat otomatik açılma isteği'),
+  b('DBF_StDoor1WngfrOpgRqst',()=>dst(1)==='OPENING','Kapı 1 ön kanat ana açılma isteği'),
+  b('D1M_StDrvrBtnOpgWngfrDoor1',pulse('DrvBtn_K1'),'Sürücü kapı 1 butonu basışı'),
+  e('BBC_StDoor1Wngfr',()=>BBC[dst(1)],'Kapı 1 ön kanat durumu (CAN)'),e('BBC_StDoor1Wngre',()=>BBC[dst(1)],'Kapı 1 arka kanat durumu (CAN)')];
+ L.forEach(x=>{x.aswLive=true;const k=SIG_DB.findIndex(s=>s.n===x.n);if(k>=0){x.listReqs=SIG_DB[k].listReqs;SIG_DB.splice(k,1);}});SIG_DB.push(...L);}
 SIG_DB.forEach(s=>{if(s.sim===undefined)s.sim=true;s.hist=[];s.changes=0;s.lastT=0;s.prev=undefined;s.cur=undefined;
   s.reqs=[...REQS.filter(r=>(r.signals||[]).includes(s.n)).map(r=>r.id),...(s.listReqs||[])];});
 const SIG_GROUPS=[...new Set(SIG_DB.map(s=>s.g))];
@@ -1862,7 +1929,7 @@ function sampleSignals(){
     if(k!==s.prev){if(s.prev!==undefined){s.changes++;s.lastT=t;if(s.t!=='num'){s.hist.unshift({t:now_s(),v:sigFmt(s,v)});if(s.hist.length>12)s.hist.pop();}}s.prev=k;}});
 }
 /* ---------- yan panel tablosu ---------- */
-const SIDE_SIG=SIG_DB.filter(s=>s.sim&&!/^DoorPos_|^StopReq_(Stroller|PRM|Elderly)_K1$|^DoorHold_K1$|^AutoCloseTimer_K1$/.test(s.n));
+const SIDE_SIG=SIG_DB.filter(s=>s.sim&&!s.aswLive&&!/^DoorPos_|^StopReq_(Stroller|PRM|Elderly)_K1$|^DoorHold_K1$|^AutoCloseTimer_K1$/.test(s.n));
 function sideHtml(s){const v=s.cur;if(s.n.startsWith('DoorState_')){const cls=v==='CLOSED'?'ok':v==='OPEN'?'open':'move';return `<span class="st ${cls}">${esc(v)}</span>`;}
   if(s.t==='num')return esc(sigFmt(s,v));return `<span class="st ${sigActive(s,v)?'on':''}">${esc(sigFmt(s,v))}</span>`;}
 $('#sig').innerHTML=SIDE_SIG.map((s,i)=>`<tr><td>${s.n}</td><td id="sg${i}"></td></tr>`).join('');
@@ -1871,11 +1938,12 @@ function renderSignals(){sampleSignals();SIDE_SIG.forEach((s,i)=>{const v=sideHt
 /* ---------- tam sayfa sinyal görünümü ---------- */
 let SIG_F='all',SIG_G='';
 function renderSigView(){
+  if(SIG_MODE!=='live'){renderInvToc();SIG_MODE==='inv'?renderInvMain():renderChains();return;}
   const act=SIG_DB.filter(s=>sigActive(s,s.cur)).length;
   $('#dtoc').innerHTML=`<div class="tochead">Gruplar</div><a class="tocg${SIG_G===''?' cur':''}" href="#" data-tsg=""><span>Tümü</span><em>${SIG_DB.length}</em></a>`+
     SIG_GROUPS.map(g=>`<a class="tocg${SIG_G===g?' cur':''}" href="#" data-tsg="${esc(g)}"><span>${esc(g)}</span><em>${SIG_DB.filter(s=>s.g===g).length}</em></a>`).join('')+
-    `<p class="note tocnote">Tanımlı ama henüz simüle edilmeyen sinyaller “bağlı değil” olarak görünür. Sinyal listeni gönderdiğinde buraya eklerim.</p>`;
-  $('#dmain').innerHTML=`<div class="dwrap wide">
+    `<p class="note tocnote">“ASW (gerçek isim)” grubu, B24 envanterindeki sinyallerin simülatördeki karşılığıdır. 6.082 sinyalin tamamı için “ASW envanteri” sekmesine bakın.</p>`;
+  $('#dmain').innerHTML=`<div class="dwrap wide">${modeBar()}
     <div class="dsum"><div><div class="eyebrow">Sinyal kataloğu · Signal catalogue</div><h3>${SIG_DB.length} sinyal · <span id="sigActN">${act}</span> aktif</h3>
       <p>Değerler simülatörden canlı okunur. Satıra tıklayınca son değişimler ve bağlı gereksinimler açılır.</p></div>
       <div class="sfilters" role="group" aria-label="Filtre">${[['all','Tümü'],['active','Yalnızca aktif'],['recent','Son 10 s değişen'],['nosim','Bağlı değil']].map(([k,l])=>`<button class="sfb" data-sf="${k}" aria-pressed="${SIG_F===k}">${l}</button>`).join('')}</div></div>
@@ -1892,6 +1960,153 @@ function renderSigTable(){
       <div class="dlbl" style="margin-top:10px">Kaynak</div><span class="note">${s.sim?'Simülatör (canlı)':'Tanımlı, henüz bağlı değil'}</span></div></div></td></tr>`:''}`).join('');
   updateSigView(true);
 }
+/* ---------- B24 ASW sinyal envanteri ve fonksiyon zincirleri ---------- */
+let SIG_MODE='live',INV=null,INV_P=null,INV_F=-1,REQ_BY_SIG=null;
+const SIGN=new Map(SIG_DB.map(s=>[s.n,s]));
+function loadInv(){if(INV_P)return INV_P;
+  INV_P=fetch('data/asw_signals.json').then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(d=>{
+    d.byName=new Map();d.s.forEach((s,i)=>d.byName.set(s[0],i));d.cons=d.s.map(()=>[]);d.loc=d.s.map(()=>[]);d.fnSig=d.fn.map(()=>0);
+    d.asw.forEach((a,ai)=>{a.i.forEach(i=>d.cons[i].push(ai));a.l.forEach(i=>d.loc[i].push(ai));d.fnSig[a.f]+=a.i.length+a.o.length+a.l.length;});
+    SIG_DB.forEach(s=>{const i=d.byName.get(s.n);if(i==null)return;s.inv=i;if(s.aswLive){s.tr=d.s[i][1];s.en=d.s[i][2];}});
+    INV=d;return d;});
+  INV_P.catch(()=>{INV_P=null;});return INV_P;}
+function reqBySig(){if(REQ_BY_SIG)return REQ_BY_SIG;REQ_BY_SIG=new Map();
+  LIST.forEach(x=>(x.sig||[]).forEach(n=>{if(!REQ_BY_SIG.has(n))REQ_BY_SIG.set(n,[]);REQ_BY_SIG.get(n).push(x.id);}));
+  REQS.forEach(r=>(r.signals||[]).forEach(n=>{if(!REQ_BY_SIG.has(n))REQ_BY_SIG.set(n,[]);const l=REQ_BY_SIG.get(n);if(!l.includes(r.id))l.push(r.id);}));return REQ_BY_SIG;}
+const nf=n=>n.toLocaleString('tr-TR');
+const isPar=i=>INV.s[i][8]===1||/(_P|Nv)$/.test(INV.s[i][0]);
+function invVal(s){const v=s[3]>=0?INV.v[s[3]]:'',r=(s[4]!==''||s[5]!=='')?`${s[4]}…${s[5]}${s[6]?' '+s[6]:''}`:'';return [v,r].filter(Boolean).join(' · ')||'—';}
+function liveBadge(n){const s=SIGN.get(n);if(!s||!s.sim)return '';const a=sigActive(s,s.cur);return `<span class="sv${a?' on':''}" data-live="${esc(n)}">${esc(sigFmt(s,s.cur))}</span>`;}
+function invRow(i,ctx){const s=INV.s[i];
+  return `<tr class="srow"><td><button class="sname" data-inv="${i}" aria-expanded="false"><code>${esc(s[0])}</code></button>${ctx?`<div class="sg">${esc(ctx)}</div>`:''}</td>
+    <td>${esc(s[1])}<div class="en">${esc(s[2])}</div></td><td class="stype wrap">${esc(invVal(s))}</td><td class="stype">${esc(s[7].replace(/_T/g,''))}${s[8]?'<div>CALIB</div>':''}</td><td class="sval">${liveBadge(s[0])}</td></tr>`;}
+const srcOf=i=>{const p=INV.s[i][9];return p>=0?'← '+INV.asw[p].n:INV.loc[i].length?'yerel':'← BSW / CAN';};
+function invDet(i){const s=INV.s[i],p=s[9],cons=INV.cons[i],loc=INV.loc[i],reqs=reqBySig().get(s[0])||[],live=SIGN.get(s[0]);
+  const chip=a=>`<button class="sigchip" data-invasw="${a}">${esc(INV.asw[a].n)}</button>`;
+  return `<tr class="sdet"><td colspan="5"><div class="sdet-in">
+    <div><div class="dlbl">Üreten (Output)</div>${p>=0?chip(p):'<span class="note">ASW dışı: BSW / CAN girişi</span>'}
+      ${loc.length?`<div class="dlbl" style="margin-top:10px">Yerel tanım</div>${loc.map(chip).join(' ')}`:''}
+      <div class="dlbl" style="margin-top:10px">Değer / tip</div><span class="note">${esc(invVal(s))} · ${esc(s[7])} · ${s[8]?'CALIB (kalibrasyon)':'VAR'}</span></div>
+    <div><div class="dlbl">Kullanan ASW’ler (Input) · ${cons.length}</div>${cons.length?cons.map(chip).join(' '):'<span class="note">Yok</span>'}</div>
+    <div><div class="dlbl">Gereksinimlerde</div>${reqs.length?reqs.slice(0,30).map(id=>`<button class="sigchip" data-openreq="${id}">${id}</button>`).join(' ')+(reqs.length>30?` <span class="note">+${reqs.length-30}</span>`:''):'<span class="note">Geçmiyor</span>'}
+      <div class="dlbl" style="margin-top:10px">Simülatör</div>${live&&live.sim?`${liveBadge(s[0])} <button class="sigchip" data-plot="${esc(s[0])}">Grafikte izle</button><div class="note">${esc(live.note||'Simülatörden canlı okunur')}</div>`:'<span class="note">Henüz simülatöre bağlı değil</span>'}</div>
+  </div></td></tr>`;}
+function invTable(list,ctxFn){return `<div class="stable-wrap"><table class="stable inv"><thead><tr><th>Sinyal</th><th>Anlam (TR yorum · proje açıklaması)</th><th>Değerler</th><th>Tip</th><th>Canlı</th></tr></thead><tbody>${list.map(i=>invRow(i,ctxFn&&ctxFn(i))).join('')}</tbody></table></div>`;}
+function aswBody(ai){const a=INV.asw[ai],par=a.l.filter(isPar),loc=a.l.filter(i=>!isPar(i));
+  const sec=(t,list,hint,ctx)=>list.length?`<h5 class="invh">${t} <em>${list.length}</em></h5>${hint?`<p class="note">${hint}</p>`:''}${invTable(list,ctx)}`:'';
+  return sec('Çıkışlar · ürettiği sinyaller',a.o,'',i=>`→ ${INV.cons[i].length} ASW kullanıyor`)+sec('Girişler · okuduğu sinyaller',a.i,'',srcOf)+
+    sec('Parametreler · _P kalibrasyon / Nv varyant kodlama',par,'C kodu geldiğinde bu parametrelerin mantıktaki etkisini buradan inceleyeceğiz.')+sec('Yerel değişkenler',loc,'');}
+function modeBar(){const n=CHAINS.length;return `<div class="smodes" role="group" aria-label="Sinyal görünümü">${[['live','Canlı simülatör ('+SIG_DB.filter(s=>s.sim).length+')'],['inv','ASW envanteri'+(INV?' ('+nf(INV.s.length)+')':'')],['chain','Fonksiyon zincirleri ('+n+')']].map(([k,l])=>`<button class="sfb" data-smode="${k}" aria-pressed="${SIG_MODE===k}">${l}</button>`).join('')}</div>`;}
+function renderInvToc(){
+  if(SIG_MODE==='chain'){$('#dtoc').innerHTML=`<div class="tochead">Zincirler</div>`+CHAINS.map(c=>`<a class="tocg" href="#" data-chain="${c.id}"><span>${esc(c.t)}</span></a>`).join('')+`<a class="tocg" href="#" data-chain="pf"><span>Yol bul (iki sinyal arası)</span></a>`;return;}
+  if(!INV){$('#dtoc').innerHTML='<div class="tochead">Fonksiyonlar</div><p class="note tocnote">Yükleniyor…</p>';return;}
+  $('#dtoc').innerHTML=`<div class="tochead">Fonksiyonlar</div><a class="tocg${INV_F<0?' cur':''}" href="#" data-invfn="-1"><span>Genel bakış</span><em>${INV.asw.length}</em></a>`+
+    INV.fn.map((f,k)=>`<a class="tocg${INV_F===k?' cur':''}" href="#" data-invfn="${k}"><span>${esc(f.t)}</span><em>${INV.asw.filter(a=>a.f===k).length}</em></a>`).join('')+
+    `<p class="note tocnote">Kaynak: ${esc(INV.meta.kaynak)}. Türkçe yorumlar isimden türetilmiş tahmindir; kesin anlam için proje açıklamasına bakın.</p>`;}
+function renderInvMain(){const m=$('#dmain');
+  if(!INV){m.innerHTML=`<div class="dwrap wide">${modeBar()}<p class="note">B24 ASW envanteri yükleniyor…</p></div>`;
+    loadInv().then(()=>{if(VIEW==='sigs'&&SIG_MODE!=='live'){renderInvToc();SIG_MODE==='inv'?renderInvMain():renderChains();}})
+      .catch(e=>{m.innerHTML=`<div class="dwrap wide">${modeBar()}<p class="note">Envanter dosyası (data/asw_signals.json) yüklenemedi: ${esc(String(e.message||e))}</p></div>`;});return;}
+  const q=$('#docSearch').value.trim().toLowerCase();let body;
+  if(q.length>=2){const hit=[];INV.s.forEach((s,i)=>{if((s[0]+' '+s[1]+' '+s[2]).toLowerCase().includes(q))hit.push(i);});
+    hit.sort((a,b)=>(INV.s[a][0].toLowerCase()===q?-1:0)-(INV.s[b][0].toLowerCase()===q?-1:0));
+    body=`<div class="dsum"><div><div class="eyebrow">ASW envanteri · arama</div><h3>“${esc(q)}” · ${nf(hit.length)} sinyal</h3>${hit.length>300?'<p>İlk 300 sonuç gösteriliyor; aramayı daraltın.</p>':''}</div></div>${hit.length?invTable(hit.slice(0,300),srcOf):'<p class="note">Eşleşme yok.</p>'}`;}
+  else if(INV_F<0){const ext=INV.s.filter((s,i)=>s[9]<0&&!INV.loc[i].length).length,cal=INV.s.filter(s=>s[8]).length;
+    body=`<div class="dsum"><div><div class="eyebrow">B24 ASW sinyal envanteri · ${esc(INV.meta.kaynak)}</div><h3>${nf(INV.s.length)} sinyal · ${INV.asw.length} ASW · ${INV.fn.length} fonksiyon</h3>
+      <p>Her ASW’nin giriş, çıkış, parametre ve yerel sinyalleri fonksiyonlara göre ayrıldı. Bir sinyale tıklayınca onu üreten ve kullanan ASW’ler açılır; böylece “TF aktif → kapı açılır” gibi zincirleri adım adım takip edebilirsiniz. ${nf(cal)} kalibrasyon parametresi, ${nf(ext)} ASW dışı (BSW/CAN) giriş var.</p></div></div>
+      <div class="fngrid">${INV.fn.map((f,k)=>{const as=INV.asw.filter(a=>a.f===k);return `<button class="fncard" data-invfn="${k}"><b>${esc(f.t)}</b><span>${esc(f.d)}</span><em>${as.length} ASW · ${nf(INV.fnSig[k])} tanım</em></button>`;}).join('')}</div>`;}
+  else{const f=INV.fn[INV_F],as=INV.asw.map((a,i)=>[a,i]).filter(([a])=>a.f===INV_F);
+    body=`<div class="dsum"><div><div class="eyebrow"><a href="#" class="linkbtn" data-invfn="-1">Envanter</a> · Fonksiyon</div><h3>${esc(f.t)}</h3><p>${esc(f.d)}</p></div></div>
+      <div class="aswlist">${as.map(([a,i])=>{const p=a.l.filter(isPar).length;return `<details class="aswd" data-a="${i}"><summary><code>${esc(a.n)}</code><em>giriş ${a.i.length} · çıkış ${a.o.length} · parametre ${p} · yerel ${a.l.length-p}</em></summary><div class="aswb"></div></details>`;}).join('')}</div>`;}
+  m.innerHTML=`<div class="dwrap wide">${modeBar()}${body}</div>`;}
+function openInvAsw(ai){SIG_MODE='inv';INV_F=INV.asw[ai].f;$('#docSearch').value='';renderInvToc();renderInvMain();
+  const d=document.querySelector(`.aswd[data-a="${ai}"]`);if(d){d.open=true;fillAsw(d);d.scrollIntoView({block:'start',behavior:'smooth'});}}
+function fillAsw(d){if(d.dataset.filled)return;d.querySelector('.aswb').innerHTML=aswBody(+d.dataset.a);d.dataset.filled='1';}
+function openInvSig(n){SIG_MODE='inv';$('#docSearch').value=n;renderInvToc();loadInv().then(()=>{renderInvMain();const i=INV.byName.get(n),b=i!=null&&document.querySelector(`[data-inv="${i}"]`);if(b)toggleInvDet(b);});}
+function toggleInvDet(btn){const tr=btn.closest('tr'),nx=tr.nextElementSibling;
+  if(nx&&nx.classList.contains('sdet')){nx.remove();btn.setAttribute('aria-expanded','false');return;}
+  tr.insertAdjacentHTML('afterend',invDet(+btn.dataset.inv));btn.setAttribute('aria-expanded','true');}
+/* Fonksiyon zincirleri: header bağlantılarından çıkarılan olası akışlar. Kesin mantık C kodu ile doğrulanacak. */
+const CHAINS=[
+ {id:'tfopen',t:'TF aktifken kapı 2 içten açılır (Öffnung)',demo:'oeffnung',d:'Sürücü kapıları serbest bırakır, yolcu kapı 2’nin iç AÇ butonuna basar, kapı otomatik modda açılır.',
+  steps:[['DR_StDoorRelsBtnPosn1_I','Sürücü panodaki Türfreigabe tuşuna basar (FAP üzerinden ham giriş).'],['DR_StDoorRelsActv','Doors_DoorsRels kapı serbest bırakmayı aktif eder.'],
+   ['DR_StDoorRelsActvForDoor2','Serbest bırakma kapı 2 bölgesine dağıtılır.'],['D2SR_StBtnIntDoor2','Yolcu kapı 2 iç AÇ butonuna basar (PinManager girişi).',1],
+   ['D2A_StDoorOpngRqst','Doors_AutoD2 otomatik modda açılma isteği üretir.'],['DBF_StDoor2OpgRqst','Doors_BasicFct tüm istekleri birleştirip kapı 2 ana açılma isteğini verir.'],
+   ['BD12_ReqDoor2Opg_OC','Doors_BBCAN açılma isteğini gövde CAN’ına gönderir.'],['BBC_StDoor2','Kapı kontrolcüsü durumu geri bildirir: OPENING=4 → OPEN=2.'],['DBF_StsDoor2Open','“Kapı 2 açık” bilgisi diğer fonksiyonlara dağıtılır.']],
+  cond:['GW_StClmp15On','GW_SpdLess1On','GW_SpdLess3On'],par:['DR_StsFctEna_P','DR_StDoorRelsBtnTaster_P','DBF_StDoorAutoOpngByRelsGp','D2A_StDoor2AutoOpndTiGp']},
+ {id:'vorsp',t:'Vorspeicherung: STOP isteği kaydedilir',demo:'vorsp',d:'Seyir sırasında basılan STOP isteği kaydedilir. TF araç dururken aktifse STOP kapıyı açmaz; Öffnung butonu her zaman açar (simülatördeki kural).',
+  steps:[['D2SR_StDoor2StrqBtn','Yolcu bölge K2’de STOP butonuna basar.'],['D2SR_StStrqDoor2Saved','Doors_Strq_D2 durak isteğini kaydeder (G_77_Tuer2_HW_Vorspeicherung); gösterge (D2SR_StDoor2StrqDisp) yanar.'],
+   ['DR_StDoorRelsActvForDoor2','Sürücü durakta TF verir; kapı 2 bölgesi serbest.',1],['D2A_StDoorOpngRqst','Kayıtlı istek varsa Doors_AutoD2 açılma isteği üretir.'],
+   ['DBF_StDoor2OpgRqst','Ana açılma isteği.'],['BBC_StDoor2','Kapı açılır.']],
+  cond:['GW_SpdLess3On'],par:['D2SR_StStrqTypDoor2Gp','D2SR_StIntExtOpgBtnInhForStrqGp']},
+ {id:'prm',t:'Engelli butonu kapı 2’yi açık tutar',demo:'prm',d:'Tekerlekli sandalye isteği kapı 2’ye yönlendirilir; kapı açılır ve sürücü kapatana kadar kapanma bloke edilir.',
+  steps:[['D2W_StStrqDoor2FromWhlchrBtn','Doors_WhlchrBtn_D2 kapı 2 için tekerlekli sandalye isteği üretir.'],['D2A_StDoorOpngRqst','Otomatik modda açılma isteği.'],
+   ['D2A_StDoorClsngBlkgRqst','Otomatik kapanma bloke edilir (açık tutma).'],['DBF_StDoor2OpgRqst','Ana açılma isteği.'],['DBF_StsDoor2Open','Kapı 2 açık.']],
+  cond:['DR_StDoorRelsActv','GW_SpdLess3On'],par:['DOP_StWhlchrDoorOpenByIntBtnGp','DOP_StWhlchrBtnDoorOpndNotifGp','DOP_StWhlchrPrmBtnDelManOpenGp']},
+ {id:'pram',t:'Bebek arabası butonu kapı 2',demo:'stroller',d:'Bebek arabası isteği kapı 2’ye gider; kapı açılır ve açık tutulur.',
+  steps:[['D2PB_StStrqDoor2FromPrmBtn','Doors_PrmBtn_D2 kapı 2 için bebek arabası isteği üretir.'],['D2A_StDoorOpngRqst','Otomatik modda açılma isteği.'],['D2A_StDoorClsngBlkgRqst','Kapanma bloke (açık tutma).'],['DBF_StsDoor2Open','Kapı 2 açık.']],
+  cond:['DR_StDoorRelsActv'],par:['DOP_StPrmBtnDoorOpndNotifGp','DOP_StDoorsOpgPrmBtnSetAcvGp','DOP_StDoorOpgByPrmDrvrRstEnaGp']},
+ {id:'old',t:'Yaşlı yolcu butonu',demo:'elderly',d:'Yaşlı yolcu isteği atanmış kapıda açık kalma süresini uzatır.',
+  steps:[['DOM_StDoor2OldMBtn','Doors_OldManButton kapı 2 için yaşlı yolcu isteği.'],['D2A_StDoorClsngBlkgRqst','Kapanma bloke / süre uzatma.'],['DBF_StsDoor2Open','Kapı 2 açık.']],
+  cond:['DR_StDoorRelsActv'],par:['DOM_StOldMBtnDoor2Asgn_P','DOM_StDoor2OldMRstOpt_P']},
+ {id:'close',t:'Otomatik kapanma (süre sonunda)',demo:'autoclose',d:'Kapı otomatik modda açıldıktan sonra süre dolunca uyarı verilir ve kapı kapanır.',
+  steps:[['BBC_StDoor2','Kapı 2 açık (CAN durumu OPEN=2); Doors_AutoD2 bunu okur.'],['D2A_StDoor2AutoOpndTiGp','Otomatik modda açık kalma süresi (MTS T08) parametresi.',1],['D2A_StDoor2WarnSigBefClsng','Kapanmadan önce buzzer / uyarı lambası isteği.'],
+   ['D2A_StDoorClsngRqst','Otomatik kapanma isteği.'],['DBF_StDoor2ClsgRqst','Doors_BasicFct kapı 2 ana kapanma isteği.'],['BD12_ReqDoor2Clsng_OC','Gövde CAN’ına kapanma isteği.'],['BBC_StDoor2','Kapı durumu: CLOSING=3 → CLOSED=1.']],
+  cond:['DR_StDoorRelsActv','BBC_StDoor2Libar'],par:['D2A_StDoor2AutoOpndTiGp']},
+ {id:'drv',t:'Sürücü butonuyla kapı 2',demo:'drvbtn19027',d:'Sürücü kapı 2 butonuna basar; istek doğrudan temel kapı fonksiyonuna gider.',
+  steps:[['D2M_StDrvrBtnOpgDoor2','Doors_Manual_D2 sürücü butonunu işler.'],['DBF_StDoor2OpgRqst','Ana açılma isteği.'],['BD12_ReqDoor2Opg_OC','Gövde CAN’ına açılma isteği.'],['BBC_StDoor2','Kapı durumu geri bildirimi.']],
+  cond:['GW_SpdLess3On'],par:[]},
+ {id:'knee',t:'TF ile kneeling talebi',demo:'',d:'Tüm kapılar kapalıyken Türfreigabe verilirse kneeling talebi oluşabilir (KSW parametresine bağlı).',
+  steps:[['DR_StDoorRelsActv','Türfreigabe aktif.'],['DR_StKneeDmndByRelsActv','Serbest bırakma ile kneeling talebi.'],['DR_StKneeLvlDmnd','Kneeling seviyesi talebi.']],
+  cond:['DBF_StMinOneDoorOpnd'],par:['DR_StVehKneeAcvByRelsEnaNv']},
+ {id:'bsb',t:'TF ile durak freni',demo:'bsb13674',d:'Türfreigabe ile durak freni isteği; parametreye göre süreli.',
+  steps:[['DR_StDoorRelsActv','Türfreigabe aktif.'],['DR_StBstbrkByDoorRels','Doors_DoorsRels durak freni ister.']],
+  cond:['GW_SpdLess1On'],par:['DR_StDoorRelsByBstbrk_P','DR_StBstbrkByDoorRelsTime_P']},
+];
+function chainStep(n,txt,k,arr){const i=INV&&INV.byName.get(n),s=i!=null?INV.s[i]:null,p=s?(s[9]>=0?INV.asw[s[9]].n:INV.loc[i].length?'yerel · '+INV.asw[INV.loc[i][0]].n:'BSW / CAN'):'envanterde yok';
+  let lk='',nx=k+1;while(nx<arr.length&&arr[nx][2]===1)nx++;
+  if(INV&&s&&nx<arr.length){const j=INV.byName.get(arr[nx][0]);if(j!=null){const np=INV.s[j][9];
+    lk=np>=0&&np===s[9]?`<span class="lk ok">↻ aynı ASW (${esc(INV.asw[np].n)}) içinde türetilir</span>`:np>=0&&INV.asw[np].i.includes(i)?`<span class="lk ok">✓ ${esc(INV.asw[np].n)} bu sinyali okuyor</span>`:np<0?'<span class="lk">↯ dış sistem (kapı kontrolcüsü / CAN) üzerinden</span>':'<span class="lk">· dolaylı bağlantı (araya başka sinyal giriyor)</span>';}}
+  if(arr[k][2]===1)lk='<span class="lk par">＋ paralel giriş: aynı anda gereken koşul</span>'+lk;
+  return `<li class="cst" data-cs="${esc(n)}"><div class="cnum">${k+1}</div><div class="cbody"><div class="ctop"><button class="sname" data-invname="${esc(n)}"><code>${esc(n)}</code></button><span class="casw">${esc(p)}</span>${liveBadge(n)}</div>
+    <div class="ctxt">${esc(txt)}</div>${s?`<div class="en">${esc(s[1])} · ${esc(s[2])}</div>`:''}${lk}</div></li>`;}
+function chipList(ns){return ns.length?ns.map(n=>{const i=INV&&INV.byName.get(n);return `<span class="cchip"><button class="sname" data-invname="${esc(n)}"><code>${esc(n)}</code></button>${liveBadge(n)}${i!=null?`<em>${esc(INV.s[i][1])}</em>`:''}</span>`;}).join(''):'<span class="note">—</span>';}
+function renderChains(){const m=$('#dmain');
+  m.innerHTML=`<div class="dwrap wide">${modeBar()}<div class="dsum"><div><div class="eyebrow">Fonksiyon zincirleri · B24 ASW</div><h3>Sinyaller fonksiyon akışına göre</h3>
+    <p>Her adım gerçek ASW sinyalidir. “✓” işaretli bağlantılar envanterde doğrulandı: bir sonraki ASW o sinyali giriş olarak okuyor. Mantığın tam koşulları C kodu geldiğinde doğrulanacak. Yeşil numaralar simülatörde o an aktif olan adımlardır.</p></div></div>
+    ${INV?'':'<p class="note">Envanter yükleniyor…</p>'}
+    ${CHAINS.map(c=>`<section class="chain" id="ch-${c.id}"><div class="chd"><div><h4>${esc(c.t)}</h4><p class="note">${esc(c.d)}</p></div><div class="ractions">${c.demo&&reqFor(c.demo)?`<button class="pbtn" data-chaindemo="${c.id}">▶ Otomatik dene</button>`:''}<button class="pbtn ghost" data-chainplot="${c.id}">Grafikte izle</button></div></div>
+      <ol class="csteps">${c.steps.map((s,k,a)=>chainStep(s[0],s[1],k,a)).join('')}</ol>
+      <div class="cgrid"><div><div class="dlbl">Ön koşullar</div><div class="cchips2">${chipList(c.cond)}</div></div><div><div class="dlbl">İlgili parametreler</div><div class="cchips2">${chipList(c.par)}</div></div></div></section>`).join('')}
+    <section class="chain" id="ch-pf"><h4>Yol bul: iki sinyal arasındaki akış</h4><p class="note">Başlangıç sinyalini okuyan ASW’lerin çıkışları üzerinden en kısa yolu arar. Örnek: DR_StDoorRelsActv → BD12_ReqDoor2Opg_OC.</p>
+      <div class="pf"><label>Başlangıç<input id="pfA" list="invNames" value="DR_StDoorRelsActv" spellcheck="false"></label><label>Hedef<input id="pfB" list="invNames" value="BD12_ReqDoor2Opg_OC" spellcheck="false"></label><button class="pbtn" id="pfGo">Yolu bul</button></div>
+      <datalist id="invNames"></datalist><div id="pfRes"></div></section></div>`;
+  if(INV){const dl=$('#invNames');if(dl)dl.innerHTML=INV.s.map(s=>`<option value="${s[0]}">`).join('');}}
+const tokOf=n=>new Set(n.replace(/_(P|I|O|OC|IC)$/,'').split(/_|(?=[A-Z][a-z])|(?<=[a-z])(?=\d)|(?<=\d)(?=[A-Za-z])/).filter(x=>x.length>1||/\d/.test(x)).map(x=>({rqst:'req',opng:'opg',clsng:'cls',clsg:'cls'})[x.toLowerCase()]||x.toLowerCase()));
+function findPath(a,b){const A=INV.byName.get(a),B=INV.byName.get(b);if(A==null||B==null)return null;if(A===B)return [[A,-1]];
+  const pb=INV.s[B][9];if(pb<0)return [];
+  /* ASW düzeyinde en kısa yol: A'yı okuyan ASW'lerden B'yi üreten ASW'ye */
+  /* KSW (müşteriye özel) blokları biraz daha pahalı: önce seri yazılım yolu tercih edilir */
+  const inSet=INV.asw.map(x=>new Set(x.i)),N=INV.asw.length,cost=ai=>/KSW/.test(INV.asw[ai].n)?1.6:1,dist=new Array(N).fill(Infinity),prev=new Map(),done=new Set();
+  INV.cons[A].forEach(ai=>{dist[ai]=cost(ai);prev.set(ai,-1);});
+  for(;;){let x=-1;for(let i=0;i<N;i++)if(!done.has(i)&&dist[i]<Infinity&&(x<0||dist[i]<dist[x]))x=i;if(x<0||x===pb)break;done.add(x);
+    for(let ai=0;ai<N;ai++){if(done.has(ai))continue;const d2=dist[x]+cost(ai);if(d2<dist[ai]&&INV.asw[x].o.some(o=>inSet[ai].has(o))){dist[ai]=d2;prev.set(ai,x);}}}
+  if(!prev.has(pb))return [];const chain=[];for(let x=pb;x!==-1;x=prev.get(x))chain.unshift(x);
+  /* her geçişte hedefe en çok benzeyen bağlantı sinyalini seç */
+  const T=new Set([...tokOf(INV.s[B][0]),...tokOf(INV.s[A][0])]),score=i=>{let n=0;const k=tokOf(INV.s[i][0]);k.forEach(t=>{if(T.has(t))n++;});return n-0.1*k.size;};
+  const path=[[A,-1]];
+  for(let k=0;k<chain.length-1;k++){const c=INV.asw[chain[k]].o.filter(o=>inSet[chain[k+1]].has(o));c.sort((x,y)=>score(y)-score(x));path.push([c[0],chain[k]]);}
+  path.push([B,pb]);return path;}
+function runPathFinder(){const a=$('#pfA').value.trim(),b=$('#pfB').value.trim(),out=$('#pfRes');
+  loadInv().then(()=>{const p=findPath(a,b);
+    if(p===null){out.innerHTML='<p class="note">Sinyal adlarından biri envanterde yok.</p>';return;}
+    if(!p.length){out.innerHTML='<p class="note">Bu iki sinyal arasında ASW giriş/çıkış bağlantısıyla bir yol bulunamadı (araya CAN / kapı kontrolcüsü girebilir).</p>';return;}
+    const st=p.map(([x,ai],k)=>[INV.s[x][0],k===0?'Başlangıç sinyali.':`${INV.asw[ai].n} bir önceki sinyali okuyup bunu üretiyor.`]);
+    out.innerHTML=`<p class="note">${p.length-1} adım. Header bağlantısına göre olası yoldur; ASW içindeki koşullar C kodunda görülecek.</p><ol class="csteps">${st.map((s,k,arr)=>chainStep(s[0],s[1],k,arr)).join('')}</ol>`;});}
+function updateInvLive(){document.querySelectorAll('[data-live]').forEach(el=>{const s=SIGN.get(el.dataset.live);if(!s)return;const t=sigFmt(s,s.cur),a=sigActive(s,s.cur);if(el.textContent!==t)el.textContent=t;el.classList.toggle('on',a);});
+  document.querySelectorAll('.cst').forEach(li=>{const s=SIGN.get(li.dataset.cs);li.classList.toggle('on',!!(s&&s.sim&&sigActive(s,s.cur)));});}
+function chainPlot(c){CH.sel=[...new Set([...c.cond,...c.steps.map(s=>s[0])])].filter(n=>{const s=SIGN.get(n);return s&&s.sim;}).slice(0,12);
+  SIG_MODE='live';CH.live=true;CH.start=null;CH.title=c.t;$('#docSearch').value='';renderSigView();}
 /* ---------- Sinyal kaydı ve zaman grafiği ---------- */
 const REC={t:[],v:[],sigs:null,max:12000,t0:performance.now(),acc:0,now(){return (performance.now()-this.t0)/1000;}};
 function recSample(){if(!REC.sigs)REC.sigs=SIG_DB.filter(s=>s.sim);REC.t.push(REC.now());REC.v.push(REC.sigs.map(s=>s.get()));if(REC.t.length>REC.max){REC.t.splice(0,1500);REC.v.splice(0,1500);}}
@@ -1954,6 +2169,7 @@ function showRecording(r){if(!r.rec)return;const base=['DashBtn_B01','DoorReleas
   CH.sel=[...new Set([...base,...(r.signals||[]).filter(n=>SIG_DB.some(s=>s.n===n&&s.sim)),...['DrvBtn_K2','OeffBtn_K2','StopBtn_K2','SpecBtn_K2','DoorState_K2'].filter(n=>JSON.stringify(r.signals||[]).includes(n.slice(-2))||n==='DoorState_K2')])];
   CH.live=false;CH.start=r.rec.t0;CH.end=r.rec.t1;CH.title=r.id+' · otomatik test kaydı ('+(r.rec.t1-r.rec.t0).toFixed(1)+' s)';setView('sigs');}
 function updateSigView(force){
+  if(SIG_MODE!=='live'){updateInvLive();return;}
   drawChart();
   const tb=$('#sigBody');if(!tb)return;const q=$('#docSearch').value.trim().toLowerCase(),now=performance.now();let act=0;
   tb.querySelectorAll('tr.srow').forEach(tr=>{const s=SIG_DB[+tr.dataset.i],v=s.cur,a=sigActive(s,v);if(a)act++;

@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev M)
+# Otobüs Tasarım Stüdyosu (konsept, Rev N)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -100,3 +100,11 @@ Sinyaller: DoorRelease, DoorState_K2
 - **Sinyal grafiği** (Sinyaller sekmesi): 50 ms örnekleme, seçilebilir zaman penceresi, bool/enum/sayısal izler, her sinyal için pencere içindeki aktif süre (s) ve yükselen kenar sayısı.
 - Buton basma darbe sinyalleri: DrvBtn_K1–3, OeffBtn_K1–3, StopBtn_K1–3, SpecBtn_K1–3, DashBtn_*.
 - Her otomatik test kaydedilir; gereksinim kartındaki "Sinyal grafiği" o testin zaman aralığını gösterir.
+
+## Rev N
+- **B24 ASW sinyal envanteri** (`data/asw_signals.json`, kaynak xlsx'ten `data/build_asw_inventory.py` ile üretilir): 6.082 sinyal, 119 ASW, 18 fonksiyon bölümü.
+- Sinyaller sayfasında üç görünüm: **Canlı simülatör**, **ASW envanteri**, **Fonksiyon zincirleri**.
+- Envanter: her ASW için çıkışlar, girişler, parametreler (_P / Nv) ve yerel değişkenler. Sinyal detayında üreten ASW, kullanan ASW'ler, bağlı gereksinimler ve canlı değer gösterilir. 6.082 sinyalin tamamında arama yapılabilir.
+- 9 fonksiyon zinciri (TF → kapı 2 açılır, Vorspeicherung, engelli, bebek arabası, yaşlı, otomatik kapanma, sürücü butonu, TF ile kneeling, TF ile durak freni). Her bağlantı envanterde kontrol edilir (✓ okuyor / ↻ aynı ASW / ↯ CAN üzerinden).
+- Yol bulucu: iki sinyal arasında ASW giriş/çıkış bağlantısıyla olası en kısa akış.
+- 59 gerçek ASW sinyali (DR_StDoorRelsActv, D2A_StDoorOpngRqst, BBC_StDoor2 …) simülatöre eşlendi; grafikte ve testlerde canlı izlenebilir.
