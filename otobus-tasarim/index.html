@@ -333,6 +333,10 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
 #cDiff{padding:10px 12px;border-bottom:1px solid var(--line);max-height:40vh;overflow:auto}
 .cdiff{margin:6px 0 0;font:12px/1.55 var(--f-mono);white-space:pre} .cdiff button{all:unset;cursor:pointer} .cdiff button:hover{text-decoration:underline} .dl-add{color:var(--ok)} .dl-del{color:var(--warn)}
 #hC{background:var(--prm);color:#fff}
+.cdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--line);margin-right:8px;vertical-align:1px} .cdot.ok{background:var(--ok)} .cdot.bad{background:var(--warn)}
+.csrc .chd2{align-items:flex-start} .crun{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)} .crun .sp{flex:1}
+.cdrop.small{padding:14px;margin:10px 12px;border-width:1.5px} #cImp:empty{display:none} #cImp{padding:0 12px 10px;font-weight:600;color:var(--accent)}
+.cact{display:inline-flex;gap:8px;align-items:center;font-weight:600;margin-top:4px;cursor:pointer} .cact input{width:18px;height:18px;accent-color:var(--ok)}
 </style>
 
 <div id="app">
@@ -341,7 +345,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev P</div>
+    <div class="eyebrow">Konsept · Rev Q</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
   </div>
@@ -363,6 +367,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hud">
     <div id="hudBar">
       <button class="hbtn" id="hRelease" aria-pressed="false"><canvas width="44" height="44" id="hRelIcon"></canvas>Türfreigabe<span class="lamp"></span></button>
+      <button class="hbtn" id="hPerf" title="Performans modu"><span>Performans</span> <b>Dengeli</b></button>
       <button class="hbtn" id="hC" hidden title="C kodu simülatöre bağlı; tıklayınca C Kod sayfası açılır">C kodu</button>
       <button class="hbtn" id="hDrive" aria-pressed="false"><canvas width="44" height="44" id="hDrvIcon"></canvas>Sür<span class="lamp"></span></button>
       <button class="hbtn" id="hHome" hidden>Durağa dön</button>
@@ -474,7 +479,7 @@ const AXLES=[3.3,-2.6], ARCH=0.65;
 const KIND={stroller:{name:'Bebek arabası',sig:z=>`D${z}PB_StStrqDoor${z}FromPrmBtn`,code:'BTN-STR'},prm:{name:'Engelli',sig:z=>`D${z}W_StStrqDoor${z}FromWhlchrBtn`,code:'BTN-PRM'},elderly:{name:'Yaşlı yolcu',sig:z=>`DOM_StStrqDoor${z}FromOldMBtn`,code:'BTN-ELD'}};
 
 /* ================= Araç durumu ================= */
-const PRS={};const CSIM={files:{},cur:null,build:null,G:{},on:false,paused:false,acc:0,steps:0,period:100,step:null,forces:{},params:{},err:null,tab:'out',added:[],dirty:false};const pulse=k=>()=>performance.now()-(PRS[k]||-1e9)<300;
+const PRS={};const CSIM={asws:{},common:{},src:null,sel:null,cur:null,mods:{},errs:{},prod:{},extIn:[],order:[],tasks:[],t:0,build:null,G:{},on:false,paused:false,acc:0,steps:0,period:100,step:null,forces:{},params:{},tab:'out',added:[]};const pulse=k=>()=>performance.now()-(PRS[k]||-1e9)<300;
 const V={speed:0,rpm:620,gear:'N',stopReq:false,req:{stroller:false,prm:false,elderly:false},temp:17,odo:47389,stopBrake:false,intLight:true,night:false,
   release:false,kneel:false,kneelPos:0,fog:false,wiper:false,ramp:false,rampPos:0,dim:false,engine:true,hazard:false,head:false,park:true,stopBrakeMan:false,doorLock:false};
 const DOOR_T=2.4;
@@ -531,8 +536,10 @@ const doorPos=d=>[(d.x0+d.x1)/2,1.7,HW-0.1];
 /* ================= Renderer ================= */
 let renderer;
 try{renderer=new THREE.WebGLRenderer({canvas:$('#view'),antialias:true});}catch(e){fail();return;}
-renderer.setPixelRatio(Math.min(2,Math.max(1.25,window.devicePixelRatio||1)));
-renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const PERF_CFG={yuksek:{ad:'Yüksek',pr:2,idle:0,fps:60,shadow:true,slow:0.08},dengeli:{ad:'Dengeli',pr:1.5,idle:250,fps:60,shadow:true,slow:0.12},tasarruf:{ad:'Tasarruf',pr:1,idle:500,fps:30,shadow:false,slow:0.25}};
+const PERF={mode:(()=>{try{const m=localStorage.getItem('otobus.perf');return PERF_CFG[m]?m:'dengeli';}catch(e){return 'dengeli';}})(),lastR:-1e9,lastKey:'',frames:0,renders:0,t0:0,fps:0,cms:0,cAcc:0};
+renderer.setPixelRatio(Math.min(PERF_CFG[PERF.mode].pr,window.devicePixelRatio||1));
+renderer.shadowMap.enabled=PERF_CFG[PERF.mode].shadow;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;
 const scene=new THREE.Scene();
 const SKY_DAY='#c5d2d8',SKY_NIGHT='#0a1018';
 scene.background=new THREE.Color(SKY_DAY);scene.fog=new THREE.Fog(SKY_DAY,35,110);
@@ -1368,7 +1375,7 @@ function applyDocSearch(){
       if(q){const n=list.filter(r=>r.group===gid&&qOf(r).includes(q)).length;sec.hidden=!n;if(n){d.open=true;fillChapter(gid,q);}}
       else{sec.hidden=false;d.open=OPEN_G.has(gid);const el=sec.querySelector('[data-gl]');if(d.open)fillChapter(gid,'');else{el.innerHTML='';el.dataset.filled='';}}});}
   if(VIEW==='sigs'){if(SIG_MODE==='inv')renderInvMain();else updateSigView(true);}
-  if(VIEW==='code'){const io=$('#cIO');if(io)io.innerHTML=cIOHTML();}
+  if(VIEW==='code'){const io=$('#cIO');if(io)io.innerHTML=cIOHTML();if(Object.keys(CSIM.asws).length)$('#dtoc').innerHTML=cTocHTML();}
 }
 let searchT=0;$('#docSearch').addEventListener('input',()=>{clearTimeout(searchT);searchT=setTimeout(applyDocSearch,160);});
 document.addEventListener('click',e=>{const b=e.target.closest('.vbtn');if(b)setView(b.dataset.view);const g=e.target.closest('[data-goview]');if(g)setView(g.dataset.goview);});
@@ -1380,7 +1387,7 @@ $('#dmain').addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.cla
 $('#dmain').addEventListener('input',e=>{if(VIEW==='code')cCodeInput(e);});
 $('#dmain').addEventListener('scroll',e=>{if(e.target.id==='cTa'){const g=$('#cGut');if(g)g.scrollTop=e.target.scrollTop;}},true);
 $('#dmain').addEventListener('keydown',e=>{if(e.target.id==='cTa'&&e.key==='Tab'&&!e.shiftKey){e.preventDefault();const t=e.target,a=t.selectionStart;t.setRangeText('  ',a,t.selectionEnd,'end');cCodeInput({target:t});}
-  if(e.target.id==='cTa'&&(e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();cBuild();if(CSIM.build&&!CSIM.on)cSetOn(true);renderCode();}});
+  if(e.target.id==='cTa'&&(e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();const A=CSIM.asws[CSIM.sel];if(A)A.active=true;cRebuildDirty().then(renderCode);}});
 $('#dmain').addEventListener('dragover',e=>{if(VIEW!=='code')return;e.preventDefault();const d=$('#cDrop');if(d)d.classList.add('over');});
 $('#dmain').addEventListener('dragleave',()=>{const d=$('#cDrop');if(d)d.classList.remove('over');});
 $('#dmain').addEventListener('drop',e=>{if(VIEW!=='code')return;e.preventDefault();if(e.dataTransfer&&e.dataTransfer.files.length)cAddFiles(e.dataTransfer.files);});
@@ -1425,7 +1432,7 @@ $('#dmain').addEventListener('submit',e=>{if(e.target.id!=='reqForm2')return;e.p
   const used=new Set(allReqs().map(r=>r.id));let n=11;while(used.has('REQ-'+String(n).padStart(3,'0')))n++;const nid='REQ-'+String(n).padStart(3,'0'),grp=$('#rfGroup').value;
   manual.push({id:nid,group:grp,en,tr,desc:$('#rfDesc').value.trim(),status:'untested'});saveManual();OPEN_G.add(grp);renderDocReqs();openReq(nid);});
 $('#dtoc').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();
-  if(a.dataset.cfile){CSIM.cur=a.dataset.cfile;renderCode();return;}
+  if(a.dataset.casw){CSIM.sel=a.dataset.casw;CSIM.cur=null;cSaveCfg();renderCode();$('#dmain').scrollTop=0;return;}
   if(a.dataset.tsg!==undefined){SIG_G=a.dataset.tsg;renderSigView();return;}
   if(a.dataset.invfn!==undefined){INV_F=+a.dataset.invfn;$('#docSearch').value='';renderInvToc();renderInvMain();$('#dmain').scrollTop=0;return;}
   if(a.dataset.chain){const el=document.getElementById('ch-'+a.dataset.chain);if(el)el.scrollIntoView({block:'start',behavior:'smooth'});return;}
@@ -1530,7 +1537,6 @@ function onDoorOpened(id){
 function drawDoorSigns(){
   const bOn=(blink%0.6)<0.3;
   DOORS.forEach(d=>{const s=doorS[d.id],Z=ZR[d.id],g=s.sign.image.getContext('2d'),w=512,h=112;
-    g.fillStyle='#050709';g.fillRect(0,0,w,h);
     let txt,col;
     if(s.state==='OPEN'&&s.hold){txt='AÇIK · BEKLE';col='#ffb000';}
     else if(s.state==='OPEN'&&s.auto&&s.timer>0){txt='KAPANIYOR  '+Math.ceil(s.timer);col='#3ddc84';}
@@ -1539,10 +1545,12 @@ function drawDoorSigns(){
     else if(s.reqOpen){txt='İSTEK ALINDI';col='#ffb000';}
     else if(V.release&&s.state==='CLOSED'){txt='KAPI SERBEST';col='#3ddc84';}
     else{txt='KAPI '+d.id;col='#3c464e';}
+    const sig=txt+'|'+col+'|'+['elderly','prm','stroller'].map(k=>Z[k]?1:0).join('');
+    if(s._sig!==sig){s._sig=sig;g.fillStyle='#050709';g.fillRect(0,0,w,h);
     let ix=w-14;['elderly','prm','stroller'].forEach(k=>{if(Z[k]){ix-=62;g.fillStyle='#1f63c6';rr(g,ix,22,56,68,8);g.fill();g.drawImage(ICON[k],ix+4,30,48,48);}});
     let fs=54;g.font=`bold ${fs}px sans-serif`;while(g.measureText(txt).width>ix-40&&fs>24){fs-=2;g.font=`bold ${fs}px sans-serif`;}
     g.fillStyle=col;g.textBaseline='middle';g.textAlign='left';g.fillText(txt,22,58);
-    s.sign.needsUpdate=true;
+    s.sign.needsUpdate=true;}
     s.led.color.set(s.state==='CLOSING'?(bOn?'#ff3b22':'#3a0a08'):(s.state!=='CLOSED'?'#eaf4ff':V.release?'#3ddc84':'#1a1f22'));
     const oe=s.oeffMat;if(oe)oe.emissiveIntensity=s.reqOpen?(bOn?1:0.3):(V.release&&s.state==='CLOSED'?0.75:0.1);
   });
@@ -1869,7 +1877,7 @@ function renderCluster(){drawCluster(hudG,880,330);drawCluster(c3G,880,330);clus
 [1,2,3].forEach(k=>{const el=document.getElementById('kr'+k);el.addEventListener('input',()=>{KREIS[k].set=+el.value;applyLighting();});el.addEventListener('change',()=>log(`İç aydınlatma Kreis ${k} ayarı = ${KREIS[k].set} %`));});
 $('#hDrive').onclick=()=>toggleDrive('Gösterge HUD');$('#hHome').onclick=()=>goHome();$('#demoStop').onclick=()=>{if(DEMO)DEMO.cancel=true;};
 (()=>{const g=$('#hDrvIcon').getContext('2d');g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();g.arc(22,22,15,0,7);g.stroke();g.beginPath();g.arc(22,22,4,0,7);g.fill();g.fillStyle='#fff';g.fill();[0,2.1,4.2].forEach(a=>{g.beginPath();g.moveTo(22,22);g.lineTo(22+15*Math.cos(a+1.57),22+15*Math.sin(a+1.57));g.stroke();});})();
-$('#hLight').onclick=()=>pressBtn(BTN[4],'Gösterge HUD');$('#hC').onclick=()=>setView('code');$('#hRelease').onclick=()=>pressBtn(BTN[0],'Gösterge HUD');
+$('#hLight').onclick=()=>pressBtn(BTN[4],'Gösterge HUD');$('#hC').onclick=()=>setView('code');$('#hPerf').onclick=()=>{const ks=Object.keys(PERF_CFG);setPerf(ks[(ks.indexOf(PERF.mode)+1)%ks.length]);};$('#hPerf').querySelector('b').textContent=PERF_CFG[PERF.mode].ad;$('#hRelease').onclick=()=>pressBtn(BTN[0],'Gösterge HUD');
 (()=>{const g=$('#hRelIcon').getContext('2d');g.strokeStyle='#fff';g.lineWidth=3;g.strokeRect(9,6,26,32);g.beginPath();g.moveTo(22,6);g.lineTo(22,38);g.stroke();g.fillStyle='#3ddc84';g.font='bold 13px sans-serif';g.textAlign='center';g.fillText('A',22,26);})();
 
 /* ================= Sinyal kataloğu ================= */
@@ -2175,8 +2183,13 @@ function preprocess(files,mainName,ctx){
         if(a.v===')'){if(--d===0)break;args[args.length-1].push(a);continue;}
         if(a.v===','&&d===1){args.push([]);continue;}args[args.length-1].push(a);}
       if(j>=toks.length)throw new CErr(`Makro ${t.v} için kapanmayan parantez`,t);
-      const ea=args.map(a=>expand(a,hide));const body=[];
-      m.body.forEach(b=>{const k=b.t==='id'?m.params.indexOf(b.v):-1;if(k>=0)body.push(...(ea[k]||[]));else body.push({...b,f:t.f,l:t.l});});
+      if(m.params.length===1&&args.length===1&&!args[0].length)args.length=0;
+      const ea=args.map(a=>expand(a,hide));const body=[];const MB=m.body;
+      for(let q=0;q<MB.length;q++){const b=MB[q];
+        if(b.v==='#'&&MB[q+1]&&MB[q+1].t==='id'&&m.params.includes(MB[q+1].v)){const k=m.params.indexOf(MB[q+1].v);body.push({t:'str',v:JSON.stringify((args[k]||[]).map(x=>x.v).join(' ')),f:t.f,l:t.l});q++;continue;}
+        const k=b.t==='id'?m.params.indexOf(b.v):-1;const pasteNear=(MB[q+1]&&MB[q+1].v==='##')||(MB[q-1]&&MB[q-1].v==='##');
+        if(k>=0)body.push(...((pasteNear?args[k]:ea[k])||[]).map(x=>({...x})));else body.push({...b,f:t.f,l:t.l});}
+      for(let q=1;q<body.length-1;q++){if(body[q].v==='##'&&body[q].t==='p'){const a=body[q-1],c=body[q+1];const nt=lex(String(a.v)+String(c.v),t.f).filter(x=>x.t!=='nl').map(x=>({...x,f:t.f,l:t.l}));body.splice(q-1,3,...nt);q--;}}
       const h=new Set(hide);h.add(t.v);res.push(...expand(body,h));i=j;}
     return res;}
   function evalCond(toks){const tt=[];
@@ -2201,7 +2214,7 @@ function preprocess(files,mainName,ctx){
         if(d==='endif'){cond.pop();continue;}
         if(!active())continue;
         if(d==='include'){let nm=rest.map(x=>x.v).join('');nm=nm.replace(/^["<]|[">]$/g,'');run(nm.split('/').pop());continue;}
-        if(d==='define'){const nm=rest[0]&&rest[0].v;if(!nm)continue;
+        if(d==='define'){const nm=rest[0]&&rest[0].v;if(!nm)continue;rest.forEach((x,i)=>{if(x.v==='#'&&rest[i+1]&&rest[i+1].v==='#'){x.v='##';rest.splice(i+1,1);}});
           if(rest[1]&&rest[1].v==='('&&rest[1].l===rest[0].l&&isAdj(rest[0],rest[1],src)){let j=2;const ps=[];while(j<rest.length&&rest[j].v!==')'){if(rest[j].t==='id')ps.push(rest[j].v);j++;}
             macros.set(nm,{params:ps,body:rest.slice(j+1)});}
           else{macros.set(nm,{body:rest.slice(1)});if(nm==='RUNNABLE_ID'&&rest[1])ctx.runnables.add(rest[1].v);}
@@ -2217,6 +2230,8 @@ function preprocess(files,mainName,ctx){
 /* ---------- ayrıştırıcı ---------- */
 function parse(toks,ctx){
   let p=0;const peek=(o=0)=>toks[p+o]||{t:'eof',v:'<eof>'},next=()=>toks[p++]||{t:'eof',v:'<eof>'};
+  for(let i=0;i<toks.length;i++){const t=toks[i];if(t.t==='id'&&(t.v==='__attribute__'||t.v==='__declspec'||t.v==='__asm__'||t.v==='asm')&&toks[i+1]&&toks[i+1].v==='('){let d=0,j=i+1;for(;j<toks.length;j++){if(toks[j].v==='(')d++;else if(toks[j].v===')'&&--d===0)break;}toks.splice(i,j-i+1);i--;continue;}
+    if(t.t==='id'&&['__inline','__inline__','__restrict','__restrict__','restrict','__extension__','__volatile__','__const'].includes(t.v)){toks.splice(i,1);i--;}}
   const is=v=>peek().v===v&&peek().t!=='str';
   const expect=v=>{const t=next();if(t.v!==v)throw new CErr(`“${v}” bekleniyordu, “${t.v}” bulundu`,t);return t;};
   const typedefs=ctx.typedefs;
@@ -2252,7 +2267,7 @@ function parse(toks,ctx){
     if(!is('{')){return {name:tag}; }
     next();const fields=[];
     while(!is('}')){const {ty}=parseBaseType();
-      for(;;){const d=parseDeclarator(ty);fields.push({name:d.name,ty:d.ty});if(is(',')){next();continue;}break;}
+      for(;;){const d=parseDeclarator(ty);if(is(':')){next();parseCond();}fields.push({name:d.name,ty:d.ty});if(is(',')){next();continue;}break;}
       expect(';');}
     expect('}');const st={k:'struct',name:tag,fields};if(tag)ctx.structTags.set(tag,st);return st;}
   function parseEnum(){let tag=null;if(peek().t==='id'&&!is('{'))tag=next().v;
@@ -2508,72 +2523,165 @@ function dedupe(w){const s=new Set();return w.filter(x=>{const k=x.msg;if(s.has(
 const tyName=t=>!t?'?':t.k==='bool'?'boolean':t.k==='int'?(t.signed?'int':'uint')+t.bits:t.k==='float'?'real'+(t.bits===32?'32':''):t.k;
 return {compile,CErr,tyName};
 })();
-/* ================= C kodu: tarayıcıda derleme, simülatöre bağlama ================= */
+/* ================= C kodu: B24 entegrasyonu, tarayıcıda derleme, çoklu ASW simülasyonu ================= */
 const C_KEY='otobus.ccode.v1';
-/* Simülatörde karşılığı olmayan ve kodun beklediği girişler için varsayılanlar (VARSAYIM; ekranda değiştirilebilir) */
+/* Simülatörde karşılığı olmayan ve kodun beklediği girişler için varsayılanlar (VARSAYIM; ekrandan değiştirilebilir) */
 const C_DEFAULTS={DOP_ModeDoor1AutGp:1,DOP_ModeDoor2AutGp:1,DOP_ModeDoor3AutGp:1,DOP_ModeDoor4AutGp:1};
 const C_DEF_NOTE={DOP_ModeDoor1AutGp:'Kapı 1 otomatik mod parametresi (Doors_BasicFct)',DOP_ModeDoor2AutGp:'Kapı 2 otomatik mod parametresi',DOP_ModeDoor3AutGp:'Kapı 3 otomatik mod parametresi',DOP_ModeDoor4AutGp:'Kapı 4 otomatik mod parametresi'};
-function cSave(){try{localStorage.setItem(C_KEY,JSON.stringify({files:CSIM.files,cur:CSIM.cur,forces:CSIM.forces,params:CSIM.params,on:CSIM.on}));}catch(e){CSIM.saveErr=true;}}
-let cSaveT=0;const cSaveSoon=()=>{clearTimeout(cSaveT);cSaveT=setTimeout(cSave,400);};
-function cLoad(){try{const d=JSON.parse(localStorage.getItem(C_KEY)||'null');if(!d||!d.files)return;
-  Object.assign(CSIM,{files:d.files,cur:d.cur,forces:d.forces||{},params:d.params||{}});
-  if(Object.keys(CSIM.files).length&&cBuild()&&d.on)cSetOn(true);}catch(e){}}
+/* ---- kalıcı depolama: IndexedDB (dosyalar büyük), yalnızca bu tarayıcıda ---- */
+const IDB={db:null,open(){if(this.db)return Promise.resolve(this.db);return new Promise((res,rej)=>{let r;try{r=indexedDB.open('otobus-ckod',1);}catch(e){rej(e);return;}r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>{this.db=r.result;res(r.result);};r.onerror=()=>rej(r.error);});},
+  async get(k){const db=await this.open();return new Promise((res,rej)=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});},
+  async set(k,v){const db=await this.open();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);});}};
+let cSrcT=0,cCfgT=0;
+function cSaveSrc(){clearTimeout(cSrcT);cSrcT=setTimeout(()=>{IDB.set('src',{asws:Object.fromEntries(Object.entries(CSIM.asws).map(([n,a])=>[n,{files:a.files}])),common:CSIM.common,src:CSIM.src}).catch(()=>{CSIM.saveErr=true;});},600);}
+function cSaveCfg(){clearTimeout(cCfgT);cCfgT=setTimeout(()=>{IDB.set('cfg',{active:Object.keys(CSIM.asws).filter(n=>CSIM.asws[n].active),sel:CSIM.sel,cur:CSIM.cur,forces:CSIM.forces,params:CSIM.params,on:CSIM.on}).catch(()=>{});},300);}
+const cSave=()=>{cSaveSrc();cSaveCfg();};
+async function cLoad(){
+  try{const old=JSON.parse(localStorage.getItem(C_KEY)||'null');if(old&&old.files&&Object.keys(old.files).length){const nm=cAswNameFromFiles(Object.keys(old.files));
+      CSIM.asws[nm]={files:Object.fromEntries(Object.entries(old.files).map(([f,v])=>[f,{orig:v.orig,cur:v.cur,path:f}])),active:true};CSIM.forces=old.forces||{};CSIM.params=old.params||{};CSIM.sel=nm;CSIM.cur=old.cur;
+      await IDB.set('src',{asws:{[nm]:{files:CSIM.asws[nm].files}},common:{},src:null});await IDB.set('cfg',{active:[nm],sel:nm,cur:old.cur,forces:CSIM.forces,params:CSIM.params,on:old.on});localStorage.removeItem(C_KEY);}}catch(e){}
+  try{const s=await IDB.get('src'),c=await IDB.get('cfg');if(!s||!s.asws)return;
+    CSIM.common=s.common||{};CSIM.src=s.src||null;Object.entries(s.asws).forEach(([n,a])=>CSIM.asws[n]={files:a.files,active:false});
+    if(c){(c.active||[]).forEach(n=>{if(CSIM.asws[n])CSIM.asws[n].active=true;});Object.assign(CSIM,{sel:c.sel,cur:c.cur,forces:c.forces||{},params:c.params||{}});}
+    await cBuildActive();if(c&&c.on&&cAnyRunning())cSetOn(true);if(VIEW==='code')renderCode();}catch(e){}}
+/* ---- yardımcılar ---- */
 const cNum=v=>v===true?1:v===false||v==null?0:typeof v==='number'?v:typeof v==='string'?(/=(-?\d+)$/.exec(v)?+/=(-?\d+)$/.exec(v)[1]:0):+v||0;
 function cSimVal(n){const s=SIGN.get(n);if(!s||s.cOut||s.cAdded)return undefined;return cNum((s._get||s.get)());}
-function cSrc(n){if(CSIM.forces[n]!=null)return 'Elle';if(cSimVal(n)!==undefined)return 'Simülatör';if(n in C_DEFAULTS)return 'Varsayılan';return '0 (bağlı değil)';}
+function cSrc(n){if(CSIM.forces[n]!=null)return 'Elle';if(CSIM.prod[n])return 'C: '+CSIM.prod[n];if(cSimVal(n)!==undefined)return 'Simülatör';if(n in C_DEFAULTS)return 'Varsayılan';return '0 (bağlı değil)';}
 function cTypeHint(n){const i=INV&&INV.byName.get(n);return i!=null?INV.s[i][7].split('/').pop():null;}
-/* ---- varsayım dosyası: eksik sabitler (…_data.c gelene kadar) ---- */
-function cAssumeFile(b){
-  const src=Object.entries(CSIM.files).filter(([n])=>!/^SIM_/i.test(n)).map(([,f])=>f.cur).join('\n');
-  const undef=[...new Set(b.warnings.map(w=>(/Tanımsız değişken (\w+)/.exec(w.msg)||[])[1]).filter(Boolean))];
+const cRank=n=>/^SIM_/i.test(n)?3:/\.h$/i.test(n)?2:/_(Local|Output|Input|data)\.c$/i.test(n)?1:0;
+function cAswNameFromFiles(names){const c=names.filter(n=>/\.c$/i.test(n)&&!/^SIM_/i.test(n)).sort((a,b)=>cRank(a)-cRank(b)||a.length-b.length)[0]||names[0]||'ASW';return c.replace(/_(Local|Output|Input|data)\.(c|h)$/i,'').replace(/\.(c|h)$/i,'');}
+const cAswNames=()=>Object.keys(CSIM.asws).sort((a,b)=>a.toLowerCase()<b.toLowerCase()?-1:1);
+const cAnyRunning=()=>Object.keys(CSIM.mods).length>0;
+const cChanged=a=>Object.values(a.files).some(f=>f.cur!==f.orig);
+/* ---- zip okuma (DecompressionStream ile) ---- */
+async function cUnzip(buf){const u=new Uint8Array(buf),dv=new DataView(buf);let e=-1;
+  for(let i=u.length-22;i>=Math.max(0,u.length-65600);i--)if(dv.getUint32(i,true)===0x06054b50){e=i;break;}
+  if(e<0)throw new Error('Zip dosyası okunamadı (merkez dizin bulunamadı).');
+  let n=dv.getUint16(e+10,true),off=dv.getUint32(e+16,true);
+  if((off===0xFFFFFFFF||n===0xFFFF)&&e>=20&&dv.getUint32(e-20,true)===0x07064b50){const z=Number(dv.getBigUint64(e-12,true));n=Number(dv.getBigUint64(z+32,true));off=Number(dv.getBigUint64(z+48,true));}
+  const utf=new TextDecoder('utf-8'),out=[];
+  for(let k=0;k<n;k++){if(dv.getUint32(off,true)!==0x02014b50)throw new Error('Zip merkez dizini bozuk.');
+    const fl=dv.getUint16(off+8,true),method=dv.getUint16(off+10,true);let csize=dv.getUint32(off+20,true),usize=dv.getUint32(off+24,true);
+    const nl=dv.getUint16(off+28,true),xl=dv.getUint16(off+30,true),cl=dv.getUint16(off+32,true);let lo=dv.getUint32(off+42,true);
+    const name=utf.decode(u.subarray(off+46,off+46+nl));
+    if(csize===0xFFFFFFFF||usize===0xFFFFFFFF||lo===0xFFFFFFFF){let x=off+46+nl;const xe=x+xl;while(x<xe){const id=dv.getUint16(x,true),sz=dv.getUint16(x+2,true);if(id===1){let y=x+4;if(usize===0xFFFFFFFF){usize=Number(dv.getBigUint64(y,true));y+=8;}if(csize===0xFFFFFFFF){csize=Number(dv.getBigUint64(y,true));y+=8;}if(lo===0xFFFFFFFF){lo=Number(dv.getBigUint64(y,true));}}x+=4+sz;}}
+    out.push({name,method,csize,usize,lo,enc:!!(fl&1)});off+=46+nl+xl+cl;}
+  const read=async en=>{if(en.enc)throw new Error(en.name+' şifreli');const lo=en.lo,nl=dv.getUint16(lo+26,true),xl=dv.getUint16(lo+28,true);const d=u.subarray(lo+30+nl+xl,lo+30+nl+xl+en.csize);
+    if(en.method===0)return utf.decode(d);if(en.method!==8)throw new Error(en.name+': desteklenmeyen sıkıştırma ('+en.method+')');
+    if(typeof DecompressionStream==='undefined')throw new Error('Tarayıcı zip açmayı desteklemiyor (DecompressionStream yok). Güncel Chrome/Edge/Firefox kullanın.');
+    const ds=new Blob([d]).stream().pipeThrough(new DecompressionStream('deflate-raw'));return utf.decode(await new Response(ds).arrayBuffer());};
+  return {entries:out,read};}
+/* yollardan ASW gruplama: …/ASW/<ASW>/src/*.c|h ; Cmn* ve ASW dışı .h ortak başlık */
+function cGroup(paths){const asw={},common={},skipped=[];
+  paths.forEach(p=>{const parts=p.split('/').filter(Boolean),base=parts[parts.length-1];if(!/\.(c|h)$/i.test(base))return;
+    if(parts.some(x=>/^mdl_test$/i.test(x)||/^(test|tests|unittest)$/i.test(x))){skipped.push(p);return;}
+    const ai=parts.findIndex(x=>x==='ASW'||x==='asw');let name=null;
+    if(ai>=0&&parts.length>ai+2)name=parts[ai+1];
+    else{const si=parts.lastIndexOf('src');if(si>0)name=parts[si-1];}
+    if(name&&!/^Cmn/i.test(name)&&(/\.c$/i.test(base)||/\/src\//.test('/'+parts.join('/')+'/')||ai>=0)){(asw[name]=asw[name]||[]).push(p);}
+    else if(/\.h$/i.test(base)){if(!common[base])common[base]=p;}
+    else skipped.push(p);});
+  return {asw,common,skipped};}
+async function cImportZip(file){const st=$('#cImp');const say=t=>{if(st)st.textContent=t;};
+  try{say('Zip okunuyor…');const z=await cUnzip(await file.arrayBuffer());
+    const files=z.entries.filter(e=>!/\/$/.test(e.name)&&/\.(c|h)$/i.test(e.name));const g=cGroup(files.map(e=>e.name));
+    const byName=new Map(files.map(e=>[e.name,e]));const names=Object.keys(g.asw);
+    if(!names.length)throw new Error('Zip içinde ASW kaynak dosyası bulunamadı (…/ASW/<ASW>/src/*.c beklenir).');
+    const keepEdits=Object.keys(CSIM.asws).some(n=>cChanged(CSIM.asws[n]))&&confirm('Mevcut değişiklikleriniz var. Yeni zip’teki aynı dosyalar için değişiklikleriniz korunsun mu?\n\nTamam: korunur (yeni orijinal + sizin değişikliğiniz)\nİptal: zip’teki haline döner');
+    const old=CSIM.asws,nas={},common={};let done=0;const total=files.length;
+    for(const n of names){const fs={};for(const p of g.asw[n]){const t=(await z.read(byName.get(p))).replace(/\r\n/g,'\n');const b=p.split('/').pop();
+        const prev=old[n]&&old[n].files[b];fs[b]={orig:t,cur:keepEdits&&prev&&prev.cur!==prev.orig?prev.cur:t,path:p};if(++done%40===0){say(`Dosyalar açılıyor… ${done}/${total}`);await new Promise(r=>setTimeout(r));}}
+      nas[n]={files:fs,active:!!(old[n]&&old[n].active)};}
+    for(const [b,p] of Object.entries(g.common)){common[b]=(await z.read(byName.get(p))).replace(/\r\n/g,'\n');}
+    if(CSIM.on)cSetOn(false);CSIM.asws=nas;CSIM.common=common;CSIM.mods={};CSIM.errs={};
+    CSIM.src={name:file.name,date:new Date().toISOString(),asw:names.length,files:done,common:Object.keys(common).length,skipped:g.skipped.length};
+    if(!CSIM.sel||!nas[CSIM.sel])CSIM.sel=names.includes('Doors_DoorsRels')?'Doors_DoorsRels':cAswNames()[0];CSIM.cur=null;
+    cSave();say('Seçili ASW’ler derleniyor…');await cBuildActive();say('');renderCode();
+  }catch(e){say('');alert('Zip içe aktarılamadı: '+e.message);}}
+function cAddFiles(list){const fs=[...list];const zip=fs.find(f=>/\.zip$/i.test(f.name));if(zip){cImportZip(zip);return;}
+  const src=fs.filter(f=>/\.(c|h)$/i.test(f.name));if(!src.length){alert('B24 entegrasyonu için .zip, tek ASW için .c ve .h dosyaları eklenebilir.');return;}
+  Promise.all(src.map(f=>f.text().then(t=>[f.name,t.replace(/\r\n/g,'\n')]))).then(async arr=>{
+    let nm=CSIM.sel&&CSIM.asws[CSIM.sel]&&!CSIM.src?CSIM.sel:cAswNameFromFiles(arr.map(x=>x[0]));if(CSIM.src&&!CSIM.asws[nm])nm=cAswNameFromFiles(arr.map(x=>x[0]));
+    const a=CSIM.asws[nm]||(CSIM.asws[nm]={files:{},active:true});arr.forEach(([n,t])=>a.files[n]={orig:t,cur:t,path:n});a.active=true;CSIM.sel=nm;
+    if(!CSIM.cur||!a.files[CSIM.cur])CSIM.cur=Object.keys(a.files).sort((x,y)=>cRank(x)-cRank(y))[0];
+    cSave();await cBuildOne(nm);cRewire();renderCode();});}
+/* ---- varsayım dosyası: eksik sabitler ---- */
+function cAssumeFile(asw,b){
+  const src=Object.entries(CSIM.asws[asw].files).filter(([n])=>!/^SIM_/i.test(n)).map(([,f])=>f.cur).join('\n');
+  const undef=[...new Set(b.warnings.map(w=>(/Tanımsız değişken (\w+)/.exec(w.msg)||[])[1]).filter(Boolean))].filter(n=>/_Const[BP]$|_C$/.test(n));
   if(!undef.length)return null;
   const L=['/* SIM_varsayimlar.c — simülatörün eklediği VARSAYIM dosyası.',' * Kodun kullandığı ama yüklenen dosyalarda tanımı olmayan sabitler burada.',' * Gerçek değerler Simulink’in ürettiği …_data.c ve ortak başlıklarda.',' * O dosyaları eklediğinizde bu dosyayı silin. */','void SIM_varsayimlar(void)','{'];
   undef.forEach(root=>{const re=new RegExp(root+'\\.(\\w+)(\\[)?','g');const fields=new Map();let m;while((m=re.exec(src)))fields.set(m[1],!!m[2]);
     if(fields.size){fields.forEach((arr,f)=>{
       if(arr){L.push(`  /* VARSAYIM: ${root}.${f} = Simulink S-R Flip-Flop doğruluk tablosu (Q sütunu, sonra !Q) */`);[0,1,0,0,1,1,0,0,1,0,1,1,0,0,0,0].forEach((v,i)=>L.push(`  ${root}.${f}[${i}] = ${v}U;`));}
       else L.push(`  ${root}.${f} = 1000U;  /* VARSAYIM: süre sabiti (ms). Gerçek değer …_data.c içinde */`);});}
-    else L.push(`  ${root} = ${/Off_C$/.test(root)?0:/On_C$/.test(root)?1:0}U;  /* VARSAYIM: ortak başlıktaki sabit */`);});
+    else L.push(`  ${root} = ${/On_C$/.test(root)?1:0}U;  /* VARSAYIM: ortak başlıktaki sabit */`);});
   L.push('}');return L.join('\n')+'\n';}
-function cBuild(){const t0=performance.now();CSIM.err=null;
-  let b;try{b=CC.compile(Object.fromEntries(Object.entries(CSIM.files).map(([n,f])=>[n,f.cur])),{known:n=>SIGN.has(n)||!!(INV&&INV.byName.has(n)),typeHint:cTypeHint});}
-  catch(e){CSIM.err={msg:e.message,file:e.file,line:e.line};CSIM.build=null;if(CSIM.on)cSetOn(false);CSIM.dirty=false;return false;}
-  if(!Object.keys(CSIM.files).some(n=>/^SIM_/i.test(n))){const a=cAssumeFile(b);if(a){CSIM.files['SIM_varsayimlar.c']={orig:a,cur:a,added:true};return cBuild();}}
-  b.ms=Math.round(performance.now()-t0);
-  if(!b.steps.length){CSIM.err={msg:'Adım (step) fonksiyonu bulunamadı. Parametresiz ve “…_100ms” / “…step” adlı bir fonksiyon bekleniyor.'};CSIM.build=null;return false;}
-  const was=CSIM.on;if(was)cUnhook();
-  CSIM.build=b;CSIM.step=b.steps[0];CSIM.period=b.steps[0].period||100;CSIM.dirty=false;CSIM.builtAt=new Date();
-  cInitG();if(was)cHook();cSave();return true;}
-function cInitG(){const b=CSIM.build;if(!b)return;const G={};b.mod.$init(G);CSIM.G=G;
-  b.assume.forEach(f=>b.mod.F['$'+f]());
-  CSIM.paramInit={};b.params.forEach(n=>CSIM.paramInit[n]=G[n]??0);
-  Object.entries(CSIM.params).forEach(([n,v])=>{if(b.params.includes(n))G[n]=v;});
-  b.reset.forEach(f=>b.mod.F['$'+f]());b.init.forEach(f=>b.mod.F['$'+f]());CSIM.steps=0;CSIM.acc=0;}
-function cStep(){const b=CSIM.build,G=CSIM.G;if(!b)return;
-  for(const n of b.inputs){let v=CSIM.forces[n];if(v==null){v=cSimVal(n);if(v===undefined)v=C_DEFAULTS[n]??0;}G[n]=v;}
-  try{b.mod.resetIt();b.mod.F['$'+CSIM.step.name]();}
-  catch(e){CSIM.err={msg:'Çalışma hatası: '+e.message};log('C kodu durdu: '+e.message,'warn');cSetOn(false);return;}
+/* ---- derleme ---- */
+function cCompileAsw(name){const a=CSIM.asws[name];
+  const map={};Object.entries(CSIM.common).forEach(([b,t])=>map[b]=t);Object.entries(a.files).forEach(([b,f])=>map[b]=f.cur);
+  return CC.compile(map,{known:n=>SIGN.has(n)||!!(INV&&INV.byName.has(n)),typeHint:cTypeHint});}
+async function cBuildOne(name){const a=CSIM.asws[name];if(!a)return false;const t0=performance.now();delete CSIM.errs[name];delete CSIM.mods[name];
+  let b;try{b=cCompileAsw(name);
+    if(!Object.keys(a.files).some(n=>/^SIM_/i.test(n))){const s=cAssumeFile(name,b);if(s){a.files['SIM_varsayimlar.c']={orig:s,cur:s,path:'SIM_varsayimlar.c',added:true};b=cCompileAsw(name);cSaveSrc();}}
+    if(!b.steps.length)throw Object.assign(new Error('Adım (step) fonksiyonu bulunamadı. Parametresiz ve “…_10ms / …_100ms / …step” adlı bir fonksiyon bekleniyor.'),{file:null});}
+  catch(e){CSIM.errs[name]={msg:e.message,file:e.file,line:e.line};a.dirty=false;return false;}
+  b.ms=Math.round(performance.now()-t0);b.asw=name;CSIM.mods[name]=b;a.dirty=false;return true;}
+async function cBuildActive(){const act=cAswNames().filter(n=>CSIM.asws[n].active);CSIM.mods={};CSIM.errs={};
+  for(let i=0;i<act.length;i++){await cBuildOne(act[i]);const st=$('#cImp');if(st&&act.length>3)st.textContent=`Derleniyor… ${i+1}/${act.length} · ${act[i]}`;if(act.length>3)await new Promise(r=>setTimeout(r));}
+  const st=$('#cImp');if(st)st.textContent='';cRewire();}
+/* ---- çalışma zamanı: ortak sinyal alanı, sıralama, zamanlama ---- */
+function cRewire(){const was=CSIM.on;if(was)cUnhook();
+  const mods=Object.values(CSIM.mods);CSIM.prod={};mods.forEach(b=>b.outputs.forEach(n=>{if(!CSIM.prod[n])CSIM.prod[n]=b.asw;}));
+  const ext=new Set();mods.forEach(b=>b.inputs.forEach(n=>{if(!CSIM.prod[n])ext.add(n);}));CSIM.extIn=[...ext].sort();
+  /* üretici → tüketici sırası (Kahn), döngüde ada göre */
+  const names=mods.map(b=>b.asw).sort(),deg={},adj={};names.forEach(n=>{deg[n]=0;adj[n]=new Set();});
+  mods.forEach(b=>b.inputs.forEach(i=>{const p=CSIM.prod[i];if(p&&p!==b.asw&&!adj[p].has(b.asw)){adj[p].add(b.asw);deg[b.asw]++;}}));
+  const order=[],q=names.filter(n=>!deg[n]);while(q.length){q.sort();const n=q.shift();order.push(n);adj[n].forEach(m=>{if(--deg[m]===0)q.push(m);});}
+  names.forEach(n=>{if(!order.includes(n))order.push(n);});CSIM.order=order;
+  CSIM.tasks=[];order.forEach(n=>{const b=CSIM.mods[n];b.steps.forEach(s=>CSIM.tasks.push({asw:n,fn:s.name,period:s.period||10}));});
+  const gcd=(a,b)=>b?gcd(b,a%b):a;CSIM.period=CSIM.tasks.length?Math.max(5,CSIM.tasks.reduce((g,t)=>gcd(g,t.period),CSIM.tasks[0].period)):100;
+  CSIM.build=mods.length?{n:mods.length}:null;
+  if(was&&CSIM.build){cHook();cInitG();}else if(was&&!CSIM.build){CSIM.on=false;const h=$('#hC');if(h)h.hidden=true;}
+  CSIM.step=CSIM.tasks[0]?{name:CSIM.tasks[0].fn}:null;}
+function cInitG(){const G={};CSIM.G=G;CSIM.paramInit={};CSIM.t=0;CSIM.steps=0;CSIM.acc=0;
+  CSIM.order.forEach(n=>{const b=CSIM.mods[n];b.mod.$init(G);b.assume.forEach(f=>b.mod.F['$'+f]());b.params.forEach(p=>{if(!(p in CSIM.paramInit))CSIM.paramInit[p]=G[p]??0;});});
+  Object.entries(CSIM.params).forEach(([n,v])=>{if(n in CSIM.paramInit)G[n]=v;});
+  CSIM.order.forEach(n=>{const b=CSIM.mods[n];b.reset.forEach(f=>b.mod.F['$'+f]());b.init.forEach(f=>b.mod.F['$'+f]());});}
+function cInputs(){const G=CSIM.G;for(const n of CSIM.extIn){let v=CSIM.forces[n];if(v==null){v=cSimVal(n);if(v===undefined)v=C_DEFAULTS[n]??0;}G[n]=v;}}
+function cStep(noIn){const G=CSIM.G;if(!CSIM.build)return;
+  if(!noIn)cInputs();
+  for(const n in CSIM.forces)if(CSIM.prod[n])G[n]=CSIM.forces[n];
+  CSIM.t+=CSIM.period;
+  for(const t of CSIM.tasks){if(CSIM.t%t.period)continue;const b=CSIM.mods[t.asw];
+    try{b.mod.resetIt();b.mod.F['$'+t.fn]();}
+    catch(e){CSIM.errs[t.asw]={msg:'Çalışma hatası ('+t.fn+'): '+e.message};delete CSIM.mods[t.asw];log(`C kodu: ${t.asw} durduruldu: ${e.message}`,'warn');cRewire();return;}}
+  for(const n in CSIM.forces)if(CSIM.prod[n])G[n]=CSIM.forces[n];
   CSIM.steps++;
-  if(b.outputs.includes('DR_StDoorRelsActv')){const r=!!G.DR_StDoorRelsActv;if(r!==V.release)setRelease(r,'C kodu');}}
-/* simülatördeki TF tuşu C modunda koda darbe olarak gider */
+  if(CSIM.prod.DR_StDoorRelsActv){const r=!!G.DR_StDoorRelsActv;if(r!==V.release)setRelease(r,'C kodu');}}
 function cRelease(on,src){const t=performance.now();if(on){PRS['Dash_B01']=t;PRS['Dash_B01_off']=-1e9;}else{PRS['Dash_B01_off']=t;PRS['Dash_B01']=-1e9;}
   log(`${src} → C kodu girişi ${on?'DR_StDoorRelsBtnPosn1_I':'DR_StDoorRelsDisadBtnPosn1_I'} = 1 (300 ms); karar C kodunda`);}
-const cDrivesRelease=()=>CSIM.on&&CSIM.build&&CSIM.build.outputs.includes('DR_StDoorRelsActv');
+const cDrivesRelease=()=>CSIM.on&&!!CSIM.build&&!!CSIM.prod.DR_StDoorRelsActv;
 /* sinyal kataloğuna bağla */
-function cHook(){const b=CSIM.build;if(!b)return;CSIM.added=[];
-  const mk=(n,g,isOut)=>{const ty=b.typeOf(n)||(cTypeHint(n)?{k:/boolean/.test(cTypeHint(n))?'bool':'int'}:{k:'int'});const get=()=>CSIM.G[n]??0;
-    const s=ty.k==='bool'?sB(n,g,'C kodu',isOut?'C kodunun ürettiği çıkış':'C kodunun okuduğu giriş',get):sN(n,g,'C kodu',isOut?'C kodunun ürettiği çıkış':'C kodunun okuduğu giriş',get,'');
+function cHook(){CSIM.added=[];const mods=Object.values(CSIM.mods);const tyOf=n=>{for(const b of mods){const t=b.typeOf(n);if(t)return t;}const h=cTypeHint(n);return h?{k:/boolean/.test(h)?'bool':'int'}:{k:'int'};};
+  const mk=(n,g,isOut)=>{const get=()=>CSIM.G[n]??0;const lab=isOut?`${CSIM.prod[n]} çıkışı (C kodu)`:'C kodunun okuduğu giriş';
+    const s=tyOf(n).k==='bool'?sB(n,g,'C kodu',lab,get):sN(n,g,'C kodu',lab,get,'');
     const i=INV&&INV.byName.get(n);if(i!=null){s.tr=INV.s[i][1];s.en=INV.s[i][2];}
     Object.assign(s,{sim:true,cAdded:true,aswLive:true,hist:[],changes:0,lastT:0,prev:undefined,cur:undefined,reqs:[]});SIG_DB.push(s);SIGN.set(n,s);CSIM.added.push(s);};
-  b.outputs.forEach(n=>{const s=SIGN.get(n);if(s){s._get=s.get;s.get=()=>CSIM.G[n]??0;s.cOut=true;}else mk(n,'C kodu · çıkış',true);});
-  b.inputs.forEach(n=>{const s=SIGN.get(n);if(s){s._get=s.get;s.get=()=>CSIM.forces[n]!=null?CSIM.forces[n]:s._get();s.cIn=true;}else mk(n,'C kodu · giriş',false);});
+  Object.keys(CSIM.prod).sort().forEach(n=>{const s=SIGN.get(n);if(s){s._get=s.get;s.get=()=>CSIM.G[n]??0;s.cOut=true;}else mk(n,'C kodu · çıkış',true);});
+  CSIM.extIn.forEach(n=>{const s=SIGN.get(n);if(s){s._get=s.get;s.get=()=>CSIM.forces[n]!=null?CSIM.forces[n]:s._get();s.cIn=true;}else mk(n,'C kodu · giriş',false);});
   cRegroup();}
 function cUnhook(){SIG_DB.forEach(s=>{if(s._get){s.get=s._get;delete s._get;}delete s.cOut;delete s.cIn;});
   (CSIM.added||[]).forEach(s=>{const k=SIG_DB.indexOf(s);if(k>=0)SIG_DB.splice(k,1);if(SIGN.get(s.n)===s)SIGN.delete(s.n);});CSIM.added=[];cRegroup();}
 function cRegroup(){const g=[...new Set(SIG_DB.map(s=>s.g))];SIG_GROUPS.length=0;SIG_GROUPS.push(...g);REC.sigs=null;REC.t.length=0;REC.v.length=0;REC.t0=performance.now();}
 function cSetOn(on){if(on&&!CSIM.build)return;if(on===CSIM.on)return;CSIM.on=on;
-  if(on){cHook();cInitG();log(`C kodu simülatöre bağlandı: ${CSIM.step.name} her ${CSIM.period} ms`);}
+  if(on){cHook();cInitG();log(`C kodu simülatöre bağlandı: ${CSIM.order.length} ASW, temel adım ${CSIM.period} ms`);}
   else{cUnhook();log('C kodu bağlantısı kapatıldı, simülatör kendi mantığına döndü');}
-  const h=$('#hC');if(h){h.hidden=!on;h.textContent='C kodu · '+(CSIM.step?CSIM.step.name:'');}cSave();}
+  const h=$('#hC');if(h){h.hidden=!on;h.textContent='C kodu · '+CSIM.order.length+' ASW';}cSaveCfg();}
+function cSetActive(name,on){const a=CSIM.asws[name];if(!a)return Promise.resolve();a.active=on;cSaveCfg();
+  if(!on){delete CSIM.mods[name];delete CSIM.errs[name];cRewire();return Promise.resolve();}
+  return cBuildOne(name).then(()=>cRewire());}
 /* ---- diff (satır bazlı LCS) ---- */
 function cDiff(a,b){const A=a.split('\n'),B=b.split('\n');let s=0;while(s<A.length&&s<B.length&&A[s]===B[s])s++;let ea=A.length,eb=B.length;while(ea>s&&eb>s&&A[ea-1]===B[eb-1]){ea--;eb--;}
   const X=A.slice(s,ea),Y=B.slice(s,eb);if(X.length*Y.length>4e6)return [{t:'~',a:s+1,txt:`${X.length} satır → ${Y.length} satır (fark çok büyük)`}];
@@ -2581,55 +2689,75 @@ function cDiff(a,b){const A=a.split('\n'),B=b.split('\n');let s=0;while(s<A.leng
   for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)D[i][j]=X[i]===Y[j]?D[i+1][j+1]+1:Math.max(D[i+1][j],D[i][j+1]);
   const out=[];let i=0,j=0;while(i<n||j<m){if(i<n&&j<m&&X[i]===Y[j]){i++;j++;}else if(j<m&&(i>=n||D[i][j+1]>=D[i+1][j])){out.push({t:'+',b:s+j+1,txt:Y[j]});j++;}else{out.push({t:'-',a:s+i+1,txt:X[i]});i++;}}
   return out;}
+/* ---- zip yazma (indirme) ---- */
+function cZip(files){const enc=new TextEncoder(),crcT=cZip.t||(cZip.t=Array.from({length:256},(_,n)=>{let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;return c>>>0;}));
+  const crc=u=>{let c=~0;for(let i=0;i<u.length;i++)c=crcT[(c^u[i])&255]^(c>>>8);return (~c)>>>0;};const parts=[],cen=[];let off=0;
+  files.forEach(([name,txt])=>{const nm=enc.encode(name),d=enc.encode(txt),c=crc(d);
+    const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x800,true);h.setUint32(14,c,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,nm.length,true);parts.push(new Uint8Array(h.buffer),nm,d);
+    const ch=new DataView(new ArrayBuffer(46));ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x800,true);ch.setUint32(16,c,true);ch.setUint32(20,d.length,true);ch.setUint32(24,d.length,true);ch.setUint16(28,nm.length,true);ch.setUint32(42,off,true);cen.push(new Uint8Array(ch.buffer),nm);off+=30+nm.length+d.length;});
+  const cl=cen.reduce((a,x)=>a+x.length,0),e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cl,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...cen,new Uint8Array(e.buffer)],{type:'application/zip'});}
+async function cDownload(btn,mode){const list=[];
+  cAswNames().forEach(n=>Object.entries(CSIM.asws[n].files).forEach(([b,f])=>{if(/^SIM_/i.test(b))return;if(mode==='all'?n===CSIM.sel:f.cur!==f.orig)list.push([f.path||b,f.cur]);}));
+  if(!list.length){btn.textContent='Değişen dosya yok';setTimeout(()=>btn.textContent=btn.dataset.lbl,1500);return;}
+  const blob=cZip(list),fn=(mode==='all'?CSIM.sel:'degisen_asw')+'_'+new Date().toISOString().slice(0,16).replace(/[-:T]/g,'')+'.zip';
+  let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){}
+  if(dl){try{await dl.save({filename:fn,data:blob});btn.textContent='İndirildi';}catch(e){btn.textContent=e&&e.code==='declined'?'İptal edildi':'İndirilemedi';}setTimeout(()=>btn.textContent=btn.dataset.lbl,1500);return;}
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}catch(e){btn.textContent='İndirilemedi';}}
 /* ---- arayüz ---- */
-const cRank=n=>/^SIM_/i.test(n)?3:/\.h$/i.test(n)?2:/_(Local|Output|Input|data)\.c$/i.test(n)?1:0;
-const cFileNames=()=>Object.keys(CSIM.files).sort((a,b)=>cRank(a)-cRank(b)||(a<b?-1:1));
-function cAddFiles(list){const fs=[...list].filter(f=>/\.(c|h)$/i.test(f.name));if(!fs.length){alert('Yalnızca .c ve .h dosyaları eklenebilir.');return;}
-  Promise.all(fs.map(f=>f.text().then(t=>[f.name,t]))).then(arr=>{arr.forEach(([n,t])=>{t=t.replace(/\r\n/g,'\n');CSIM.files[n]={orig:t,cur:t};});
-    if(!CSIM.cur||!CSIM.files[CSIM.cur])CSIM.cur=cFileNames().find(n=>/\.c$/i.test(n)&&!/^SIM_/.test(n)&&!/_(Local|Output|Input|data)\.c$/i.test(n))||cFileNames()[0];
-    cBuild();cSave();renderCode();});}
-function cStatusHTML(){const b=CSIM.build;
-  if(CSIM.err)return `<span class="cst-chip bad">Hata</span>`;
-  if(!b)return `<span class="cst-chip">Derlenmedi</span>`;
-  return `<span class="cst-chip ${CSIM.dirty?'warn':'ok'}">${CSIM.dirty?'Değişiklik var, derleyin':'Derlendi'}</span><span class="note">${b.ms} ms · ${esc(CSIM.step.name)} her ${CSIM.period} ms · <span id="cSteps">${CSIM.on?CSIM.steps+' adım':'simülatöre bağlı değil'}</span></span>`;}
-function cMsgsHTML(){const b=CSIM.build,o=[];
-  if(CSIM.err)o.push(`<div class="cmsg bad"><b>Derleme durdu</b><div>${esc(CSIM.err.msg)}</div>${CSIM.err.file?`<button class="linkbtn" data-cjump="${esc(CSIM.err.file)}:${CSIM.err.line}">${esc(CSIM.err.file)} · satır ${CSIM.err.line}</button>`:''}</div>`);
-  if(b){const off=b.params.filter(n=>/StsFctEna_P$/.test(n)&&!(CSIM.G[n])&&!(CSIM.G[n.replace(/_P$/,'Nv')]));
+function cStatusHTML(){const n=CSIM.sel,b=CSIM.mods[n],a=CSIM.asws[n];if(!a)return '';
+  const run=CSIM.order.length;
+  const chip=CSIM.errs[n]?'<span class="cst-chip bad">Hata</span>':!a.active?'<span class="cst-chip">Çalışmıyor</span>':a.dirty?'<span class="cst-chip warn">Değişiklik var, derleyin</span>':b?'<span class="cst-chip ok">Derlendi, çalışıyor</span>':'<span class="cst-chip">Derlenmedi</span>';
+  return `${chip}${b?`<span class="note">${b.ms} ms · ${b.steps.map(s=>esc(s.name)).join(', ')} · ${b.inputs.length} giriş · ${b.outputs.length} çıkış</span>`:''}<span class="note">Toplam ${run} ASW çalışıyor · <span id="cSteps">${CSIM.on?Math.round(CSIM.t/1000)+' s simüle edildi':'simülatöre bağlı değil'}</span>${CSIM.on?` · yük <span id="cLoad">${PERF.cms.toFixed(1)}</span> ms/s`:''}</span>`;}
+function cMsgsHTML(){const n=CSIM.sel,b=CSIM.mods[n],a=CSIM.asws[n],o=[],er=CSIM.errs[n];if(!a)return '';
+  if(er)o.push(`<div class="cmsg bad"><b>${esc(n)} derlenemedi</b><div>${esc(er.msg)}</div>${er.file?`<button class="linkbtn" data-cjump="${esc(er.file)}:${er.line}">${esc(er.file)} · satır ${er.line}</button>`:''}</div>`);
+  if(b){const off=b.params.filter(p=>/StsFctEna_P$/.test(p)&&!(CSIM.G[p])&&!(CSIM.G[p.replace(/_P$/,'Nv')]));
     if(off.length)o.push(`<div class="cmsg warn"><b>Fonksiyon kapalı: ${off.map(esc).join(', ')} = 0</b><div>Koddaki başlangıç değeri 0; gerçek araçta değer kalibrasyon verisinden gelir. Simülasyonda denemek için değeri 1 yapın.</div><button class="pbtn" data-cact="fcten">${off.map(esc).join(', ')} = 1 yap</button></div>`);
-    if(CSIM.files['SIM_varsayimlar.c'])o.push(`<div class="cmsg info"><b>Varsayım dosyası kullanılıyor: SIM_varsayimlar.c</b><div>Kodun kullandığı bazı sabitlerin tanımı yüklenen dosyalarda yok (ör. S-R flip-flop tablosu, süre sabitleri). Tahmini değerlerle çalışıyor; gerçek değerler için Simulink’in ürettiği <code>…_data.c</code> dosyasını ekleyip bu dosyayı silin.</div><button class="linkbtn" data-cfile="SIM_varsayimlar.c">Dosyayı aç</button></div>`);
-    const miss=b.missingInc.filter(n=>!/MemMap/i.test(n));
-    if(miss.length)o.push(`<details class="cmsg"><summary>${miss.length} başlık dosyası yok; sorun değil</summary><div class="note">Tipler Excel envanterinden ve koddaki kullanımdan çıkarıldı: ${miss.map(esc).join(', ')}</div></details>`);
-    const w=b.warnings.filter(x=>!/Tanımsız değişken \w+_(Const[BP])|_C →/.test(x.msg)||!CSIM.files['SIM_varsayimlar.c']);
+    if(a.files['SIM_varsayimlar.c'])o.push(`<div class="cmsg info"><b>Varsayım dosyası kullanılıyor: SIM_varsayimlar.c</b><div>Kodun kullandığı bazı sabitlerin tanımı yüklenen dosyalarda yok (ör. S-R flip-flop tablosu, süre sabitleri). Tahmini değerlerle çalışıyor; gerçek değerler için <code>…_data.c</code> dosyasını ekleyip bu dosyayı silin.</div><button class="linkbtn" data-cfile="SIM_varsayimlar.c">Dosyayı aç</button></div>`);
+    const miss=b.missingInc.filter(x=>!/MemMap/i.test(x));
+    if(miss.length)o.push(`<details class="cmsg"><summary>${miss.length} başlık dosyası bulunamadı</summary><div class="note">Tipler Excel envanterinden ve koddaki kullanımdan çıkarıldı: ${miss.map(esc).join(', ')}</div></details>`);
+    const w=b.warnings.filter(x=>!(a.files['SIM_varsayimlar.c']&&/Tanımsız değişken \w+(_Const[BP]|_C) /.test(x.msg)));
     if(w.length)o.push(`<details class="cmsg"><summary>${w.length} uyarı</summary>${w.slice(0,40).map(x=>`<div class="note">${x.file?`<button class="linkbtn" data-cjump="${esc(x.file)}:${x.line}">${esc(x.file)}:${x.line}</button> `:''}${esc(x.msg)}</div>`).join('')}</details>`);}
   return o.join('');}
-function cIOHTML(){const b=CSIM.build;if(!b)return '<p class="note">Önce kodu derleyin.</p>';const q=($('#docSearch').value||'').trim().toLowerCase(),f=n=>!q||n.toLowerCase().includes(q);const G=CSIM.G;
+function cIOHTML(){const b=CSIM.mods[CSIM.sel];if(!b)return `<p class="note" style="padding:12px">${CSIM.asws[CSIM.sel]&&!CSIM.asws[CSIM.sel].active?'Bu ASW çalışmıyor. Yukarıdan “Bu ASW’yi C koduyla çalıştır”ı işaretleyin.':'Önce kodu derleyin.'}</p>`;
+  const q=($('#docSearch').value||'').trim().toLowerCase(),f=n=>!q||n.toLowerCase().includes(q);const G=CSIM.G;
   const val=n=>`<span class="sv" data-cv="${esc(n)}">${esc(String(G[n]??0))}</span>`;
   const tr=n=>{const i=INV&&INV.byName.get(n);return i!=null?`<div class="en">${esc(INV.s[i][1])}</div>`:'';};
+  const cons=n=>CSIM.order.filter(x=>x!==CSIM.sel&&CSIM.mods[x].inputs.includes(n));
   const tabs=[['out','Çıkışlar',b.outputs.length],['in','Girişler',b.inputs.length],['par','Parametreler',b.params.length],['st','İç durum','']];
   let body='';
-  if(CSIM.tab==='out')body=`<table class="stable"><thead><tr><th>Çıkış (Set_)</th><th>Değer</th><th></th></tr></thead><tbody>${b.outputs.filter(f).map(n=>`<tr><td><code>${esc(n)}</code>${tr(n)}</td><td>${val(n)}</td><td><button class="sigchip" data-cplot="${esc(n)}">Grafik</button></td></tr>`).join('')}</tbody></table>`;
-  if(CSIM.tab==='in')body=`<p class="note">Girişler her adımda simülatörden okunur. “Elle” kutusunu işaretleyip değer girerek bir girişi sabitleyebilir, “Darbe” ile 0,3 s 1 verebilirsiniz.</p><table class="stable"><thead><tr><th>Giriş (Get_)</th><th>Kaynak</th><th>Değer</th><th>Elle</th><th></th></tr></thead><tbody>${b.inputs.filter(f).sort((x,y)=>{const r=n=>['Elle','Simülatör','Varsayılan'].indexOf(cSrc(n));const a=r(x),c=r(y);return (a<0?9:a)-(c<0?9:c)||(x<y?-1:1);}).map(n=>{const fo=CSIM.forces[n];
-    return `<tr><td><code>${esc(n)}</code>${tr(n)}${C_DEF_NOTE[n]?`<div class="en">Varsayılan ${C_DEFAULTS[n]} (VARSAYIM): ${esc(C_DEF_NOTE[n])}</div>`:''}</td><td class="stype" data-csrc="${esc(n)}">${cSrc(n)}</td><td>${val(n)}</td>
+  if(CSIM.tab==='out')body=`<table class="stable"><thead><tr><th>Çıkış (Set_)</th><th>Değer</th><th>Kullanan (çalışan ASW)</th><th></th></tr></thead><tbody>${b.outputs.filter(f).map(n=>`<tr><td><code>${esc(n)}</code>${tr(n)}</td><td>${val(n)}</td><td class="stype">${cons(n).map(x=>`<button class="linkbtn" data-casw="${esc(x)}">${esc(x)}</button>`).join(' ')||'—'}</td><td><button class="sigchip" data-cplot="${esc(n)}">Grafik</button></td></tr>`).join('')}</tbody></table>`;
+  if(CSIM.tab==='in'){const ord=n=>{const s=cSrc(n);return s==='Elle'?0:s.startsWith('C:')?1:s==='Simülatör'?2:s==='Varsayılan'?3:9;};
+    body=`<p class="note">Girişler her adımda başka bir çalışan ASW’den (C:), yoksa simülatörden okunur. “Elle” ile bir girişi sabitleyebilir, “Darbe” ile 0,3 s 1 verebilirsiniz.</p><table class="stable"><thead><tr><th>Giriş (Get_)</th><th>Kaynak</th><th>Değer</th><th>Elle</th><th></th></tr></thead><tbody>${b.inputs.filter(f).sort((x,y)=>ord(x)-ord(y)||(x<y?-1:1)).map(n=>{const fo=CSIM.forces[n];
+    return `<tr><td><code>${esc(n)}</code>${tr(n)}${C_DEF_NOTE[n]?`<div class="en">Varsayılan ${C_DEFAULTS[n]} (VARSAYIM): ${esc(C_DEF_NOTE[n])}</div>`:''}</td><td class="stype" data-csrc="${esc(n)}">${esc(cSrc(n))}</td><td>${val(n)}</td>
       <td class="cforce"><input type="checkbox" data-cforce="${esc(n)}" ${fo!=null?'checked':''} aria-label="${esc(n)} elle"><input type="number" data-cfv="${esc(n)}" value="${fo!=null?fo:''}" placeholder="—" ${fo!=null?'':'disabled'} aria-label="${esc(n)} değeri"></td>
-      <td><button class="sigchip" data-cpulse="${esc(n)}">Darbe</button></td></tr>`;}).join('')}</tbody></table>`;
-  if(CSIM.tab==='par')body=`<p class="note">Kalibrasyon (_P) ve NV kodlama (Nv) değerleri. Kod, Nv ≠ 0 ise onu, değilse _P’yi kullanır. Değişiklik hemen uygulanır ve bu tarayıcıda saklanır.</p><table class="stable"><thead><tr><th>Parametre</th><th>Koddaki başlangıç</th><th>Değer</th></tr></thead><tbody>${b.params.filter(f).map(n=>`<tr><td><code>${esc(n)}</code>${tr(n)}</td><td class="stype">${esc(String(CSIM.paramInit?CSIM.paramInit[n]:0))}</td><td><input class="cpar" type="number" data-cpar="${esc(n)}" value="${esc(String(G[n]??0))}" aria-label="${esc(n)}">${CSIM.params[n]!=null?' <button class="linkbtn" data-cparrst="'+esc(n)+'">geri al</button>':''}</td></tr>`).join('')}</tbody></table>`;
-  if(CSIM.tab==='st'){const rows=[];Object.entries(G).forEach(([k,v])=>{if(v&&typeof v==='object'){const walk=(o,p)=>Object.entries(o).forEach(([kk,vv])=>{if(vv&&typeof vv==='object'&&!Array.isArray(vv))walk(vv,p+'.'+kk);else if(Array.isArray(vv))rows.push([p+'.'+kk,'['+vv.join(',')+']']);else rows.push([p+'.'+kk,vv]);});walk(v,k);}});
-    body=`<p class="note">Simulink blok sinyalleri (B), durumlar (DW) ve sıfır geçiş durumları (PrevZCX). Hata ayıklamak için.</p><table class="stable"><thead><tr><th>Değişken</th><th>Değer</th></tr></thead><tbody>${rows.filter(r=>f(r[0])).map(r=>`<tr><td><code>${esc(r[0])}</code></td><td><span class="sv" data-cst="${esc(r[0])}">${esc(String(r[1]))}</span></td></tr>`).join('')}</tbody></table>`;}
+      <td><button class="sigchip" data-cpulse="${esc(n)}">Darbe</button></td></tr>`;}).join('')}</tbody></table>`;}
+  if(CSIM.tab==='par')body=`<p class="note">Kalibrasyon (_P) ve NV kodlama (Nv) değerleri. Kod, Nv ≠ 0 ise onu, değilse _P’yi kullanır. Değişiklik hemen uygulanır ve bu tarayıcıda saklanır.</p><table class="stable"><thead><tr><th>Parametre</th><th>Koddaki başlangıç</th><th>Değer</th></tr></thead><tbody>${b.params.filter(f).map(n=>`<tr><td><code>${esc(n)}</code>${tr(n)}</td><td class="stype">${esc(String(CSIM.paramInit?CSIM.paramInit[n]??0:0))}</td><td><input class="cpar" type="number" data-cpar="${esc(n)}" value="${esc(String(G[n]??0))}" aria-label="${esc(n)}">${CSIM.params[n]!=null?' <button class="linkbtn" data-cparrst="'+esc(n)+'">geri al</button>':''}</td></tr>`).join('')}</tbody></table>`;
+  if(CSIM.tab==='st'){const pre=new RegExp('^'+CSIM.sel.replace(/[^\w]/g,'')+'_');const rows=[];Object.entries(G).forEach(([k,v])=>{if(v&&typeof v==='object'&&pre.test(k)){const walk=(o,p)=>Object.entries(o).forEach(([kk,vv])=>{if(vv&&typeof vv==='object'&&!Array.isArray(vv))walk(vv,p+'.'+kk);else if(Array.isArray(vv))rows.push([p+'.'+kk,'['+vv.join(',')+']']);else rows.push([p+'.'+kk,vv]);});walk(v,k);}});
+    body=`<p class="note">${esc(CSIM.sel)} için Simulink blok sinyalleri (B), durumlar (DW) ve sıfır geçiş durumları (PrevZCX).</p><table class="stable"><thead><tr><th>Değişken</th><th>Değer</th></tr></thead><tbody>${rows.filter(r=>f(r[0])).map(r=>`<tr><td><code>${esc(r[0])}</code></td><td><span class="sv" data-cst="${esc(r[0])}">${esc(String(r[1]))}</span></td></tr>`).join('')||'<tr><td colspan="2" class="note">Simülatörde çalışınca dolar.</td></tr>'}</tbody></table>`;}
   return `<div class="ctabs" role="tablist">${tabs.map(([k,l,c])=>`<button class="sfb" data-ctab="${k}" aria-pressed="${CSIM.tab===k}">${l}${c!==''?' ('+c+')':''}</button>`).join('')}</div><div class="stable-wrap cio">${body}</div>`;}
+function cTocHTML(){const q=($('#docSearch').value||'').trim().toLowerCase();const names=cAswNames().filter(n=>!q||n.toLowerCase().includes(q)||(CSIM.mods[n]&&q.length>2&&[...CSIM.mods[n].inputs,...CSIM.mods[n].outputs].some(x=>x.toLowerCase().includes(q))));
+  const st=n=>CSIM.errs[n]?'<i class="cdot bad" title="Hata"></i>':CSIM.mods[n]?'<i class="cdot ok" title="Çalışıyor"></i>':'<i class="cdot"></i>';
+  return `<div class="tochead">ASW’ler${CSIM.src?' · '+cAswNames().length:''}</div>${names.map(n=>`<a class="tocg${CSIM.sel===n?' cur':''}" href="#" data-casw="${esc(n)}"><span>${st(n)}${esc(n)}</span><em>${cChanged(CSIM.asws[n])?'değişti':''}</em></a>`).join('')||'<p class="note tocnote">Eşleşen ASW yok.</p>'}
+    <p class="note tocnote">Yeşil nokta: C koduyla çalışıyor. Dosyalar yalnızca bu tarayıcıda saklanır; yayınlanan sayfaya eklenmez.</p>`;}
 function renderCode(){
-  const names=cFileNames();
-  $('#dtoc').innerHTML=`<div class="tochead">Dosyalar</div>${names.length?names.map(n=>{const f=CSIM.files[n];return `<a class="tocg${CSIM.cur===n?' cur':''}" href="#" data-cfile="${esc(n)}"><span>${esc(n)}</span><em>${f.cur!==f.orig?'değişti':''}</em></a>`;}).join(''):'<p class="note tocnote">Henüz dosya yok.</p>'}
-    <p class="note tocnote">Dosyalar yalnızca bu tarayıcıda saklanır; yayınlanan sayfaya eklenmez.</p>`;
+  const names=cAswNames();$('#dtoc').innerHTML=names.length?cTocHTML():'<div class="tochead">ASW’ler</div><p class="note tocnote">Henüz kod yok.</p>';
   const m=$('#dmain');
-  if(!names.length){m.innerHTML=`<div class="dwrap wide"><div class="dsum"><div><div class="eyebrow">C kodu · tarayıcıda derlenir, simülatöre bağlanır</div><h3>C kodunu yükleyin</h3>
-    <p>Bir ASW’nin üretilmiş C dosyalarını ekleyin. Kod bu tarayıcıda derlenir; girişler simülatörden okunur, çıkışlar otobüsü sürer. Kodu değiştirip yeniden derleyerek sonucu hemen simülatörde, sinyal grafiğinde ve otomatik testlerde görebilirsiniz.</p></div></div>
-    <label class="cdrop" id="cDrop"><input type="file" id="cFiles" multiple accept=".c,.h" hidden><b>Dosyaları buraya bırakın veya tıklayıp seçin</b>
-      <span>Örnek: <code>Doors_DoorsRels.c</code>, <code>…_Local.c</code>, <code>…_Output.c</code>, <code>…_Input.h</code>; varsa <code>…_data.c</code>, <code>Doors_DoorsRels.h</code>, <code>rtwtypes.h</code>.</span>
-      <span>Dosyalar yalnızca bu tarayıcıda saklanır, kimseyle paylaşılmaz.</span></label></div>`;return;}
-  if(!CSIM.cur||!CSIM.files[CSIM.cur])CSIM.cur=names[0];
-  const f=CSIM.files[CSIM.cur],chg=f.cur!==f.orig;
+  const drop=(big)=>`<label class="cdrop${big?'':' small'}" id="cDrop"><input type="file" id="cFiles" multiple accept=".zip,.c,.h" hidden><b>${big?'B24 entegrasyon zip’ini veya ASW dosyalarını buraya bırakın ya da tıklayıp seçin':'Yeni zip veya dosya bırakın / seçin'}</b>
+      ${big?`<span>Zip içinde <code>…/ASW/&lt;ASW&gt;/src/*.c, *.h</code> yapısı aranır; tüm ASW’ler ayrılır, ortak başlıklar (rtwtypes.h, CmnAsw…) paylaşılır. Tek ASW için <code>.c</code> ve <code>.h</code> dosyalarını da ekleyebilirsiniz.</span><span>Dosyalar yalnızca bu tarayıcıda saklanır, kimseyle paylaşılmaz. Yeni sürüm geldiğinde zip’i tekrar yükleyin; değişiklikleriniz isterseniz korunur.</span>`:''}</label><div class="note" id="cImp" role="status"></div>`;
+  if(!names.length){m.innerHTML=`<div class="dwrap wide"><div class="dsum"><div><div class="eyebrow">C kodu · tarayıcıda derlenir, simülatöre bağlanır</div><h3>B24 entegrasyonunu yükleyin</h3>
+    <p>Entegrasyon zip’ini bir kez yükleyin; ASW’ler listelenir. Çalıştırmak istediklerinizi seçin, değiştirmek istediğiniz ASW’nin kodunu düzenleyip derleyin. Seçili ASW’ler birbirine bağlı çalışır: birinin çıkışı diğerinin girişine gider, kalan girişler simülatörden okunur.</p></div></div>${drop(true)}</div>`;return;}
+  if(!CSIM.sel||!CSIM.asws[CSIM.sel])CSIM.sel=names[0];
+  const a=CSIM.asws[CSIM.sel],fnames=Object.keys(a.files).sort((x,y)=>cRank(x)-cRank(y)||(x<y?-1:1));if(!CSIM.cur||!a.files[CSIM.cur])CSIM.cur=fnames[0];
+  const f=a.files[CSIM.cur],chg=f.cur!==f.orig,nChg=cAswNames().reduce((s,n)=>s+Object.entries(CSIM.asws[n].files).filter(([b,x])=>!/^SIM_/.test(b)&&x.cur!==x.orig).length,0);
   m.innerHTML=`<div class="dwrap wide cwrap">
-    <div class="dsum"><div><div class="eyebrow">C kodu · tarayıcıda derlenir, simülatöre bağlanır</div><h3>${esc((names.find(n=>cRank(n)===0)||names[0]).replace(/\.c$/i,''))}</h3>
+    <section class="ccard csrc"><div class="chd2"><div><div class="dlbl">Kaynak</div><div>${CSIM.src?`<b>${esc(CSIM.src.name)}</b> · ${CSIM.src.asw} ASW · ${CSIM.src.files} dosya · ${CSIM.src.common} ortak başlık · ${new Date(CSIM.src.date).toLocaleString('tr-TR')}`:`<b>Elle eklenen dosyalar</b> · ${names.length} ASW`}</div></div><span class="sp"></span>
+      <button class="sfb" data-cact="dlchg" data-lbl="Değişenleri indir (.zip)">Değişenleri indir (.zip)</button></div>
+      <div class="crun"><span class="dlbl">Çalışan ASW’ler (${CSIM.order.length})</span> ${CSIM.order.map(n=>`<button class="sigchip" data-casw="${esc(n)}">${esc(n)}</button>`).join(' ')||'<span class="note">Yok. Soldan bir ASW seçip “Bu ASW’yi C koduyla çalıştır”ı işaretleyin.</span>'}
+        <span class="sp"></span><button class="linkbtn" data-cact="selchg">Değişenleri çalıştır</button>${CSIM.order.length?' · <button class="linkbtn" data-cact="selnone">Hepsini durdur</button>':''}${nChg?` · <span class="note">${nChg} dosya değişti</span>`:''}</div>
+      ${drop(false)}</section>
+    <div class="dsum"><div><div class="eyebrow">ASW · C kodu</div><h3>${esc(CSIM.sel)}</h3>
+      <label class="cact"><input type="checkbox" data-cact2="active" ${a.active?'checked':''}> Bu ASW’yi C koduyla çalıştır</label>
       <div class="cstat" id="cStat">${cStatusHTML()}</div></div>
       <div class="cctl"><button class="pbtn" data-cact="build">Derle ve çalıştır</button>
         <button class="sfb" data-cact="on" aria-pressed="${CSIM.on}" ${CSIM.build?'':'disabled'}>Simülatörde kullan: ${CSIM.on?'Açık':'Kapalı'}</button>
@@ -2638,75 +2766,65 @@ function renderCode(){
         <button class="sfb" data-cact="reset" ${CSIM.build?'':'disabled'}>Durumu sıfırla</button>
         <button class="sfb" data-cact="gosim">Simülatöre git</button></div></div>
     <div id="cMsgs">${cMsgsHTML()}</div>
-    <section class="ccard"><div class="chd2"><select id="cSel" aria-label="Dosya">${names.map(n=>`<option${n===CSIM.cur?' selected':''}>${esc(n)}</option>`).join('')}</select>
+    <section class="ccard"><div class="chd2"><select id="cSel" aria-label="Dosya">${fnames.map(n=>`<option value="${esc(n)}"${n===CSIM.cur?' selected':''}>${esc(n)}${a.files[n].cur!==a.files[n].orig?' •':''}</option>`).join('')}</select>
         <span class="note" id="cChg">${chg?'Orijinalden farklı':'Orijinal'}</span><span class="sp"></span>
         <button class="sfb" data-cact="diff" ${chg?'':'disabled'}>Değişiklikler</button><button class="sfb" data-cact="orig" ${chg?'':'disabled'}>Orijinale dön</button>
-        <button class="sfb" data-cact="dl" title="Tüm dosyaların güncel hali, tek zip">İndir (.zip)</button><button class="sfb" data-cact="copy">Kopyala</button>
-        <label class="sfb cadd">+ Dosya ekle<input type="file" id="cFiles" multiple accept=".c,.h" hidden></label><button class="sfb" data-cact="rm">Dosyayı kaldır</button></div>
+        <button class="sfb" data-cact="dlall" data-lbl="ASW’yi indir (.zip)">ASW’yi indir (.zip)</button><button class="sfb" data-cact="copy">Kopyala</button>${a.files[CSIM.cur].added||!CSIM.src?'<button class="sfb" data-cact="rm">Dosyayı kaldır</button>':''}</div>
       <div id="cDiff" hidden></div>
       <div class="ced"><pre class="cgut" id="cGut" aria-hidden="true"></pre><textarea id="cTa" spellcheck="false" wrap="off" aria-label="${esc(CSIM.cur)} içeriği"></textarea></div></section>
     <section class="ccard" id="cIO">${cIOHTML()}</section></div>`;
   const ta=$('#cTa');ta.value=f.cur;cGutter();}
-function cGutter(){const ta=$('#cTa'),g=$('#cGut');if(!ta||!g)return;const n=ta.value.split('\n').length;let s='';for(let i=1;i<=n;i++)s+=i+'\n';g.textContent=s;g.scrollTop=ta.scrollTop;}
-function cJump(file,line){if(CSIM.files[file]){CSIM.cur=file;renderCode();}const ta=$('#cTa');if(!ta)return;const L=ta.value.split('\n');let pos=0;for(let i=0;i<line-1&&i<L.length;i++)pos+=L[i].length+1;
+function cGutter(){const ta=$('#cTa'),g=$('#cGut');if(!ta||!g)return;const n=ta.value.split('\n').length;if(g.dataset.n!=String(n)){let s='';for(let i=1;i<=n;i++)s+=i+'\n';g.textContent=s;g.dataset.n=n;}g.scrollTop=ta.scrollTop;}
+function cJump(file,line){const a=CSIM.asws[CSIM.sel];if(a&&a.files[file]&&CSIM.cur!==file){CSIM.cur=file;renderCode();}const ta=$('#cTa');if(!ta)return;const L=ta.value.split('\n');let pos=0;for(let i=0;i<line-1&&i<L.length;i++)pos+=L[i].length+1;
   ta.focus();ta.setSelectionRange(pos,pos+(L[line-1]||'').length);const lh=parseFloat(getComputedStyle(ta).lineHeight)||18;ta.scrollTop=Math.max(0,(line-6)*lh);cGutter();ta.scrollIntoView({block:'center',behavior:'smooth'});}
 function updateCodeView(){if(VIEW!=='code'||!CSIM.build)return;const G=CSIM.G;
-  const s=$('#cSteps');if(s)s.textContent=CSIM.on?CSIM.steps+' adım':'simülatöre bağlı değil';
+  const s=$('#cSteps');if(s)s.textContent=CSIM.on?Math.round(CSIM.t/1000)+' s simüle edildi':'simülatöre bağlı değil';const l=$('#cLoad');if(l)l.textContent=PERF.cms.toFixed(1);
   document.querySelectorAll('[data-cv]').forEach(el=>{const v=String(G[el.dataset.cv]??0);if(el.textContent!==v)el.textContent=v;el.classList.toggle('on',v!=='0');});
   document.querySelectorAll('[data-csrc]').forEach(el=>{const v=cSrc(el.dataset.csrc);if(el.textContent!==v)el.textContent=v;});
   if(CSIM.tab==='st')document.querySelectorAll('[data-cst]').forEach(el=>{const p=el.dataset.cst.split('.');let o=G;for(const k of p)o=o&&o[k];const v=Array.isArray(o)?'['+o.join(',')+']':String(o??0);if(el.textContent!==v)el.textContent=v;});}
 function cRefreshTop(){const s=$('#cStat');if(s)s.innerHTML=cStatusHTML();const m=$('#cMsgs');if(m)m.innerHTML=cMsgsHTML();const io=$('#cIO');if(io)io.innerHTML=cIOHTML();
   document.querySelectorAll('[data-cact="on"]').forEach(b=>{b.setAttribute('aria-pressed',CSIM.on);b.textContent='Simülatörde kullan: '+(CSIM.on?'Açık':'Kapalı');b.disabled=!CSIM.build;});
   ['pause','step'].forEach(k=>document.querySelectorAll(`[data-cact="${k}"]`).forEach(b=>b.disabled=!CSIM.on));}
-function cZip(files){/* sıkıştırmasız (store) zip */
-  const enc=new TextEncoder(),crcT=cZip.t||(cZip.t=Array.from({length:256},(_,n)=>{let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;return c>>>0;}));
-  const crc=u=>{let c=~0;for(let i=0;i<u.length;i++)c=crcT[(c^u[i])&255]^(c>>>8);return (~c)>>>0;};
-  const parts=[],cen=[];let off=0;
-  files.forEach(([name,txt])=>{const nm=enc.encode(name),d=enc.encode(txt),c=crc(d);
-    const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x800,true);h.setUint32(14,c,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,nm.length,true);
-    parts.push(new Uint8Array(h.buffer),nm,d);
-    const ch=new DataView(new ArrayBuffer(46));ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x800,true);ch.setUint32(16,c,true);ch.setUint32(20,d.length,true);ch.setUint32(24,d.length,true);ch.setUint16(28,nm.length,true);ch.setUint32(42,off,true);
-    cen.push(new Uint8Array(ch.buffer),nm);off+=30+nm.length+d.length;});
-  const cl=cen.reduce((a,x)=>a+x.length,0),e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cl,true);e.setUint32(16,off,true);
-  return new Blob([...parts,...cen,new Uint8Array(e.buffer)],{type:'application/zip'});}
-async function cDownload(btn){const names=cFileNames().filter(n=>!/^SIM_/i.test(n)||CSIM.files[n].cur!==CSIM.files[n].orig),blob=cZip(names.map(n=>[n,CSIM.files[n].cur]));
-  const base=(names.find(n=>cRank(n)===0)||'c_kodu').replace(/\.c$/i,''),fn=base+'_'+new Date().toISOString().slice(0,16).replace(/[-:T]/g,'')+'.zip';
-  let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){}
-  if(dl){try{await dl.save({filename:fn,data:blob});btn.textContent='İndirildi';}catch(e){btn.textContent=e&&e.code==='declined'?'İptal edildi':'İndirilemedi';}setTimeout(()=>btn.textContent='İndir (.zip)',1500);return;}
-  try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}catch(e){btn.textContent='İndirilemedi; Kopyala’yı kullanın';}}
+async function cRebuildDirty(){const dirty=cAswNames().filter(n=>CSIM.asws[n].active&&(CSIM.asws[n].dirty||!CSIM.mods[n]));for(const n of dirty)await cBuildOne(n);cRewire();if(CSIM.build&&!CSIM.on)cSetOn(true);else if(CSIM.on)cInitG();}
 function cCodeClick(e){const t=e.target.closest('button,a');if(!t)return false;
   const a=t.dataset.cact;
-  if(a){e.preventDefault();const f=CSIM.files[CSIM.cur];
-    if(a==='build'){cBuild();if(CSIM.build&&!CSIM.on)cSetOn(true);renderCode();}
+  if(a){e.preventDefault();const A=CSIM.asws[CSIM.sel],f=A&&A.files[CSIM.cur];
+    if(a==='build'){if(A&&!A.active)A.active=true;cSaveCfg();cRebuildDirty().then(renderCode);}
     else if(a==='on'){cSetOn(!CSIM.on);cRefreshTop();}
     else if(a==='pause'){CSIM.paused=!CSIM.paused;t.setAttribute('aria-pressed',CSIM.paused);t.textContent=CSIM.paused?'Devam et':'Duraklat';}
     else if(a==='step'){CSIM.paused=true;cStep();cRefreshTop();updateCodeView();}
     else if(a==='reset'){cInitG();cRefreshTop();log('C kodu durumu sıfırlandı');}
     else if(a==='gosim')setView('sim');
-    else if(a==='fcten'){CSIM.build.params.filter(n=>/StsFctEna_P$/.test(n)).forEach(n=>{CSIM.params[n]=1;CSIM.G[n]=1;});cSave();cRefreshTop();}
-    else if(a==='orig'&&f){if(confirm(`${CSIM.cur} orijinal haline dönsün mü? Değişiklikleriniz silinir.`)){f.cur=f.orig;CSIM.dirty=true;cSave();renderCode();}}
+    else if(a==='fcten'){const b=CSIM.mods[CSIM.sel];b.params.filter(n=>/StsFctEna_P$/.test(n)).forEach(n=>{CSIM.params[n]=1;CSIM.G[n]=1;});cSaveCfg();cRefreshTop();}
+    else if(a==='selchg'){cAswNames().forEach(n=>{if(cChanged(CSIM.asws[n]))CSIM.asws[n].active=true;});cSaveCfg();cBuildActive().then(()=>{if(CSIM.build&&!CSIM.on)cSetOn(true);renderCode();});}
+    else if(a==='selnone'){cAswNames().forEach(n=>CSIM.asws[n].active=false);if(CSIM.on)cSetOn(false);CSIM.mods={};CSIM.errs={};cRewire();cSaveCfg();renderCode();}
+    else if(a==='orig'&&f){if(confirm(`${CSIM.cur} orijinal haline dönsün mü? Değişiklikleriniz silinir.`)){f.cur=f.orig;A.dirty=true;cSaveSrc();renderCode();}}
     else if(a==='diff'&&f){const d=$('#cDiff');if(!d.hidden){d.hidden=true;return true;}const ds=cDiff(f.orig,f.cur);d.hidden=false;
       d.innerHTML=`<div class="dlbl">${ds.filter(x=>x.t==='+').length} satır eklendi/değişti · ${ds.filter(x=>x.t==='-').length} satır silindi/değişti</div><pre class="cdiff">${ds.slice(0,400).map(x=>x.t==='+'?`<button class="dl-add" data-cjump="${esc(CSIM.cur)}:${x.b}">+ ${String(x.b).padStart(4)} │ ${esc(x.txt)}</button>`:x.t==='-'?`<span class="dl-del">− ${String(x.a).padStart(4)} │ ${esc(x.txt)}</span>`:`<span>${esc(x.txt)}</span>`).join('\n')}</pre>`;}
-    else if(a==='dl')cDownload(t);
+    else if(a==='dlchg')cDownload(t,'chg');else if(a==='dlall')cDownload(t,'all');
     else if(a==='copy'&&f){(navigator.clipboard?navigator.clipboard.writeText(f.cur):Promise.reject()).then(()=>{t.textContent='Kopyalandı';setTimeout(()=>t.textContent='Kopyala',1200);}).catch(()=>{const ta=$('#cTa');ta.select();document.execCommand&&document.execCommand('copy');});}
-    else if(a==='rm'&&f){if(confirm(`${CSIM.cur} kaldırılsın mı?`)){delete CSIM.files[CSIM.cur];CSIM.cur=null;if(Object.keys(CSIM.files).length)cBuild();else{CSIM.build=null;if(CSIM.on)cSetOn(false);}cSave();renderCode();}}
+    else if(a==='rm'&&f){if(confirm(`${CSIM.cur} kaldırılsın mı?`)){delete A.files[CSIM.cur];CSIM.cur=null;if(!Object.keys(A.files).length){delete CSIM.asws[CSIM.sel];delete CSIM.mods[CSIM.sel];CSIM.sel=null;cRewire();cSave();renderCode();}else{A.dirty=true;cSaveSrc();cBuildOne(CSIM.sel).then(()=>{cRewire();renderCode();});}}}
     return true;}
+  if(t.dataset.casw){e.preventDefault();CSIM.sel=t.dataset.casw;CSIM.cur=null;cSaveCfg();renderCode();$('#dmain').scrollTop=0;return true;}
   if(t.dataset.cfile){e.preventDefault();CSIM.cur=t.dataset.cfile;renderCode();return true;}
-  if(t.dataset.cjump){const [fl,ln]=t.dataset.cjump.split(':');cJump(fl,+ln);return true;}
+  if(t.dataset.cjump){const i=t.dataset.cjump.lastIndexOf(':');cJump(t.dataset.cjump.slice(0,i),+t.dataset.cjump.slice(i+1));return true;}
   if(t.dataset.ctab){CSIM.tab=t.dataset.ctab;$('#cIO').innerHTML=cIOHTML();return true;}
   if(t.dataset.cpulse){const n=t.dataset.cpulse,old=CSIM.forces[n];CSIM.forces[n]=1;setTimeout(()=>{if(old==null)delete CSIM.forces[n];else CSIM.forces[n]=old;},300);return true;}
   if(t.dataset.cplot){const n=t.dataset.cplot;if(!CSIM.on)cSetOn(true);if(!CH.sel.includes(n))CH.sel.push(n);SIG_MODE='live';CH.live=true;CH.start=null;setView('sigs');return true;}
-  if(t.dataset.cparrst){const n=t.dataset.cparrst;delete CSIM.params[n];CSIM.G[n]=CSIM.paramInit[n]??0;cSave();$('#cIO').innerHTML=cIOHTML();return true;}
+  if(t.dataset.cparrst){const n=t.dataset.cparrst;delete CSIM.params[n];CSIM.G[n]=CSIM.paramInit[n]??0;cSaveCfg();$('#cIO').innerHTML=cIOHTML();return true;}
   return false;}
 function cCodeChange(e){const t=e.target;
-  if(t.id==='cFiles'){cAddFiles(t.files);return true;}
+  if(t.id==='cFiles'){cAddFiles(t.files);t.value='';return true;}
   if(t.id==='cSel'){CSIM.cur=t.value;renderCode();return true;}
-  if(t.dataset.cforce){const n=t.dataset.cforce,inp=document.querySelector(`[data-cfv="${CSS.escape(n)}"]`);if(t.checked){CSIM.forces[n]=+(inp.value||CSIM.G[n]||0);inp.disabled=false;inp.value=CSIM.forces[n];}else{delete CSIM.forces[n];inp.disabled=true;inp.value='';}cSave();return true;}
-  if(t.dataset.cfv){const n=t.dataset.cfv;if(CSIM.forces[n]!=null){CSIM.forces[n]=+t.value||0;cSave();}return true;}
-  if(t.dataset.cpar){const n=t.dataset.cpar,v=+t.value||0;CSIM.params[n]=v;if(CSIM.G)CSIM.G[n]=v;cSave();const m=$('#cMsgs');if(m)m.innerHTML=cMsgsHTML();return true;}
+  if(t.dataset.cact2==='active'){cSetActive(CSIM.sel,t.checked).then(()=>{if(CSIM.build&&!CSIM.on&&t.checked)cSetOn(true);renderCode();});return true;}
+  if(t.dataset.cforce){const n=t.dataset.cforce,inp=document.querySelector(`[data-cfv="${CSS.escape(n)}"]`);if(t.checked){CSIM.forces[n]=+(inp.value||CSIM.G[n]||0);inp.disabled=false;inp.value=CSIM.forces[n];}else{delete CSIM.forces[n];inp.disabled=true;inp.value='';}cSaveCfg();return true;}
+  if(t.dataset.cfv){const n=t.dataset.cfv;if(CSIM.forces[n]!=null){CSIM.forces[n]=+t.value||0;cSaveCfg();}return true;}
+  if(t.dataset.cpar){const n=t.dataset.cpar,v=+t.value||0;CSIM.params[n]=v;if(CSIM.G)CSIM.G[n]=v;cSaveCfg();const m=$('#cMsgs');if(m)m.innerHTML=cMsgsHTML();return true;}
   return false;}
-function cCodeInput(e){const t=e.target;if(t.id!=='cTa')return false;const f=CSIM.files[CSIM.cur];if(!f)return true;f.cur=t.value;CSIM.dirty=true;cGutter();cSaveSoon();
+function cCodeInput(e){const t=e.target;if(t.id!=='cTa')return false;const A=CSIM.asws[CSIM.sel],f=A&&A.files[CSIM.cur];if(!f)return true;f.cur=t.value;A.dirty=true;cGutter();cSaveSrc();
   const c=$('#cChg');if(c)c.textContent=f.cur!==f.orig?'Orijinalden farklı':'Orijinal';const s=$('#cStat');if(s)s.innerHTML=cStatusHTML();return true;}
+/* eski adlarla uyumluluk */
+const cBuild=()=>{cRebuildDirty();return true;};
 /* ---------- Sinyal kaydı ve zaman grafiği ---------- */
 const REC={t:[],v:[],sigs:null,max:12000,t0:performance.now(),acc:0,now(){return (performance.now()-this.t0)/1000;}};
 function recSample(){if(!REC.sigs)REC.sigs=SIG_DB.filter(s=>s.sim);REC.t.push(REC.now());REC.v.push(REC.sigs.map(s=>s.get()));if(REC.t.length>REC.max){REC.t.splice(0,1500);REC.v.splice(0,1500);}}
@@ -2927,6 +3045,15 @@ new ResizeObserver(resize).observe(cv);resize();
 let last=performance.now(),hoverT=0,slowT=0;const fwd=new THREE.Vector3();
 setMode('walk');applyLighting();
 const hashView=()=>{const h=location.hash;if(h==='#gereksinimler')setView('reqs');else if(h==='#sinyaller')setView('sigs');else if(h==='#ckod')setView('code');};hashView();addEventListener('hashchange',hashView);
+function needRender(now){const c=PERF_CFG[PERF.mode];if(now-PERF.lastR<1000/c.fps-4)return false;
+  const p=camera.position,r=camera.rotation,key=`${p.x.toFixed(3)},${p.y.toFixed(3)},${p.z.toFixed(3)},${r.x.toFixed(4)},${r.y.toFixed(4)},${r.z.toFixed(4)},${camera.fov},${renderer.domElement.width}`;
+  const anim=st.driving||Math.abs(V.speed)>0.01||DOORS.some(d=>{const x=doorS[d.id].state;return x==='OPENING'||x==='CLOSING';})||(CAB.pos>0&&CAB.pos<1)||(V.rampPos>0&&V.rampPos<1)||(V.kneelPos>0&&V.kneelPos<1)||V.wiper||(WIPERS.wph||0)>0.02||V.hazard||BTN.some(b=>b.pressT>0)||!!DEMO;
+  const idleDue=now-PERF.lastR>=c.idle;
+  if(c.idle===0||anim||key!==PERF.lastKey||idleDue){if(anim||idleDue||c.idle===0)renderer.shadowMap.needsUpdate=true;PERF.lastKey=key;PERF.lastR=now;return true;}
+  return false;}
+function setPerf(m){PERF.mode=m;const c=PERF_CFG[m];try{localStorage.setItem('otobus.perf',m);}catch(e){}
+  renderer.setPixelRatio(Math.min(c.pr,window.devicePixelRatio||1));if(renderer.shadowMap.enabled!==c.shadow){renderer.shadowMap.enabled=c.shadow;scene.traverse(o=>{if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(x=>x.needsUpdate=true);});}
+  renderer.shadowMap.needsUpdate=true;try{resize();}catch(e){}PERF.lastR=-1e9;const h=$('#hPerf');if(h)h.querySelector('b').textContent=c.ad;log(`Performans modu: ${c.ad}`);}
 function frame(now){
   const dt=Math.min(0.05,(now-last)/1000);last=now;const k=st.keys;
   updateDoors(dt);updateCab(dt);updateDrive(dt,k);
@@ -2953,10 +3080,12 @@ function frame(now){
     if(l.positionX){l.positionX.value=p.x;l.positionY.value=p.y;l.positionZ.value=p.z;l.forwardX.value=fwd.x;l.forwardY.value=fwd.y;l.forwardZ.value=fwd.z;l.upX.value=0;l.upY.value=1;l.upZ.value=0;}
     else{l.setPosition(p.x,p.y,p.z);l.setOrientation(fwd.x,fwd.y,fwd.z,0,1,0);}}
   REC.acc+=dt;if(REC.acc>=0.05){REC.acc=0;recSample();}
-  if(CSIM.on&&CSIM.build&&!CSIM.paused){CSIM.acc+=dt*1000;let n=0;while(CSIM.acc>=CSIM.period&&n++<5){CSIM.acc-=CSIM.period;cStep();}}
-  slowT-=dt;if(slowT<=0){slowT=0.08;renderCluster();renderSignals();refreshBtns();drawDoorSigns();renderDemoSig();updateCodeView();}
+  if(CSIM.on&&CSIM.build&&!CSIM.paused){const c0=performance.now();CSIM.acc+=dt*1000;if(CSIM.acc>=CSIM.period){cInputs();let n=0;while(CSIM.acc>=CSIM.period&&n++<10){CSIM.acc-=CSIM.period;cStep(true);}if(CSIM.acc>CSIM.period)CSIM.acc=0;}PERF.cAcc+=performance.now()-c0;}
+  slowT-=dt;if(slowT<=0){slowT=PERF_CFG[PERF.mode].slow;if(VIEW==='sim'){renderCluster();refreshBtns();drawDoorSigns();}renderSignals();if(DEMO)renderDemoSig();updateCodeView();}
   if(selHelper)selHelper.update();
-  if(VIEW==='sim'){renderer.render(scene,camera);drawMap();}
+  PERF.frames++;
+  if(VIEW==='sim'&&needRender(now)){renderer.render(scene,camera);drawMap();PERF.renders++;}
+  if(now-PERF.t0>=1000){PERF.fps=Math.round(PERF.renders*1000/(now-PERF.t0));PERF.cms=PERF.cAcc*1000/(now-PERF.t0);PERF.t0=now;PERF.renders=0;PERF.frames=0;PERF.cAcc=0;const h=$('#hPerf');if(h)h.title=`Performans: ${PERF_CFG[PERF.mode].ad} · ${PERF.fps} kare/s çiziliyor`+(CSIM.on?` · C kodu ${PERF.cms.toFixed(2)} ms/s`:'');}
   requestAnimationFrame(frame);
 }
 try{cLoad();}catch(e){}

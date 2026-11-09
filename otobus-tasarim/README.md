@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev P)
+# Otobüs Tasarım Stüdyosu (konsept, Rev Q)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -122,3 +122,9 @@ Sinyaller: DoorRelease, DoorState_K2
 - Kaynak kod yalnızca kullanıcının tarayıcısında saklanır, yayınlanan sayfaya eklenmez.
 - Derleyici gcc ile karşılaştırıldı (`tools/ctest`): Doors_DoorsRels, 200.000 adım, 0 fark.
 - Düzeltme: Gereksinimler/Sinyaller sayfasından simülatöre dönünce örtü gizlenmiyordu (`[hidden]` kuralı).
+
+## Rev Q
+- **Performans:** 3D sahne artık yalnızca bir şey değiştiğinde çiziliyor (kamera, kapı, sürüş, animasyon); boştayken saniyede 2–4 kare. Gölgeler yalnızca hareket olunca yeniden hesaplanıyor, kapı tabelaları yalnızca metin değişince çiziliyor, gösterge ve tabelalar diğer sayfalardayken çizilmiyor. HUD'da **Performans** düğmesi: Yüksek / Dengeli / Tasarruf (Tasarruf'ta gölge kapalı, piksel oranı 1, en fazla 30 kare/s).
+- **B24 entegrasyon zip'i:** C Kod sayfasına zip bırakılır; `…/ASW/<ASW>/src/*.c|h` yapısından ASW'ler ayrılır, `mdl_test` kopyaları atlanır, Cmn*/BSW başlıkları ortak başlık olarak paylaşılır. Dosyalar tarayıcının IndexedDB'sinde saklanır.
+- **Çoklu ASW:** Seçilen ASW'ler tek sinyal alanında birlikte çalışır; bir ASW'nin çıkışı diğerinin girişine doğrudan gider (kaynak “C: <ASW>”), kalan girişler simülatörden okunur. Üretici → tüketici sırasına göre, her görev kendi periyodunda (10/20/100 ms) çağrılır.
+- Yeni zip yüklenince değişiklikler isteğe göre korunur; **Değişenleri indir** yalnızca değişen dosyaları orijinal yollarıyla zip'ler.

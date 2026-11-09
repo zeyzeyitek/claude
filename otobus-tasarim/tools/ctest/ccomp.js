@@ -47,8 +47,13 @@ function preprocess(files,mainName,ctx){
         if(a.v===')'){if(--d===0)break;args[args.length-1].push(a);continue;}
         if(a.v===','&&d===1){args.push([]);continue;}args[args.length-1].push(a);}
       if(j>=toks.length)throw new CErr(`Makro ${t.v} için kapanmayan parantez`,t);
-      const ea=args.map(a=>expand(a,hide));const body=[];
-      m.body.forEach(b=>{const k=b.t==='id'?m.params.indexOf(b.v):-1;if(k>=0)body.push(...(ea[k]||[]));else body.push({...b,f:t.f,l:t.l});});
+      if(m.params.length===1&&args.length===1&&!args[0].length)args.length=0;
+      const ea=args.map(a=>expand(a,hide));const body=[];const MB=m.body;
+      for(let q=0;q<MB.length;q++){const b=MB[q];
+        if(b.v==='#'&&MB[q+1]&&MB[q+1].t==='id'&&m.params.includes(MB[q+1].v)){const k=m.params.indexOf(MB[q+1].v);body.push({t:'str',v:JSON.stringify((args[k]||[]).map(x=>x.v).join(' ')),f:t.f,l:t.l});q++;continue;}
+        const k=b.t==='id'?m.params.indexOf(b.v):-1;const pasteNear=(MB[q+1]&&MB[q+1].v==='##')||(MB[q-1]&&MB[q-1].v==='##');
+        if(k>=0)body.push(...((pasteNear?args[k]:ea[k])||[]).map(x=>({...x})));else body.push({...b,f:t.f,l:t.l});}
+      for(let q=1;q<body.length-1;q++){if(body[q].v==='##'&&body[q].t==='p'){const a=body[q-1],c=body[q+1];const nt=lex(String(a.v)+String(c.v),t.f).filter(x=>x.t!=='nl').map(x=>({...x,f:t.f,l:t.l}));body.splice(q-1,3,...nt);q--;}}
       const h=new Set(hide);h.add(t.v);res.push(...expand(body,h));i=j;}
     return res;}
   function evalCond(toks){const tt=[];
@@ -73,7 +78,7 @@ function preprocess(files,mainName,ctx){
         if(d==='endif'){cond.pop();continue;}
         if(!active())continue;
         if(d==='include'){let nm=rest.map(x=>x.v).join('');nm=nm.replace(/^["<]|[">]$/g,'');run(nm.split('/').pop());continue;}
-        if(d==='define'){const nm=rest[0]&&rest[0].v;if(!nm)continue;
+        if(d==='define'){const nm=rest[0]&&rest[0].v;if(!nm)continue;rest.forEach((x,i)=>{if(x.v==='#'&&rest[i+1]&&rest[i+1].v==='#'){x.v='##';rest.splice(i+1,1);}});
           if(rest[1]&&rest[1].v==='('&&rest[1].l===rest[0].l&&isAdj(rest[0],rest[1],src)){let j=2;const ps=[];while(j<rest.length&&rest[j].v!==')'){if(rest[j].t==='id')ps.push(rest[j].v);j++;}
             macros.set(nm,{params:ps,body:rest.slice(j+1)});}
           else{macros.set(nm,{body:rest.slice(1)});if(nm==='RUNNABLE_ID'&&rest[1])ctx.runnables.add(rest[1].v);}
@@ -89,6 +94,8 @@ function preprocess(files,mainName,ctx){
 /* ---------- ayrıştırıcı ---------- */
 function parse(toks,ctx){
   let p=0;const peek=(o=0)=>toks[p+o]||{t:'eof',v:'<eof>'},next=()=>toks[p++]||{t:'eof',v:'<eof>'};
+  for(let i=0;i<toks.length;i++){const t=toks[i];if(t.t==='id'&&(t.v==='__attribute__'||t.v==='__declspec'||t.v==='__asm__'||t.v==='asm')&&toks[i+1]&&toks[i+1].v==='('){let d=0,j=i+1;for(;j<toks.length;j++){if(toks[j].v==='(')d++;else if(toks[j].v===')'&&--d===0)break;}toks.splice(i,j-i+1);i--;continue;}
+    if(t.t==='id'&&['__inline','__inline__','__restrict','__restrict__','restrict','__extension__','__volatile__','__const'].includes(t.v)){toks.splice(i,1);i--;}}
   const is=v=>peek().v===v&&peek().t!=='str';
   const expect=v=>{const t=next();if(t.v!==v)throw new CErr(`“${v}” bekleniyordu, “${t.v}” bulundu`,t);return t;};
   const typedefs=ctx.typedefs;
@@ -124,7 +131,7 @@ function parse(toks,ctx){
     if(!is('{')){return {name:tag}; }
     next();const fields=[];
     while(!is('}')){const {ty}=parseBaseType();
-      for(;;){const d=parseDeclarator(ty);fields.push({name:d.name,ty:d.ty});if(is(',')){next();continue;}break;}
+      for(;;){const d=parseDeclarator(ty);if(is(':')){next();parseCond();}fields.push({name:d.name,ty:d.ty});if(is(',')){next();continue;}break;}
       expect(';');}
     expect('}');const st={k:'struct',name:tag,fields};if(tag)ctx.structTags.set(tag,st);return st;}
   function parseEnum(){let tag=null;if(peek().t==='id'&&!is('{'))tag=next().v;
