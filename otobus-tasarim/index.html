@@ -318,7 +318,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev N</div>
+    <div class="eyebrow">Konsept · Rev O</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button></nav>
   </div>
@@ -447,7 +447,7 @@ const DOORS=[
   {id:3,x0:-4.60,x1:-3.60,w:1000,name:'Kapı 3 · arka',desc:'Çift kanatlı, iniş kapısı.'}
 ];
 const AXLES=[3.3,-2.6], ARCH=0.65;
-const KIND={stroller:{name:'Bebek arabası',sig:'StopReq_Stroller',code:'BTN-STR'},prm:{name:'Engelli',sig:'StopReq_PRM',code:'BTN-PRM'},elderly:{name:'Yaşlı yolcu',sig:'StopReq_Elderly',code:'BTN-ELD'}};
+const KIND={stroller:{name:'Bebek arabası',sig:z=>`D${z}PB_StStrqDoor${z}FromPrmBtn`,code:'BTN-STR'},prm:{name:'Engelli',sig:z=>`D${z}W_StStrqDoor${z}FromWhlchrBtn`,code:'BTN-PRM'},elderly:{name:'Yaşlı yolcu',sig:z=>`DOM_StStrqDoor${z}FromOldMBtn`,code:'BTN-ELD'}};
 
 /* ================= Araç durumu ================= */
 const PRS={};const pulse=k=>()=>performance.now()-(PRS[k]||-1e9)<300;
@@ -778,10 +778,10 @@ const doorIconTex=tex(128,128,g=>{g.strokeStyle='#fff';g.fillStyle='#fff';g.line
 
 /* ---------- 30 gösterge butonu ---------- */
 const BTN=[
- {label:'SERBEST',name:'Türfreigabe (kapı serbest)',type:'toggle',impl:true,get:()=>V.release,fn:(on,src)=>setRelease(on,src),desc:'Kapıları otomatik moda alır (DoorMode=AUTO). Bekleyen (önceden saklanmış) isteği olan bölgenin kapısı açılır (bölgeleme: K1, K2, K3 ayrı). Türfreigabe aktifken STOP butonları kapı açmaz (Vorspeicherung); kapı üstü AÇ butonları her zaman açar. Türfreigabe aktifken durak freni devrededir. Normal istekte kapı, açık kalma süresi (parametre, varsayılan 3 s) dolunca kendiliğinden kapanır; ışık bariyeri süreyi yeniden başlatır. Bebek arabası, engelli veya yaşlı yolcu isteğinde kapı açık kalır, sürücü K butonuyla kapatır. Kapatınca otomatik açılmış kapılar kapanır.'},
+ {label:'SERBEST',name:'Türfreigabe (kapı serbest)',type:'toggle',impl:true,get:()=>V.release,fn:(on,src)=>setRelease(on,src),desc:'Kapıları otomatik moda alır (DR_StDoorRelsActv=1). Bekleyen (önceden saklanmış) isteği olan bölgenin kapısı açılır (bölgeleme: K1, K2, K3 ayrı). Türfreigabe aktifken STOP butonları kapı açmaz (Vorspeicherung); kapı üstü AÇ butonları her zaman açar. Türfreigabe aktifken durak freni devrededir. Normal istekte kapı, açık kalma süresi (parametre, varsayılan 3 s) dolunca kendiliğinden kapanır; ışık bariyeri süreyi yeniden başlatır. Bebek arabası, engelli veya yaşlı yolcu isteğinde kapı açık kalır, sürücü K butonuyla kapatır. Kapatınca otomatik açılmış kapılar kapanır.'},
  {label:'DİZ',name:'Diz çöktürme (kneeling)',type:'toggle',impl:true,get:()=>V.kneel,fn:(on,src)=>{V.kneel=on;SFX.hiss([2,0,HW]);SFX.motor();log(`${src} → Kneel=${on?1:0} (${on?'sağ taraf alçalıyor':'normal seviyeye dönüyor'})`);},desc:'Aracın kapı tarafını (sağ) yaklaşık 70 mm alçaltır; gövde sağa yatar. Tekrar basınca normal seviyeye döner. Cluster’da DİZ lambası yanar.'},
  {label:'RAMPA',name:'Rampa · kapı 2',type:'toggle',impl:true,get:()=>V.ramp,fn:(on,src)=>setRamp(on,src),desc:'Kapı 2 tamamen açıkken rampayı kaldırıma açar, tekrar basınca toplar. Rampa açıkken K2 kapanamaz.'},
- {label:'İSTEK ↺',name:'Durak isteği sıfırla',type:'momentary',impl:true,fn:src=>resetStop(src),desc:'StopReq ve tüm özel istekleri sıfırlar.'},
+ {label:'İSTEK ↺',name:'Durak isteği sıfırla',type:'momentary',impl:true,fn:src=>resetStop(src),desc:'DSRD_StDoorsStopReqDisp ve tüm özel istekleri sıfırlar.'},
  {label:'IŞIK',name:'İç aydınlatma',type:'toggle',impl:true,get:()=>V.intLight,fn:(on,src)=>setIntLight(on,src),desc:'Yolcu salonu aydınlatmasını açar/kapatır. Cluster’da yeşil lamba.'},
  {label:'IŞIK ½',name:'İç aydınlatma %50',type:'toggle',impl:true,get:()=>V.dim,fn:(on,src)=>{V.dim=on;applyLighting();log(`${src} → IntLightDim=${on?1:0}`);},desc:'Aydınlatmayı yarı güce düşürür (gece sürüşü).'},
  {label:'KABİN',name:'Kabin kapısı (mıknatıs)',type:'momentary',impl:true,fn:src=>cabRelease(src),desc:'Park freni çekiliyken kabin kapısının mıknatısını 5 s bırakır ve kapı açılır. Park freni inikken kapı açılmaz (2022.05043). Kapı açıkken el freni indirilirse sürücü buzzer’ı çalar (2023.05022).'},
@@ -797,7 +797,7 @@ const BTN=[
  {label:'KAMERA',name:'Kamera monitörü',type:'toggle'},
  {label:'OKUL',name:'Okul taşıtı modu',type:'toggle'},
  {label:'ALARM',name:'Sessiz alarm',type:'toggle'},
- {label:'K.KİLİT',name:'Kapı kilidi',type:'toggle',impl:true,get:()=>V.doorLock,fn:(on,src)=>{V.doorLock=on;log(`${src} → DoorLock=${on?1:0}`+(on?' (kapılar açılamaz)':''));},desc:'Aktifken hiçbir kapı açılmaz. Sürücü ve otomatik açma engellenir.'},
+ {label:'K.KİLİT',name:'Kapı kilidi',type:'toggle',impl:true,get:()=>V.doorLock,fn:(on,src)=>{V.doorLock=on;log(`${src} → CLS_StDoorVlvLockd=${on?1:0}`+(on?' (kapılar açılamaz)':''));},desc:'Aktifken hiçbir kapı açılmaz. Sürücü ve otomatik açma engellenir.'},
  {label:'MOTOR',name:'Motor start/stop',type:'toggle',impl:true,get:()=>V.engine,fn:(on,src)=>{V.engine=on;log(`${src} → Engine=${on?'RUN':'OFF'}`);if(on)SFX.crank();else SFX.thunk([-5.5,0.5,0]);},desc:'Motoru çalıştırır/durdurur. Devir göstergesi buna göre değişir.'},
  {label:'FLAŞÖR',name:'Dörtlü flaşör',type:'toggle',impl:true,get:()=>V.hazard,fn:(on,src)=>{V.hazard=on;log(`${src} → Hazard=${on?1:0}`);},desc:'Dört köşedeki sinyaller yanıp söner. Cluster’da ok lambası, tık sesi.'},
  {label:'FAR',name:'Farlar',type:'toggle',impl:true,get:()=>V.head,fn:(on,src)=>{V.head=on;applyLighting();log(`${src} → Headlights=${on?1:0}`);},desc:'Ön farları açar/kapatır.'},
@@ -806,8 +806,8 @@ const BTN=[
  {label:'SİLECEK',name:'Silecek',type:'toggle',impl:true,get:()=>V.wiper,fn:(on,src)=>{V.wiper=on;log(`${src} → Wiper=${on?1:0}`);},desc:'Ön cam sileceklerini çalıştırır. Kapatınca silecekler park konumuna döner.'},
  {label:'KORNA',name:'Korna',type:'momentary',impl:true,fn:src=>{SFX.horn();log(`${src} → Horn`);},desc:'Korna çalar.'},
  {label:'ASR OFF',name:'Çekiş kontrolü kapalı',type:'toggle'},
- {label:'PARK',name:'Park freni',type:'toggle',impl:true,get:()=>V.park,fn:(on,src)=>{V.park=on;SFX.hiss([3,0,0]);log(`${src} → ParkBrake=${on?1:0}`);},desc:'Park frenini çeker/bırakır. Cluster’da P lambası.'},
- {label:'DUR.FR',name:'Durak freni (manuel)',type:'toggle',impl:true,get:()=>V.stopBrakeMan,fn:(on,src)=>{V.stopBrakeMan=on;log(`${src} → BusStopBrake_Manual=${on?1:0}`);},desc:'Durak frenini kapı durumundan bağımsız devreye alır.'}
+ {label:'PARK',name:'Park freni',type:'toggle',impl:true,get:()=>V.park,fn:(on,src)=>{V.park=on;SFX.hiss([3,0,0]);log(`${src} → GW_StPrkgBrkEngdOn=${on?1:0}`);},desc:'Park frenini çeker/bırakır. Cluster’da P lambası.'},
+ {label:'DUR.FR',name:'Durak freni (manuel)',type:'toggle',impl:true,get:()=>V.stopBrakeMan,fn:(on,src)=>{V.stopBrakeMan=on;log(`${src} → DBSBR_StBstbrkReq=${on?1:0}`);},desc:'Durak frenini kapı durumundan bağımsız devreye alır.'}
 ];
 function drawKeyIcon(g,label){
   g.save();g.strokeStyle='#e9edf0';g.fillStyle='#e9edf0';g.lineWidth=5;g.lineCap='round';g.lineJoin='round';
@@ -968,7 +968,7 @@ function stopButton(x,y,z,rotY,zone,where,clamp){
   const f=new THREE.Mesh(new THREE.PlaneGeometry(0.066,0.099),MAT.stopFace);f.position.z=0.0135;g.add(f);
   const ring=new THREE.Mesh(STOP_RING,MAT.chrome);ring.position.set(0,0.0093,0.0145);g.add(ring);
   const c=code('BTN-STOP');
-  info(g,{name:'Durak butonu (STOP) · bölge K'+zone,code:c,desc:where+'. Basınca StopReq_K'+zone+'=1, tüm STOP butonları yanar. Türfreigabe aktifken STOP kapıyı açmaz (Vorspeicherung); istek saklanır ve Türfreigabe verildiğinde K'+zone+' açılır.',tag:'Fonksiyon: aktif',action:()=>stopRequest(null,c,zone)});
+  info(g,{name:'Durak butonu (STOP) · bölge K'+zone,code:c,desc:where+'. Basınca D'+zone+'SR_StStrqDoor'+zone+'Saved=1, tüm STOP butonları yanar. Türfreigabe aktifken STOP kapıyı açmaz (Vorspeicherung); istek saklanır ve Türfreigabe verildiğinde K'+zone+' açılır.',tag:'Fonksiyon: aktif',action:()=>stopRequest(null,c,zone)});
   return g;
 }
 rows.forEach(r=>{const x=r.x+0.1*r.face,zn=zoneOf(x);
@@ -999,7 +999,7 @@ function specialPanel(x,y,z,rotY,where,kinds,zone){
     const b=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.08,0.012),[MAT.blue,MAT.blue,MAT.blue,MAT.blue,m,MAT.blue]);
     b.position.set(0,dy,0.021);g.add(b);specialMats[zone][k].push(m);
     const c=code(KIND[k].code);
-    info(b,{name:KIND[k].name+' butonu · bölge K'+zone,code:c,desc:where+'. Basınca '+KIND[k].sig+'_K'+zone+'=1 ve durak isteği verir. Türfreigabe açıksa yalnızca K'+zone+' açılır'+(k==='elderly'?' ve açık kalma süresi (parametre) dolunca kapanır.':' ve sürücü kapatana kadar açık kalır.'),tag:'Fonksiyon: aktif',action:()=>stopRequest(k,c,zone)});
+    info(b,{name:KIND[k].name+' butonu · bölge K'+zone,code:c,desc:where+'. Basınca '+KIND[k].sig(zone)+'=1 ve durak isteği verir. Türfreigabe açıksa yalnızca K'+zone+' açılır'+(k==='elderly'?' ve açık kalma süresi (parametre) dolunca kapanır.':' ve sürücü kapatana kadar açık kalır.'),tag:'Fonksiyon: aktif',action:()=>stopRequest(k,c,zone)});
   });
   specialPanels.push({x,z,zone});return g;
 }
@@ -1112,89 +1112,89 @@ const REQ_GROUPS=[
 ];
 const REQS=[
  {id:'REQ-010',group:'stop',kind:'stop',title_tr:'STOP butonu bölge isteği',title_en:'STOP button zone request',
-  en:'When a passenger presses a STOP button, the system shall set the stop request of the button’s door zone (StopReq_Kx = 1) and illuminate all STOP buttons. The request shall be cleared when the door of that zone opens.',
-  tr:'Yolcu bir STOP butonuna bastığında sistem, butonun bağlı olduğu kapı bölgesinin durak isteğini set etmeli (StopReq_Kx = 1) ve tüm STOP butonlarını yakmalıdır. İstek, o bölgenin kapısı açıldığında sıfırlanmalıdır.',
-  desc_tr:'Herhangi bir STOP butonuna bas. StopReq_Kx = 1 olmalı ve tüm STOP butonları yanmalı. Sonra o bölgenin kapısını aç; istek sıfırlanmalı.',
+  en:'When a passenger presses a STOP button, the system shall set the stop request of the button’s door zone (DxSR_StStrqDoorxSaved = 1) and illuminate all STOP buttons. The request shall be cleared when the door of that zone opens.',
+  tr:'Yolcu bir STOP butonuna bastığında sistem, butonun bağlı olduğu kapı bölgesinin durak isteğini set etmeli (DxSR_StStrqDoorxSaved = 1) ve tüm STOP butonlarını yakmalıdır. İstek, o bölgenin kapısı açıldığında sıfırlanmalıdır.',
+  desc_tr:'Herhangi bir STOP butonuna bas. DxSR_StStrqDoorxSaved = 1 olmalı ve tüm STOP butonları yanmalı. Sonra o bölgenin kapısını aç; istek sıfırlanmalı.',
   desc_en:'Press any STOP button. StopReq_Kx must be 1 and all STOP buttons must light up. Then open the zone door; the request must clear.',
-  signals:['StopReq','StopReq_K1','StopReq_K2','StopReq_K3'],go:[-1.0,0.0,null,0.35,-0.05]},
+  signals:['DSRD_StDoorsStopReqDisp','D1SR_StStrqDoor1Saved','D2SR_StStrqDoor2Saved','D3SR_StStrqDoor3Saved'],go:[-1.0,0.0,null,0.35,-0.05]},
  {id:'REQ-001',group:'special',kind:'stroller',title_tr:'Bebek arabası butonu · K2',title_en:'Stroller button · K2',
-  en:'A stroller button shall be provided opposite door 2 (wheelchair area). When it is pressed, the system shall set StopReq = 1 and StopReq_Stroller = 1 for its zone and show the stroller telltale on the cluster. The request shall be cleared when the zone door opens.',
-  tr:'Kapı 2 karşısında (engelli alanı) bebek arabası butonu bulunmalıdır. Basıldığında sistem StopReq = 1 ve kendi bölgesi için StopReq_Stroller = 1 set etmeli, cluster’da bebek arabası lambasını yakmalıdır. İstek, bölge kapısı açıldığında sıfırlanmalıdır.',
+  en:'A stroller button shall be provided opposite door 2 (wheelchair area). When it is pressed, the system shall set DSRD_StDoorsStopReqDisp = 1 and DxPB_StStrqDoorxFromPrmBtn = 1 for its zone and show the stroller telltale on the cluster. The request shall be cleared when the zone door opens.',
+  tr:'Kapı 2 karşısında (engelli alanı) bebek arabası butonu bulunmalıdır. Basıldığında sistem DSRD_StDoorsStopReqDisp = 1 ve kendi bölgesi için DxPB_StStrqDoorxFromPrmBtn = 1 set etmeli, cluster’da bebek arabası lambasını yakmalıdır. İstek, bölge kapısı açıldığında sıfırlanmalıdır.',
   desc_tr:'Kapı 2 karşısındaki paneldeki bebek arabası butonuna bas, cluster lambasını kontrol et, ardından kapı 2’yi aç.',
   desc_en:'Press the stroller button on the panel opposite door 2, check the cluster telltale, then open door 2.',
-  signals:['StopReq','StopReq_Stroller_K2','DoorState_K2'],go:[1.2,0.1,null,0,-0.25]},
+  signals:['DSRD_StDoorsStopReqDisp','D2PB_StStrqDoor2FromPrmBtn','BBC_StDoor2'],go:[1.2,0.1,null,0,-0.25]},
  {id:'REQ-002',group:'special',kind:'prm',title_tr:'Engelli butonu · K2',title_en:'Wheelchair button · K2',
-  en:'A wheelchair button shall be provided opposite door 2. When it is pressed, the system shall set StopReq = 1 and StopReq_PRM = 1 for its zone and show the wheelchair and RAMP telltales on the cluster. The request shall be cleared when the zone door opens.',
-  tr:'Kapı 2 karşısında engelli butonu bulunmalıdır. Basıldığında sistem StopReq = 1 ve kendi bölgesi için StopReq_PRM = 1 set etmeli, cluster’da engelli ve RAMPA lambalarını yakmalıdır. İstek, bölge kapısı açıldığında sıfırlanmalıdır.',
+  en:'A wheelchair button shall be provided opposite door 2. When it is pressed, the system shall set DSRD_StDoorsStopReqDisp = 1 and DxW_StStrqDoorxFromWhlchrBtn = 1 for its zone and show the wheelchair and RAMP telltales on the cluster. The request shall be cleared when the zone door opens.',
+  tr:'Kapı 2 karşısında engelli butonu bulunmalıdır. Basıldığında sistem DSRD_StDoorsStopReqDisp = 1 ve kendi bölgesi için DxW_StStrqDoorxFromWhlchrBtn = 1 set etmeli, cluster’da engelli ve RAMPA lambalarını yakmalıdır. İstek, bölge kapısı açıldığında sıfırlanmalıdır.',
   desc_tr:'Kapı 2 karşısındaki paneldeki engelli butonuna bas, cluster’da engelli ve RAMPA lambalarını kontrol et, ardından kapı 2’yi aç.',
   desc_en:'Press the wheelchair button on the panel opposite door 2, check the wheelchair and RAMP telltales, then open door 2.',
-  signals:['StopReq','StopReq_PRM_K2','DoorState_K2'],go:[1.2,0.1,null,0,-0.25]},
+  signals:['DSRD_StDoorsStopReqDisp','D2W_StStrqDoor2FromWhlchrBtn','BBC_StDoor2'],go:[1.2,0.1,null,0,-0.25]},
  {id:'2025.03465',rev:'BASE; 2',src:'list',group:'special',kind:'hold',title_tr:'Özel butonla açılan kapı otomatik kapanmaz',title_en:'Door opened by special buttons does not close automatically',
   en:'If the door is opened by the special buttons (wheelchair, pram or old man with stick button) then the door shall not be closed automatically. Only the driver shall be able to close the door by the manual driver buttons.',
   tr:'Kapı özel butonlarla (engelli, bebek arabası veya bastonlu yaşlı yolcu butonu) açıldıysa otomatik olarak kapanmamalıdır. Kapıyı yalnızca sürücü, manuel sürücü butonlarıyla kapatabilmelidir.',
-  desc_tr:'Türfreigabe’yi aç, bebek arabası, engelli veya yaşlı yolcu butonuna bas. Kapı açılınca açık kalma süresinden uzun bekle; kapı açık kalmalı (DoorHold_Kx = 1). Ardından sürücü K butonuyla kapat.',
-  desc_en:'Activate Door Release and press the pram, wheelchair or elderly button. After the door opens, wait longer than the hold open time; the door must stay open (DoorHold_Kx = 1). Then close it with the driver K button.',
-  signals:['DoorRelease','DoorHold_K2','DoorHold_K3','AutoCloseTimer_K2'],go:[1.2,0.1,null,0,-0.25]},
+  desc_tr:'Türfreigabe’yi aç, bebek arabası, engelli veya yaşlı yolcu butonuna bas. Kapı açılınca açık kalma süresinden uzun bekle; kapı açık kalmalı (DxA_StDoorClsngBlkgRqst = 1). Ardından sürücü K butonuyla kapat.',
+  desc_en:'Activate Door Release and press the pram, wheelchair or elderly button. After the door opens, wait longer than the hold open time; the door must stay open (DxA_StDoorClsngBlkgRqst = 1). Then close it with the driver K button.',
+  signals:['DR_StDoorRelsActv','D2A_StDoorClsngBlkgRqst','D3A_StDoorClsngBlkgRqst','D2A_StDoor2AutoOpndTiGp'],go:[1.2,0.1,null,0,-0.25]},
  {id:'REQ-003',group:'elderly',kind:'elderly',title_tr:'Yaşlı yolcu butonu · K1–K2 arası',title_en:'Elderly passenger button · between K1 and K2',
-  en:'An elderly passenger button shall be provided between door 1 and door 2. When it is pressed, the system shall set StopReq = 1 and StopReq_Elderly = 1 and show the elderly telltale on the cluster. The request shall be cleared when the zone door opens.',
-  tr:'Kapı 1 ile kapı 2 arasında yaşlı yolcu butonu bulunmalıdır. Basıldığında sistem StopReq = 1 ve StopReq_Elderly = 1 set etmeli, cluster’da yaşlı yolcu lambasını yakmalıdır. İstek, bölge kapısı açıldığında sıfırlanmalıdır.',
+  en:'An elderly passenger button shall be provided between door 1 and door 2. When it is pressed, the system shall set DSRD_StDoorsStopReqDisp = 1 and DOM_StStrqDoorxFromOldMBtn = 1 and show the elderly telltale on the cluster. The request shall be cleared when the zone door opens.',
+  tr:'Kapı 1 ile kapı 2 arasında yaşlı yolcu butonu bulunmalıdır. Basıldığında sistem DSRD_StDoorsStopReqDisp = 1 ve DOM_StStrqDoorxFromOldMBtn = 1 set etmeli, cluster’da yaşlı yolcu lambasını yakmalıdır. İstek, bölge kapısı açıldığında sıfırlanmalıdır.',
   desc_tr:'Kapı 1–2 arasındaki yaşlı yolcu butonuna bas, cluster lambasını kontrol et, ardından kapı 2’yi aç.',
   desc_en:'Press the elderly passenger button between door 1 and door 2, check the cluster telltale, then open door 2.',
-  signals:['StopReq','StopReq_Elderly_K2','DoorState_K2'],go:[2.3,0.0,null,-2.8,-0.2]},
+  signals:['DSRD_StDoorsStopReqDisp','DOM_StStrqDoor2FromOldMBtn','BBC_StDoor2'],go:[2.3,0.0,null,-2.8,-0.2]},
  {id:'REQ-005',group:'door',kind:'release',title_tr:'Türfreigabe → otomatik kapı',title_en:'Door Release → automatic door mode',
-  en:'When the driver presses the Door Release button, the doors shall switch to automatic mode (DoorRelease = 1, DoorMode = AUTO). The doors of zones with a pending request shall open automatically.',
-  tr:'Sürücü Türfreigabe butonuna bastığında kapılar otomatik moda geçmelidir (DoorRelease = 1, DoorMode = AUTO). İsteği bekleyen bölgelerin kapıları otomatik açılmalıdır.',
-  desc_tr:'Bir durak isteği ver, sonra Türfreigabe’ye bas. DoorMode = AUTO olmalı ve isteği olan bölgenin kapısı açılmalı.',
-  desc_en:'Request a stop, then press Door Release. DoorMode must become AUTO and the door of the requesting zone must open.',
-  signals:['DoorRelease','DoorMode','StopReq'],go:[4.9,-0.72,1.3,-1.92,-0.55]},
+  en:'When the driver presses the Door Release button, the doors shall switch to automatic mode (DR_StDoorRelsActv = 1). The doors of zones with a pending request shall open automatically.',
+  tr:'Sürücü Türfreigabe butonuna bastığında kapılar otomatik moda geçmelidir (DR_StDoorRelsActv = 1). İsteği bekleyen bölgelerin kapıları otomatik açılmalıdır.',
+  desc_tr:'Bir durak isteği ver, sonra Türfreigabe’ye bas. DR_StDoorRelsActv = 1 olmalı ve isteği olan bölgenin kapısı açılmalı.',
+  desc_en:'Request a stop, then press Door Release. DR_StDoorRelsActv must become 1 and the door of the requesting zone must open.',
+  signals:['DR_StDoorRelsActv','DSRD_StDoorsStopReqDisp'],go:[4.9,-0.72,1.3,-1.92,-0.55]},
  {id:'REQ-007',group:'door',kind:'autoclose',title_tr:'Normal istekte otomatik kapanma',title_en:'Auto-close after normal request',
   en:'In automatic door mode, a door opened by a normal (pre-stored) stop request shall close automatically once the hold open time (parameter, default 3 s) has elapsed after reaching the fully open position.',
   tr:'Otomatik kapı modunda normal durak isteğiyle açılan kapı, tam açık konuma geldikten sonra açık kalma süresi (parametre, varsayılan 3 s) dolunca kendiliğinden kapanmalıdır.',
   desc_tr:'Önce bir STOP butonuna bas (istek saklanır), sonra Türfreigabe ver. Kapı tam açıldıktan sonra kapanma, parametredeki süre ± 0,4 s içinde başlamalı.',
   desc_en:'First press a STOP button (the request is stored), then activate Door Release. Closing must start within the parameter time ± 0.4 s after the door is fully open.',
-  signals:['DoorRelease','DoorState_K2','AutoCloseTimer_K2','AutoCloseTimer_K3','DoorHoldOpenTime_P'],go:[-1.0,0.0,null,0.35,-0.05]},
+  signals:['DR_StDoorRelsActv','BBC_StDoor2','D2A_StDoor2AutoOpndTiGp','D3A_StDoor3AutoOpndTiGp'],go:[-1.0,0.0,null,0.35,-0.05]},
  {id:'2021.19178',rev:'BASE; 1',src:'list',group:'door',kind:'oeffnung',title_tr:'Kapı açma butonu: isteği sakla ya da doğrudan aç',title_en:'Door opening button: store request or open directly',
   en:'If the doors are closed and door release is disabled, door opening buttons shall send a stop request signal that is stored by the system to open the doors upon activation of door release; if door release is enabled, the opening buttons shall directly open the doors without generating a request.',
   tr:'Kapılar kapalı ve Türfreigabe devre dışıyken kapı açma butonları, Türfreigabe etkinleştirildiğinde kapıları açmak üzere sistemin sakladığı bir durak isteği sinyali göndermelidir. Türfreigabe etkinse açma butonları istek oluşturmadan kapıları doğrudan açmalıdır.',
-  desc_tr:'Türfreigabe kapalıyken kapı kanadındaki AÇ butonuna bas: kapı kapalı kalmalı, istek saklanmalı (DoorOpenReq_Kx = 1, StopReq_Kx = 1). Türfreigabe’yi ver: yalnızca o kapı açılmalı. Türfreigabe açıkken tekrar dene: kapı doğrudan açılmalı.',
-  desc_en:'With Door Release disabled, press the OPEN button on the door leaf: the door must stay closed and the request must be stored (DoorOpenReq_Kx = 1, StopReq_Kx = 1). Enable Door Release: only that door must open. Try again with Door Release enabled: the door must open directly.',
-  signals:['DoorRelease','DoorOpenReq_K2','StopReq_K2','DoorState_K2'],go:[0.6,0.2,null,Math.PI,-0.1]},
+  desc_tr:'Türfreigabe kapalıyken kapı kanadındaki AÇ butonuna bas: kapı kapalı kalmalı, istek saklanmalı (DxSR_StBtnIntDoorx = 1, DxSR_StStrqDoorxSaved = 1). Türfreigabe’yi ver: yalnızca o kapı açılmalı. Türfreigabe açıkken tekrar dene: kapı doğrudan açılmalı.',
+  desc_en:'With Door Release disabled, press the OPEN button on the door leaf: the door must stay closed and the request must be stored (DxSR_StBtnIntDoorx = 1, DxSR_StStrqDoorxSaved = 1). Enable Door Release: only that door must open. Try again with Door Release enabled: the door must open directly.',
+  signals:['DR_StDoorRelsActv','D2SR_StBtnIntDoor2','D2SR_StStrqDoor2Saved','BBC_StDoor2'],go:[0.6,0.2,null,Math.PI,-0.1]},
  {id:'2021.18647',rev:'BASE; 4',src:'list',group:'door',kind:'barrier',title_tr:'Açık kalma süresi ve ışık bariyeri',title_en:'Hold open time and light barrier',
   en:'The standard hold open time is 3 seconds. If one of the detection of light barrier or safety edge is active, the time shall be restarted.',
   tr:'Standart açık kalma süresi 3 saniyedir. Işık bariyeri veya emniyet kenarı algılamalarından biri aktifse süre yeniden başlatılmalıdır.',
   desc_tr:'Türfreigabe açıkken kapı kanadındaki AÇ butonuna bas. Kapı tam açılınca kapı boşluğunda dur (ışık bariyeri). Sayaç sen çekilene kadar başa dönmeli; çekildikten sonra süre dolunca kapı kapanmalı. Emniyet kenarı simülatörde henüz yok; süre bu bölümdeki parametreden değişir (2021.18637).',
   desc_en:'With Door Release active, press the OPEN button on the door leaf. When the door is fully open, stand in the doorway (light barrier). The timer must keep restarting until you step away; the door must close once the time has elapsed. The safety edge is not modelled yet; the time comes from the parameter in this section (2021.18637).',
-  signals:['LightBarrier_K2','LightBarrier_K3','AutoCloseTimer_K2','DoorHoldOpenTime_P'],go:[0.6,0.2,null,Math.PI,-0.1]},
+  signals:['BBC_StDoor2Libar','BBC_StDoor3Libar','D2A_StDoor2AutoOpndTiGp'],go:[0.6,0.2,null,Math.PI,-0.1]},
  {id:'REQ-011',group:'door',kind:'vorsp',title_tr:'Vorspeicherung: Türfreigabe aktifken STOP kapı açmaz',title_en:'Pre-storage: STOP does not open the door while Door Release is active',
   en:'While Door Release is active and the vehicle is stationary, pressing a STOP button shall not open the door; the request shall only be stored (Vorspeicherung). The door opening (Öffnung) buttons on the door leaves shall open their door whenever Door Release is active.',
   tr:'Türfreigabe aktifken ve araç duruyorken STOP butonuna basılması kapıyı açmamalı, istek yalnızca saklanmalıdır (Vorspeicherung). Kapı kanatlarındaki açma (Öffnung) butonları ise Türfreigabe aktif olduğu her durumda kendi kapısını açmalıdır.',
   desc_tr:'Türfreigabe’yi aç. Bir STOP butonuna bas: kapı kapalı kalmalı. Kapı kanadındaki AÇ butonuna bas: kapı açılmalı.',
   desc_en:'Activate Door Release. Press a STOP button: the door must stay closed. Press the OPEN button on the door leaf: the door must open.',
-  signals:['DoorRelease','StopReq_K2','DoorState_K2','DoorOpenReq_K2'],go:[-0.12,0.4,null,0,-0.15]},
+  signals:['DR_StDoorRelsActv','D2SR_StStrqDoor2Saved','BBC_StDoor2','D2SR_StBtnIntDoor2'],go:[-0.12,0.4,null,0,-0.15]},
  {id:'REQ-008',group:'zone',kind:'zone',title_tr:'Özel istek yalnızca kendi bölgesini etkiler',title_en:'Special request affects only its own zone',
   en:'A special request button shall affect only its own door zone. For example, with Door Release active, the wheelchair button in zone K3 shall open and hold only door 3; doors 1 and 2 shall remain unchanged.',
   tr:'Özel istek butonu yalnızca kendi kapı bölgesini etkilemelidir. Örneğin Türfreigabe aktifken K3 bölgesindeki engelli butonu yalnızca kapı 3’ü açmalı ve açık tutmalı; kapı 1 ve kapı 2 değişmemelidir.',
   desc_tr:'Türfreigabe açıkken kapı 3 direğindeki engelli butonuna bas. Yalnızca K3 açılmalı ve açık kalmalı.',
   desc_en:'With Door Release active, press the wheelchair button on the door 3 stanchion. Only door 3 must open and stay open.',
-  signals:['StopReq_PRM_K3','DoorState_K1','DoorState_K2','DoorState_K3','DoorHold_K3'],go:[-4.1,0.6,null,2.33,-0.25]},
+  signals:['D3W_StStrqDoor3FromWhlchrBtn','BBC_StDoor1Wngfr','BBC_StDoor2','BBC_StDoor3','D3A_StDoorClsngBlkgRqst'],go:[-4.1,0.6,null,2.33,-0.25]},
  {id:'2022.05043',rev:'BASE; 0',src:'list',group:'cab',kind:'cablock',title_tr:'Kabin kapısı kilidi gösterge butonuyla, park freni çekiliyken açılır',title_en:'Driver door lock released by dashboard button with parking brake applied',
   en:'The system shall have possibility to deactivate the driver door lock by the separate driver button on the dashboard. The parking brake should be active simultaneously for the possibility of using this driver door to unlock.',
   tr:'Sistem, sürücü kapısı kilidini gösterge üzerindeki ayrı bir sürücü butonuyla devre dışı bırakma imkânı sağlamalıdır. Bu sürücü kapısının kilidini açabilmek için park freni aynı anda aktif olmalıdır.',
   desc_tr:'El freni çekiliyken göstergedeki KABİN butonuna bas: mıknatıs 5 s bırakılmalı, kapı açılmalı. El frenini indir ve tekrar bas: kapı kilitli kalmalı.',
   desc_en:'With the parking brake applied, press the CABIN button: the magnet must release for 5 s and the door must open. Release the parking brake and press again: the door must stay locked.',
-  signals:['CabDoorLock','CabDoorState','ParkBrake'],go:[4.9,-0.72,1.3,-1.92,-0.55]},
+  signals:['DAD_StDrvrDoorLockRqst','DAD_StDrvrDoorOpnd','GW_StPrkgBrkEngdOn'],go:[4.9,-0.72,1.3,-1.92,-0.55]},
  {id:'2023.05022',rev:'BASE; 0',src:'list',group:'cab',kind:'cabbuzz',title_tr:'Kabin kapısı açık ve park freni inikse buzzer',title_en:'Buzzer when driver door open and parking brake not engaged',
   en:'In the ignition radio position, If the driver area door is opened and the park brake is not engaged, the driver buzzer should be turned on.',
   tr:'Kontak radyo konumundayken sürücü bölmesi kapısı açılırsa ve park freni çekili değilse sürücü buzzer’ı çalışmalıdır.',
   desc_tr:'El freni çekiliyken kabin kapısını aç, sonra el frenini indir: buzzer çalmalı. El frenini çek ya da kapıyı kapat: buzzer susmalı. Kontak simülatörde her zaman radyo konumunda kabul edilir.',
   desc_en:'Open the cabin door with the parking brake applied, then release the brake: the buzzer must sound. Apply the brake or close the door: it must stop. Ignition is assumed to be in radio position.',
-  signals:['CabDoorState','ParkBrake','DriverBuzzer'],go:[4.9,-0.72,1.3,-1.92,-0.3]},
+  signals:['DAD_StDrvrDoorOpnd','GW_StPrkgBrkEngdOn','DRB_StDrvrBuzActv'],go:[4.9,-0.72,1.3,-1.92,-0.3]},
  {id:'REQ-004',group:'light',kind:'light',title_tr:'İç aydınlatma (gösterge)',title_en:'Interior lighting (dashboard)',
   en:'The driver shall be able to switch the passenger compartment lighting on and off with the interior light button on the dashboard. The state shall be shown on the cluster with a telltale.',
   tr:'Sürücü, gösterge üzerindeki iç aydınlatma butonuyla yolcu salonu aydınlatmasını açıp kapatabilmelidir. Durum cluster’da bir lamba ile gösterilmelidir.',
   desc_tr:'Göstergedeki IŞIK butonuyla aydınlatmayı kapat ve tekrar aç. LED şeritler ve cluster lambası her seferinde değişmeli.',
   desc_en:'Switch the lighting off and on again with the LIGHT button on the dashboard. The LED strips and the cluster telltale must change each time.',
-  signals:['IntLight','IntLightDim'],go:[4.9,-0.72,1.3,-1.6,-0.3]}
+  signals:[],go:[4.9,-0.72,1.3,-1.6,-0.3]}
 ];
 const RS={untested:'Test edilmedi',progress:'Devam ediyor',pass:'Geçti',fail:'Kaldı',cancelled:'İptal'};
 REQS.forEach(r=>{r.title=(r.rev?r.id+' ':'')+r.title_tr;r.status='untested';r.ev=[];r.seen={};r.verify='auto';});
@@ -1214,23 +1214,23 @@ let LST={};try{LST=JSON.parse(localStorage.getItem('bus-liststate-v1')||'{}')||{
 const saveLST=()=>{try{localStorage.setItem('bus-liststate-v1',JSON.stringify(LST));}catch(e){}};
 /* ---------- listeden otomatik teste bağlanan gereksinimler ---------- */
 const GO={drv:[4.9,-0.72,1.3,-1.92,-0.45],door2:[0.6,-0.2,null,Math.PI,-0.08],door3:[-4.1,-0.2,null,Math.PI,-0.08],eld:[2.3,0.0,null,-2.8,-0.2],k2p:[1.2,0.1,null,0,-0.25]};
-[['2021.19182','clr19182',['StopReq_K2','DoorState_K2'],'door2'],['2021.19171','zone19171',['StopReq_K2','StopReq_K3','DoorState_K2','DoorState_K3'],'door3'],
- ['2021.18644','reopen18644',['LightBarrier_K2','DoorState_K2'],'door2'],['2023.03864','block03864',['VehSpeed','DoorState_K2'],'drv'],
- ['2021.18715','tfstand18715',['VehSpeed','DoorRelease'],'drv'],['2025.13674','bsb13674',['DoorRelease','BusStopBrake'],'drv'],
- ['2021.18762','bsb18762',['DoorState_K2','BusStopBrake'],'drv'],['2021.19560','hold19560',['DoorHold_K2','AutoCloseTimer_K2','StopReq_Elderly_K2'],'eld'],
- ['2023.03870','tfled03870',['DoorRelease'],'drv'],['2021.19027','drvbtn19027',['VehSpeed','DoorState_K2'],'drv'],['2021.19032','drvled19032',['DoorState_K2'],'drv'],
- ['2021.29327','ramp29327',['Ramp_K2','DoorState_K2'],'door2'],['2023.04582','assign04582',['StopReq_Stroller_K2','DoorState_K1','DoorState_K3'],'k2p'],
- ['2021.19556','assign04582',['StopReq_PRM_K3','DoorState_K1','DoorState_K2'],'k2p'],['2023.04407','assign04582',['StopReq_Stroller_K2','DoorState_K1','DoorState_K3'],'k2p'],
- ['2021.18640','auto18637',['DoorRelease','DoorOpenReq_K3','DoorState_K3','VehSpeed'],'door3'],['2025.14118','auto18637',['DoorRelease','DoorState_K3'],'door3'],
- ['2021.17789','drvled19032',['DoorState_K2'],'drv'],['2021.17782','drvbtn19027',['VehSpeed','DoorState_K2','BusStopBrake'],'drv'],
- ['2025.03111','ramp29327',['Ramp_K2','DoorState_K2'],'door2'],['2021.19039','ramp29327',['Ramp_K2','DoorState_K2'],'door2'],
- ['2023.04586','hold19560',['DoorHold_K2','AutoCloseTimer_K2'],'eld'],['2021.18714','release',['DoorRelease','DoorMode'],'drv'],
- ['2021.17795','oeffnung',['DoorRelease','DoorOpenReq_K2','DoorState_K2'],'door2'],['2021.19035','oeffnung',['DoorRelease','DoorOpenReq_K2','DoorState_K2'],'door2'],
- ['2021.19167','stop',['StopReq','StopReq_K2'],'door2'],['2023.03984','stop',['StopReq'],'door2'],['2023.04621','stop',['StopReq'],'door2'],['2022.02046','stop',['StopReq'],'door2'],
- ['2023.04405','stroller',['StopReq_Stroller_K2'],'k2p'],['2021.19539','stroller',['StopReq_Stroller_K2'],'k2p'],
- ['2021.19129','prm',['StopReq_PRM_K2'],'k2p'],['2021.19149','prm',['StopReq_PRM_K2'],'k2p'],
- ['2021.19554','elderly',['StopReq_Elderly_K2'],'eld'],['2021.19558','elderly',['StopReq_Elderly_K2'],'eld'],
- ['2021.18637','auto18637',['DoorRelease','DoorState_K3','DoorHoldOpenTime_P'],'door3'],['2021.18646','ac18646',['AutoCloseTimer_K2','LightBarrier_K2'],'door2']
+[['2021.19182','clr19182',['D2SR_StStrqDoor2Saved','BBC_StDoor2'],'door2'],['2021.19171','zone19171',['D2SR_StStrqDoor2Saved','D3SR_StStrqDoor3Saved','BBC_StDoor2','BBC_StDoor3'],'door3'],
+ ['2021.18644','reopen18644',['BBC_StDoor2Libar','BBC_StDoor2'],'door2'],['2023.03864','block03864',['GW_SpdVehSig','BBC_StDoor2'],'drv'],
+ ['2021.18715','tfstand18715',['GW_SpdVehSig','DR_StDoorRelsActv'],'drv'],['2025.13674','bsb13674',['DR_StDoorRelsActv','GW_AcvBstbrkOn'],'drv'],
+ ['2021.18762','bsb18762',['BBC_StDoor2','GW_AcvBstbrkOn'],'drv'],['2021.19560','hold19560',['D2A_StDoorClsngBlkgRqst','D2A_StDoor2AutoOpndTiGp','DOM_StStrqDoor2FromOldMBtn'],'eld'],
+ ['2023.03870','tfled03870',['DR_StDoorRelsActv'],'drv'],['2021.19027','drvbtn19027',['GW_SpdVehSig','BBC_StDoor2'],'drv'],['2021.19032','drvled19032',['BBC_StDoor2'],'drv'],
+ ['2021.29327','ramp29327',['ER_StRampAllOpnd','BBC_StDoor2'],'door2'],['2023.04582','assign04582',['D2PB_StStrqDoor2FromPrmBtn','BBC_StDoor1Wngfr','BBC_StDoor3'],'k2p'],
+ ['2021.19556','assign04582',['D3W_StStrqDoor3FromWhlchrBtn','BBC_StDoor1Wngfr','BBC_StDoor2'],'k2p'],['2023.04407','assign04582',['D2PB_StStrqDoor2FromPrmBtn','BBC_StDoor1Wngfr','BBC_StDoor3'],'k2p'],
+ ['2021.18640','auto18637',['DR_StDoorRelsActv','D3SR_StBtnIntDoor3','BBC_StDoor3','GW_SpdVehSig'],'door3'],['2025.14118','auto18637',['DR_StDoorRelsActv','BBC_StDoor3'],'door3'],
+ ['2021.17789','drvled19032',['BBC_StDoor2'],'drv'],['2021.17782','drvbtn19027',['GW_SpdVehSig','BBC_StDoor2','GW_AcvBstbrkOn'],'drv'],
+ ['2025.03111','ramp29327',['ER_StRampAllOpnd','BBC_StDoor2'],'door2'],['2021.19039','ramp29327',['ER_StRampAllOpnd','BBC_StDoor2'],'door2'],
+ ['2023.04586','hold19560',['D2A_StDoorClsngBlkgRqst','D2A_StDoor2AutoOpndTiGp'],'eld'],['2021.18714','release',['DR_StDoorRelsActv'],'drv'],
+ ['2021.17795','oeffnung',['DR_StDoorRelsActv','D2SR_StBtnIntDoor2','BBC_StDoor2'],'door2'],['2021.19035','oeffnung',['DR_StDoorRelsActv','D2SR_StBtnIntDoor2','BBC_StDoor2'],'door2'],
+ ['2021.19167','stop',['DSRD_StDoorsStopReqDisp','D2SR_StStrqDoor2Saved'],'door2'],['2023.03984','stop',['DSRD_StDoorsStopReqDisp'],'door2'],['2023.04621','stop',['DSRD_StDoorsStopReqDisp'],'door2'],['2022.02046','stop',['DSRD_StDoorsStopReqDisp'],'door2'],
+ ['2023.04405','stroller',['D2PB_StStrqDoor2FromPrmBtn'],'k2p'],['2021.19539','stroller',['D2PB_StStrqDoor2FromPrmBtn'],'k2p'],
+ ['2021.19129','prm',['D2W_StStrqDoor2FromWhlchrBtn'],'k2p'],['2021.19149','prm',['D2W_StStrqDoor2FromWhlchrBtn'],'k2p'],
+ ['2021.19554','elderly',['DOM_StStrqDoor2FromOldMBtn'],'eld'],['2021.19558','elderly',['DOM_StStrqDoor2FromOldMBtn'],'eld'],
+ ['2021.18637','auto18637',['DR_StDoorRelsActv','BBC_StDoor3','D2A_StDoor2AutoOpndTiGp'],'door3'],['2021.18646','ac18646',['D2A_StDoor2AutoOpndTiGp','BBC_StDoor2Libar'],'door2']
 ].forEach(([id,kind,signals,go])=>{const x=LIST.find(y=>y.id===id);if(!x||REQS.some(r=>r.id===id))return;const [t,rm]=splitTr(x),tt=titleTr(x,t);
   REQS.push({id,rev:x.rev,src:'list',group:x.group,kind,title_tr:tt,title_en:titleOf(x),en:x.en,tr:t,desc_tr:rm,desc_en:x.remark||'',signals,go:GO[go],
     status:'untested',ev:[],seen:{},verify:'auto',title:id+' '+tt});});
@@ -1298,7 +1298,7 @@ function renderDocReqs(){
       <div class="dtools"><button class="pbtn" id="runAll">▶ Tüm otomatik testleri çalıştır (${REQS.filter(r=>DEMOS[r.kind]).length} gereksinim)</button><button class="linkbtn" id="expAll">Tüm bölümleri aç</button><button class="linkbtn" id="colAll">Tümünü kapat</button><button class="linkbtn" id="resetTests">Otomatik testleri sıfırla</button></div></div>
     ${REQ_GROUPS.map((g,i)=>{const rs=list.filter(r=>r.group===g.id);if(!rs.length&&g.id!=='other')return'';const cc=counts(rs),open=OPEN_G.has(g.id);
       return `<section class="dgroup" id="g-${g.id}"><details class="gdet" data-g="${g.id}"${open?' open':''}><summary><span class="gno">${i+1}</span><div class="gh"><h3>${esc(g.tr)}</h3><div class="gen">${esc(g.en)}</div></div><span class="gcount">${cc.active} madde${cc.cancelled?` · ${cc.cancelled} iptal`:''} · <b>${cc.pass}</b> geçti</span></summary>
-        <div class="gbody"><p class="gintro">${esc(g.introTr)}</p><p class="gintro en">${esc(g.introEn)}</p>${g.id==='door'?`<div class="pbox"><span class="dlbl">Parametre · DoorHoldOpenTime_P</span><span>Otomatik modda kapı açık kalma süresi</span><span class="sfilters">${[3,5,10].map(v=>`<button class="sfb" data-hold="${v}" aria-pressed="${AUTO_T===v}">${v} s</button>`).join('')}</span></div>`:''}
+        <div class="gbody"><p class="gintro">${esc(g.introTr)}</p><p class="gintro en">${esc(g.introEn)}</p>${g.id==='door'?`<div class="pbox"><span class="dlbl">Parametre · D2A_StDoor2AutoOpndTiGp</span><span>Otomatik modda kapı açık kalma süresi</span><span class="sfilters">${[3,5,10].map(v=>`<button class="sfb" data-hold="${v}" aria-pressed="${AUTO_T===v}">${v} s</button>`).join('')}</span></div>`:''}
         <div class="glist" data-gl="${g.id}">${open?chapterBody(g.id,''):''}</div></div></details></section>`;}).join('')}
     <section class="dgroup addreq"><details class="gdet" data-g="_add"><summary><span class="gno">+</span><div class="gh"><h3>Gereksinim ekle</h3><div class="gen">Add a requirement</div></div></summary>
       <form id="reqForm2" class="rform">
@@ -1357,7 +1357,7 @@ $('#dmain').addEventListener('change',e=>{
   r.group=s.value;LST[r.id]=Object.assign(LST[r.id]||{},{g:s.value});saveLST();log(`${r.id} → bölüm: ${REQ_GROUPS.find(g=>g.id===s.value).tr}`);renderDocReqs();openReq(r.id);});
 $('#dmain').addEventListener('click',e=>{
   const t=e.target.closest('button,a');if(!t)return;
-  if(t.dataset.sig){e.preventDefault();setView('sigs',t.dataset.sig);}
+  if(t.dataset.sig){e.preventDefault();const n=t.dataset.sig;if(SIGN.has(n)){SIG_MODE='live';setView('sigs',n);}else{setView('sigs');openInvSig(n);}}
   if(t.id==='runAll'){runAllDemos();return;}
   if(t.dataset.graph){const r=REQS.find(x=>x.id===t.dataset.graph);if(r)showRecording(r);return;}
   if(t.id==='clive'){CH.live=!CH.live;if(!CH.live){CH.end=REC.now();}else{CH.start=null;CH.title='';}t.setAttribute('aria-pressed',CH.live);t.textContent=CH.live?'Canlı':'Durdu';return;}
@@ -1384,7 +1384,7 @@ $('#dmain').addEventListener('click',e=>{
   if(t.id==='pfGo'){runPathFinder();return;}
   if(t.dataset.sg!==undefined){SIG_G=t.dataset.sg;renderSigView();}
   if(t.dataset.openreq){openReq(t.dataset.openreq);}
-  if(t.dataset.hold){AUTO_T=+t.dataset.hold;log(`Parametre DoorHoldOpenTime_P = ${AUTO_T} s`);document.querySelectorAll('[data-hold]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.hold===AUTO_T));}
+  if(t.dataset.hold){AUTO_T=+t.dataset.hold;log(`Parametre D2A_StDoor2AutoOpndTiGp = ${AUTO_T} s`);document.querySelectorAll('[data-hold]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.hold===AUTO_T));}
 });
 $('#dmain').addEventListener('submit',e=>{if(e.target.id!=='reqForm2')return;e.preventDefault();
   const en=$('#rfEn').value.trim(),tr=$('#rfTr').value.trim();if(!en&&!tr)return;
@@ -1400,7 +1400,7 @@ $('#dtoc').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)retu
 
 /* ================= Fonksiyonlar ================= */
 const RQ=(k,st_,ev)=>{const r=reqFor(k);if(r)setReq(r,st_,ev);};
-let AUTO_T=3; // DoorHoldOpenTime_P (2021.18637 / 2021.18647: standart 3 s)
+let AUTO_T=3; // D2A_StDoor2AutoOpndTiGp (2021.18637 / 2021.18647: standart 3 s)
 const doorBlockedOpen=id=>V.doorLock?'Kapı kilidi aktif':V.speed>1?'araç hareket halinde (>1 km/h; 2021.19027, 2023.03864)':null;
 const doorBlockedClose=id=>(id===2&&(V.ramp||V.rampPos>0.01))?'Rampa açık':null;
 const zoneHold=id=>ZR[id].stroller||ZR[id].prm||ZR[id].elderly; // 2025.03465
@@ -1436,11 +1436,11 @@ function autoOpen(ids,src,forceHold){
 function setRelease(on,src){
   if(on&&V.speed>0.5){log(`${src} → Türfreigabe verilemedi: araç duruyor olmalı (2021.18715)`,'warn');{const r=reqFor('tfstand18715');if(r){r.seen.ref=true;setReq(r,'progress',`Araç ${V.speed.toFixed(0)} km/h iken Türfreigabe reddedildi`);}}return false;}
   V.release=on;
-  if(on){const r=reqFor('tfstand18715');if(r&&r.seen.ref)setReq(r,'pass','Araç durduktan sonra Türfreigabe kabul edildi');RQ('tfled03870','pass','Türfreigabe aktif → B01 LED’i yandı, kapı tabelalarında “KAPI SERBEST”');}log(`${src} → DoorRelease=${on?1:0}, DoorMode=${on?'AUTO':'MANUAL'}`);
+  if(on){const r=reqFor('tfstand18715');if(r&&r.seen.ref)setReq(r,'pass','Araç durduktan sonra Türfreigabe kabul edildi');RQ('tfled03870','pass','Türfreigabe aktif → B01 LED’i yandı, kapı tabelalarında “KAPI SERBEST”');}log(`${src} → DR_StDoorRelsActv=${on?1:0}`);
   if(on){const pend=[1,2,3].filter(z=>ZR[z].stop||doorS[z].reqOpen),hadOeff=[1,2,3].filter(z=>doorS[z].reqOpen);
     if(pend.length)autoOpen(pend,'Türfreigabe');
     const ok=V.doorLock||pend.every(id=>doorS[id].state==='OPENING'||doorS[id].state==='OPEN');
-    setReq(reqFor('release'),ok?'pass':'fail',`${src} → DoorMode=AUTO`+(pend.length?`, bekleyen bölgeler açılıyor: ${pend.map(z=>'K'+z).join(', ')}`:' (bekleyen istek yok)'));
+    setReq(reqFor('release'),ok?'pass':'fail',`${src} → DR_StDoorRelsActv=1`+(pend.length?`, bekleyen bölgeler açılıyor: ${pend.map(z=>'K'+z).join(', ')}`:' (bekleyen istek yok)'));
     if(hadOeff.length&&!V.doorLock){const r=reqFor('oeffnung');r.seen.opened=true;setReq(r,r.seen.pending?'pass':'progress',`Türfreigabe verildi → bekleyen Öffnung isteği ${hadOeff.map(z=>'K'+z).join(', ')} açtı`);}}
   else DOORS.forEach(d=>{const s=doorS[d.id];if(s.auto&&(s.state==='OPEN'||s.state==='OPENING')){s.hold=false;closeDoor(d.id,'Türfreigabe kapatıldı');}s.auto=false;s.timer=0;});
 }
@@ -1448,7 +1448,7 @@ function doorRequest(id,src){
   PRS['OeffBtn_K'+id]=performance.now();
   SFX.click(camera.position.toArray());const s=doorS[id],r=reqFor('oeffnung');
   if(s.state==='OPEN'||s.state==='OPENING'){if(V.release&&s.auto&&!s.hold&&s.state==='OPEN'){s.timer=AUTO_T;s.armAt=performance.now();log(`${src} → Kapı ${id} açık, kapanma sayacı yeniden başladı`);}else log(`${src} → Kapı ${id} zaten açık`);return;}
-  if(!V.release){if(!s.reqOpen){s.reqOpen=true;const fs=!V.stopReq;ZR[id].stop=true;recompute();refreshStop();if(fs)SFX.ding();log(`${src} → DoorOpenReq_K${id}=1, StopReq_K${id}=1 (saklandı, Türfreigabe bekleniyor)`);}else log(`${src} → DoorOpenReq_K${id} zaten kayıtlı`);
+  if(!V.release){if(!s.reqOpen){s.reqOpen=true;const fs=!V.stopReq;ZR[id].stop=true;recompute();refreshStop();if(fs)SFX.ding();log(`${src} → D${id}SR_StBtnIntDoor${id}=1, D${id}SR_StStrqDoor${id}Saved=1 (saklandı, Türfreigabe bekleniyor)`);}else log(`${src} → D${id}SR_StBtnIntDoor${id} zaten kayıtlı`);
     r.seen.pending=true;setReq(r,r.seen.opened?'pass':'progress',`${src} → Türfreigabe yokken istek kaydedildi, kapı kapalı kaldı`+(r.seen.opened?'':' (şimdi Türfreigabe ver)'));return;}
   const before=snap();log(`${src} → Kapı ${id} açma isteği`);autoOpen([id],src);
   const only=DOORS.every((d,i)=>d.id===id||doorS[d.id].state===before[i]);r.seen.opened=only;
@@ -1457,16 +1457,16 @@ function doorRequest(id,src){
   setReq(r,!only?'fail':(r.seen.pending?'pass':'progress'),only?`${src} → Türfreigabe açıkken yalnızca K${id} açıldı`+(r.seen.pending?'':' (Türfreigabe kapalıyken de dene)'):`${src} → başka kapılar da etkilendi`);
 }
 function stopRequest(kind,src,zone){
-  PRS[(kind?'SpecBtn_K':'StopBtn_K')+zone]=performance.now();
+  PRS[(kind?'SpecBtn_K':'StopBtn_K')+zone]=performance.now();if(kind)PRS[kind+'_K'+zone]=performance.now();
   if(doorS[zone].state!=='CLOSED'){SFX.click(camera.position.toArray());log(`${src} → Kapı ${zone} kapalı değil, istek saklanmadı (2021.19171)`+(V.release&&kind?'; otomatik kapı mantığı uygulandı':''));if(V.release&&kind)autoOpen([zone],src,true);return;}
   SFX.click(camera.position.toArray());const Z=ZR[zone],firstStop=!V.stopReq;
-  if(kind&&!Z[kind]){Z[kind]=true;log(`${src} → ${KIND[kind].sig}_K${zone}=1`);SFX.chime();}
-  if(!Z.stop){Z.stop=true;log(`${src} → StopReq_K${zone}=1`);}else if(!kind)log(`${src} → StopReq_K${zone} zaten 1`);
+  if(kind&&!Z[kind]){Z[kind]=true;log(`${src} → ${KIND[kind].sig(zone)}=1`);SFX.chime();}
+  if(!Z.stop){Z.stop=true;log(`${src} → D${zone}SR_StStrqDoor${zone}Saved=1`);}else if(!kind)log(`${src} → D${zone}SR_StStrqDoor${zone}Saved zaten 1`);
   recompute();if(firstStop&&!kind)SFX.ding();
   refreshStop();
-  if(!kind){const r=reqFor('stop');if(ZR[zone].stop&&MAT.stopFace.emissiveIntensity>0.5)setReq(r,r.status==='pass'?'pass':'progress',`${src} (bölge K${zone}) → StopReq_K${zone}=1, STOP butonları yandı`);else setReq(r,'fail',`${src} basıldı ama istek veya aydınlatma yok`);}
+  if(!kind){const r=reqFor('stop');if(ZR[zone].stop&&MAT.stopFace.emissiveIntensity>0.5)setReq(r,r.status==='pass'?'pass':'progress',`${src} (bölge K${zone}) → D${zone}SR_StStrqDoor${zone}Saved=1, STOP butonları yandı`);else setReq(r,'fail',`${src} basıldı ama istek veya aydınlatma yok`);}
   if(kind){const r=reqFor(kind);
-    if(V.stopReq&&V.req[kind])setReq(r,r.status==='pass'?'pass':'progress',`${src} (bölge K${zone}) → StopReq=1, ${KIND[kind].sig}=1, lamba yandı`);
+    if(V.stopReq&&V.req[kind])setReq(r,r.status==='pass'?'pass':'progress',`${src} (bölge K${zone}) → DSRD_StDoorsStopReqDisp=1, ${KIND[kind].sig(zone)}=1, lamba yandı`);
     else setReq(r,'fail',`${src} basıldı ama sinyal set edilmedi`);}
   if(V.release&&!kind){log(`${src} → Vorspeicherung: Türfreigabe aktif ve araç duruyor; STOP kapıyı açmaz, istek K${zone} için saklandı`);
     const r=reqFor('vorsp');r.seen.noopen=doorS[zone].state==='CLOSED';setReq(r,r.seen.noopen?(r.seen.oeff?'pass':'progress'):'fail',r.seen.noopen?`${src} → Türfreigabe aktifken STOP basıldı, K${zone} kapalı kaldı`+(r.seen.oeff?'':' (şimdi kapı üstü AÇ butonunu dene)'):'STOP kapıyı açtı');}
@@ -1476,7 +1476,7 @@ function stopRequest(kind,src,zone){
       setReq(reqFor('zone'),only&&doorS[zone].hold?'pass':'fail',only?`${src} → yalnızca K${zone} açıldı ve açık tutuluyor; diğer kapılar değişmedi`:`${src} → bölge dışı kapılar etkilendi`);}}
   else if(kind&&kind!=='elderly'){const r=reqFor('zone');if(r.status==='untested')setReq(r,'progress',`${src} (bölge K${zone}) istek kaydedildi. Bölge testi için Türfreigabe açıkken tekrarla`);}
 }
-function resetStop(src){const any=V.stopReq||Object.values(V.req).some(Boolean);[1,2,3].forEach(z=>Object.keys(ZR[z]).forEach(k=>ZR[z][k]=false));recompute();refreshStop();log(`${src} → StopReq=0`+(any?' (tüm bölgeler sıfırlandı)':' (zaten 0)'));}
+function resetStop(src){const any=V.stopReq||Object.values(V.req).some(Boolean);[1,2,3].forEach(z=>Object.keys(ZR[z]).forEach(k=>ZR[z][k]=false));recompute();refreshStop();log(`${src} → DSRD_StDoorsStopReqDisp=0`+(any?' (tüm bölgeler sıfırlandı)':' (zaten 0)'));}
 function refreshStop(){
   MAT.stopFace.emissiveIntensity=V.stopReq?0.95:0.08;
   [1,2,3].forEach(z=>Object.keys(specialMats[z]).forEach(k=>specialMats[z][k].forEach(m=>m.emissiveIntensity=ZR[z][k]?0.9:0.12)));drawPIS();
@@ -1485,10 +1485,10 @@ function onDoorOpened(id){
   const Z=ZR[id],cleared=['stroller','prm','elderly'].filter(k=>Z[k]),had=Z.stop||cleared.length;doorS[id].reqOpen=false;
   const hadStop=Z.stop;
   if(had){Object.keys(Z).forEach(k=>Z[k]=false);recompute();refreshStop();
-    log(`Kapı ${id} açılmaya başladı → bölge K${id} sıfırlandı`+(cleared.length?' ('+cleared.map(k=>KIND[k].sig).join(', ')+')':'')+`, StopReq=${V.stopReq?1:0}`);}
-  if(hadStop)RQ('clr19182','pass',`Kapı ${id} açılmaya başladı → StopReq_K${id} silindi`);
+    log(`Kapı ${id} açılmaya başladı → bölge K${id} sıfırlandı`+(cleared.length?' ('+cleared.map(k=>KIND[k].sig(id)).join(', ')+')':'')+`, DSRD_StDoorsStopReqDisp=${V.stopReq?1:0}`);}
+  if(hadStop)RQ('clr19182','pass',`Kapı ${id} açılmaya başladı → D${id}SR_StStrqDoor${id}Saved silindi`);
   {const oth=[1,2,3].filter(z=>z!==id&&ZR[z].stop);if(oth.length)RQ('zone19171','pass',`Kapı ${id} açıldı; ${oth.map(z=>'K'+z).join(', ')} bölgesinin isteği korunuyor`);}
-  if(hadStop){const r=reqFor('stop');if(r.status==='progress')setReq(r,ZR[id].stop?'fail':'pass',`Kapı ${id} açıldı → StopReq_K${id}=${ZR[id].stop?1:0}`);}
+  if(hadStop){const r=reqFor('stop');if(r.status==='progress')setReq(r,ZR[id].stop?'fail':'pass',`Kapı ${id} açıldı → D${id}SR_StStrqDoor${id}Saved=${ZR[id].stop?1:0}`);}
   cleared.forEach(k=>{const r=reqFor(k);if(r.status==='progress'){if(!ZR[id][k])setReq(r,'pass',`Kapı ${id} açıldı → bölge isteği sıfırlandı, lamba söndü`);else setReq(r,'fail',`Kapı ${id} açıldı ama istek sıfırlanmadı`);}});
 }
 function drawDoorSigns(){
@@ -1667,7 +1667,7 @@ async function runDemo(r,batch){
   if(!batch)DEMO={cancel:false};DEMO.r=r;ensureAudio();resetSim();setView('sim');log(`Otomatik test başladı: ${r.id}`,'req');
   document.body.classList.add('demo-on');$('#demo').hidden=false;$('#demoTitle').textContent=(batch?`[${batch}] `:'')+r.id+' · '+r.title_tr;
   $('#demoSteps').innerHTML=sc.map((s,i)=>`<li class="todo" id="ds${i}"><span class="sn">${i+1}</span><span class="tx">${esc(s[0])}</span><time></time></li>`).join('');
-  $('#demoRes').innerHTML='';DEMO.sigs=[...new Set(['DoorRelease','BusStopBrake',...(r.signals||[])])].map(n=>SIG_DB.find(s=>s.n===n)).filter(s=>s&&s.sim);renderDemoSig();
+  $('#demoRes').innerHTML='';DEMO.sigs=[...new Set(['DR_StDoorRelsActv','GW_AcvBstbrkOn',...(r.signals||[])])].map(n=>SIG_DB.find(s=>s.n===n)).filter(s=>s&&s.sim);renderDemoSig();
   const t0=REC.now();let ok=true;
   try{for(let i=0;i<sc.length;i++){const [cap,fn,ms]=sc[i],li=$('#ds'+i);li.className='cur';li.querySelector('time').textContent=(REC.now()-t0).toFixed(1)+' s';li.scrollIntoView({block:'nearest'});
       if(fn)fn();await sleep(typeof ms==='function'?ms():ms);li.className='done';}
@@ -1764,9 +1764,9 @@ function updateDoors(dt){
     s.btnMat.emissive.set(s.state==='CLOSED'?'#300000':s.state==='OPEN'?'#ff2a14':(bl?'#ff2a14':'#400000'));
   });
   const sb=V.stopBrakeMan||V.release||DOORS.some(d=>doorS[d.id].state!=='CLOSED');
-  if(sb!==V.stopBrake){V.stopBrake=sb;log(`BusStopBrake=${sb?1:0}`+(sb?' (hareket engeli aktif)':''));
-    {const r=reqFor('bsb13674');if(r){if(sb&&V.release){r.seen.on=true;setReq(r,r.status==='pass'?'pass':'progress','Türfreigabe aktif → BusStopBrake=1');}else if(!sb&&r.seen.on)setReq(r,'pass','Türfreigabe kapatıldı → BusStopBrake=0');}}
-    if(sb&&!V.release&&DOORS.some(d=>doorS[d.id].state!=='CLOSED'))RQ('bsb18762','pass','Kapı kapalı değil → BusStopBrake=1');}
+  if(sb!==V.stopBrake){V.stopBrake=sb;log(`GW_AcvBstbrkOn=${sb?1:0}`+(sb?' (hareket engeli aktif)':''));
+    {const r=reqFor('bsb13674');if(r){if(sb&&V.release){r.seen.on=true;setReq(r,r.status==='pass'?'pass':'progress','Türfreigabe aktif → GW_AcvBstbrkOn=1');}else if(!sb&&r.seen.on)setReq(r,'pass','Türfreigabe kapatıldı → GW_AcvBstbrkOn=0');}}
+    if(sb&&!V.release&&DOORS.some(d=>doorS[d.id].state!=='CLOSED'))RQ('bsb18762','pass','Kapı kapalı değil → GW_AcvBstbrkOn=1');}
 }
 
 /* ================= Cluster ================= */
@@ -1829,7 +1829,7 @@ function drawCluster(g,w,h){
 }
 const hudG=$('#cluster').getContext('2d'),c3G=clusterTex.image.getContext('2d');
 function renderCluster(){drawCluster(hudG,880,330);drawCluster(c3G,880,330);clusterTex.needsUpdate=true;}
-[1,2,3].forEach(k=>{const el=document.getElementById('kr'+k);el.addEventListener('input',()=>{KREIS[k].set=+el.value;applyLighting();});el.addEventListener('change',()=>log(`IntLight_Kreis${k}_Set = ${KREIS[k].set} %`));});
+[1,2,3].forEach(k=>{const el=document.getElementById('kr'+k);el.addEventListener('input',()=>{KREIS[k].set=+el.value;applyLighting();});el.addEventListener('change',()=>log(`İç aydınlatma Kreis ${k} ayarı = ${KREIS[k].set} %`));});
 $('#hDrive').onclick=()=>toggleDrive('Gösterge HUD');$('#hHome').onclick=()=>goHome();$('#demoStop').onclick=()=>{if(DEMO)DEMO.cancel=true;};
 (()=>{const g=$('#hDrvIcon').getContext('2d');g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();g.arc(22,22,15,0,7);g.stroke();g.beginPath();g.arc(22,22,4,0,7);g.fill();g.fillStyle='#fff';g.fill();[0,2.1,4.2].forEach(a=>{g.beginPath();g.moveTo(22,22);g.lineTo(22+15*Math.cos(a+1.57),22+15*Math.sin(a+1.57));g.stroke();});})();
 $('#hLight').onclick=()=>pressBtn(BTN[4],'Gösterge HUD');$('#hRelease').onclick=()=>pressBtn(BTN[0],'Gösterge HUD');
@@ -1840,84 +1840,60 @@ const rampState=()=>V.rampPos===0?'STOWED':V.rampPos===1?'DEPLOYED':V.ramp?'DEPL
 const sB=(n,g,tr,en,get,o)=>Object.assign({n,g,t:'bool',tr,en,get},o||{});
 const sE=(n,g,tr,en,get,act,o)=>Object.assign({n,g,t:'enum',tr,en,get,act},o||{});
 const sN=(n,g,tr,en,get,u,o)=>Object.assign({n,g,t:'num',tr,en,get,u},o||{});
-const SIG_DB=[
-  sB('Ignition_KL15','Araç','Kontak açık (KL15)','Ignition on (terminal 15)',null,{sim:false}),
-  sN('VehSpeed','Araç','Araç hızı','Vehicle speed',()=>V.speed,'km/h',{fmt:v=>v.toFixed(1)}),
-  sN('EngineSpeed','Araç','Motor devri','Engine speed',()=>Math.round(V.rpm/100)*100,'rpm'),
-  sB('EngineRun','Araç','Motor çalışıyor','Engine running',()=>V.engine),
-  sE('Gear','Araç','Vites konumu','Gear position',()=>V.gear,v=>v!=='N'),
-  sB('ParkBrake','Araç','Park freni çekili','Parking brake applied',()=>V.park),
-  sB('Hazard','Araç','Dörtlü flaşör','Hazard warning lights',()=>V.hazard),
-  sB('Headlights','Araç','Farlar','Headlights',()=>V.head),
-  sB('Kneel','Araç','Diz çöktürme','Kneeling',()=>V.kneel),
-  sB('DoorRelease','Kapı','Türfreigabe (kapı serbest)','Door release',()=>V.release),
-  sE('DoorMode','Kapı','Kapı modu','Door mode',()=>V.release?'AUTO':'MANUAL',v=>v==='AUTO'),
-  sB('DoorLock','Kapı','Kapı kilidi','Door lock',()=>V.doorLock),
-  ...DOORS.map(d=>sE('DoorState_K'+d.id,'Kapı',`Kapı ${d.id} durumu`,`Door ${d.id} state`,()=>doorS[d.id].state,v=>v!=='CLOSED')),
-  ...DOORS.map(d=>sN('DoorPos_K'+d.id,'Kapı',`Kapı ${d.id} açıklık oranı`,`Door ${d.id} opening`,()=>Math.round(doorS[d.id].pos*100),'%')),
-  ...DOORS.map(d=>sB('DoorOpenReq_K'+d.id,'Kapı',`Kapı ${d.id} açma isteği kayıtlı (Öffnung)`,`Door ${d.id} opening request stored`,()=>doorS[d.id].reqOpen)),
-  ...DOORS.map(d=>sB('DoorHold_K'+d.id,'Kapı',`Kapı ${d.id} açık tutuluyor`,`Door ${d.id} held open`,()=>doorS[d.id].hold)),
-  ...DOORS.map(d=>sN('AutoCloseTimer_K'+d.id,'Kapı',`Kapı ${d.id} otomatik kapanma sayacı`,`Door ${d.id} auto-close timer`,()=>Math.round(doorS[d.id].timer*10)/10,'s',{fmt:v=>v.toFixed(1)})),
-  ...DOORS.map(d=>sB('LightBarrier_K'+d.id,'Kapı',`Kapı ${d.id} ışık bariyeri algılama`,`Door ${d.id} light barrier detection`,()=>!!doorS[d.id].lb)),
-  sN('DoorHoldOpenTime_P','Parametre','Kapı açık kalma süresi (otomatik mod)','Door hold open time (automatic mode)',()=>AUTO_T,'s'),
-  sB('CabDoorLock','Kabin','Kabin kapısı mıknatıs kilidi','Cabin door magnetic lock',()=>CAB.lock),
-  sE('CabDoorState','Kabin','Kabin kapısı durumu','Cabin door state',()=>CAB.pos===0?'CLOSED':CAB.pos===1?'OPEN':CAB.open?'OPENING':'CLOSING',v=>v!=='CLOSED'),
-  sN('CabMagnetTimer','Kabin','Mıknatıs bırakma süresi','Magnet release timer',()=>Math.round(CAB.timer*10)/10,'s',{fmt:v=>v.toFixed(1)}),
-  sB('DriverBuzzer','Kabin','Sürücü buzzer’ı (kabin kapısı)','Driver buzzer (cabin door)',()=>CAB.buzzOn),
-  sB('BusStopBrake','Kapı','Durak freni aktif','Bus stop brake active',()=>V.stopBrake),
-  sE('Ramp_K2','Kapı','Rampa durumu (kapı 2)','Ramp state (door 2)',()=>rampState(),v=>v!=='STOWED'),
-  sB('StopReq','Durak istekleri','Herhangi bir bölgede durak isteği','Stop requested (any zone)',()=>V.stopReq),
-  ...[1,2,3].map(z=>sB('StopReq_K'+z,'Durak istekleri',`Bölge K${z} durak isteği`,`Stop request, zone K${z}`,()=>ZR[z].stop)),
-  ...[1,2,3].map(z=>sB('StopReq_Stroller_K'+z,'Durak istekleri',`Bölge K${z} bebek arabası isteği`,`Stroller request, zone K${z}`,()=>ZR[z].stroller)),
-  ...[1,2,3].map(z=>sB('StopReq_PRM_K'+z,'Durak istekleri',`Bölge K${z} engelli isteği`,`Wheelchair request, zone K${z}`,()=>ZR[z].prm)),
-  ...[1,2,3].map(z=>sB('StopReq_Elderly_K'+z,'Durak istekleri',`Bölge K${z} yaşlı yolcu isteği`,`Elderly request, zone K${z}`,()=>ZR[z].elderly)),
-  sB('IntLight','Aydınlatma','İç aydınlatma','Interior lighting',()=>V.intLight),
-  ...[1,2,3].map(k=>sN('IntLight_Kreis'+k+'_Pct','Aydınlatma',KREIS[k].name+' parlaklığı',['Circuit 1 · front','Circuit 2 · passenger left','Circuit 3 · passenger right'][k-1]+' brightness',()=>KREIS[k].eff,'%')),
-  sB('Driving','Araç','Sürüş modu','Driving mode',()=>!!st.driving),sN('SteerAngle','Araç','Direksiyon açısı','Steering angle',()=>Math.round(DRV.steer*57.3),'°'),
-  sB('FogLights','Araç','Sis farları','Fog lights',()=>V.fog),sB('Wiper','Araç','Silecek','Windscreen wiper',()=>V.wiper),sN('KneelLevel','Araç','Diz çöktürme seviyesi','Kneeling level',()=>Math.round(V.kneelPos*70),'mm'),
-  sB('IntLightDim','Aydınlatma','İç aydınlatma %50','Interior lighting 50 %',()=>V.dim)
-];
-{const have=new Set(SIG_DB.map(s=>s.n)),m=new Map();LIST.forEach(x=>(x.sig||[]).forEach(n=>{if(!m.has(n))m.set(n,[]);m.get(n).push(x.id);}));
-  [...m.keys()].sort().forEach(n=>{if(have.has(n))return;const ids=m.get(n),par=/(_P|Nv)$/.test(n)||/^G_\d+/.test(n)||/PARA/.test(n);
-    SIG_DB.push({n,g:par?'Listeden · parametre':'Listeden · sinyal',t:par?'param':'bool',tr:'Gereksinim listesinden alındı',en:ids.length+' gereksinimde geçiyor',sim:false,listReqs:ids});});}
-SIG_DB.splice(SIG_DB.findIndex(s=>s.g==='Listeden · sinyal'||s.g==='Listeden · parametre')>=0?SIG_DB.findIndex(s=>s.g==='Listeden · sinyal'||s.g==='Listeden · parametre'):SIG_DB.length,0,
-  sB('DashBtn_B01','Butonlar','Türfreigabe tuşu (B01) basılı','Door release key (B01) pressed',pulse('Dash_B01')),
-  ...[1,2,3].map(z=>sB('DrvBtn_K'+z,'Butonlar',`Sürücü kapı butonu K${z} basılı`,`Driver door button K${z} pressed`,pulse('DrvBtn_K'+z))),
-  ...[1,2,3].map(z=>sB('OeffBtn_K'+z,'Butonlar',`Kapı ${z} AÇ (Öffnung) butonu basılı`,`Door ${z} opening button pressed`,pulse('OeffBtn_K'+z))),
-  ...[1,2,3].map(z=>sB('StopBtn_K'+z,'Butonlar',`Bölge K${z} STOP butonu basılı`,`STOP button zone K${z} pressed`,pulse('StopBtn_K'+z))),
-  ...[1,2,3].map(z=>sB('SpecBtn_K'+z,'Butonlar',`Bölge K${z} özel buton basılı`,`Special button zone K${z} pressed`,pulse('SpecBtn_K'+z))));
-/* ---------- gerçek ASW isimleriyle simülatör eşlemesi (B24 envanteri) ---------- */
-{const G='ASW (gerçek isim)',dst=z=>doorS[z].state,BBC={CLOSED:'CLOSED=1',OPEN:'OPEN=2',CLOSING:'CLOSING=3',OPENING:'OPENING=4'};
- const b=(n,get,note)=>Object.assign(sB(n,G,'ASW sinyali',note||'',get),{note:note||'Simülatör eşlemesi'});
- const e=(n,get,note)=>Object.assign(sE(n,G,'ASW sinyali',note||'',get,v=>v!=='CLOSED=1'),{note});
- const L=[b('GW_StClmp15On',()=>true,'Simülatörde kontak (KL15) hep açık kabul edilir'),
-  b('GW_SpdLess1On',()=>V.speed<1,'Araç hızı < 1 km/h'),b('GW_SpdLess3On',()=>V.speed<3,'Araç hızı < 3 km/h'),
-  b('DR_StDoorRelsBtnPosn1_I',pulse('Dash_B01'),'Panodaki TF tuşu (B01) basışı, 300 ms darbe'),
-  b('DR_StDoorRelsActv',()=>V.release,'Simülatördeki Türfreigabe durumu'),
-  ...[1,2,3].map(z=>b('DR_StDoorRelsActvForDoor'+z,()=>V.release,`Türfreigabe, kapı ${z} bölgesi`)),
-  b('DR_StKneeLvlDmnd',()=>V.kneel,'Kneeling talebi'),b('DR_StBstbrkByDoorRels',()=>V.stopBrake&&V.release,'Durak freni + Türfreigabe'),
-  b('DBF_StMinOneDoorOpnd',()=>DOORS.some(d=>doorS[d.id].state!=='CLOSED'),'En az bir kapı kapalı değil'),
-  b('DBF_StAllDoorsOpnd',()=>DOORS.every(d=>doorS[d.id].state==='OPEN'),'Tüm kapılar açık'),
-  ...[1,2,3].flatMap(z=>[b(`D${z}SR_StBtnIntDoor${z}`,pulse('OeffBtn_K'+z),`Kapı ${z} iç AÇ (Öffnung) butonu basışı`),
-    b(`D${z}SR_StDoor${z}StrqBtn`,pulse('StopBtn_K'+z),`Bölge K${z} STOP butonu basışı`),
-    b(`D${z}SR_StStrqDoor${z}Saved`,()=>ZR[z].stop,`Bölge K${z} durak isteği kayıtlı (Vorspeicherung)`),
-    b(`D${z}SR_StDoor${z}StrqDisp`,()=>ZR[z].stop,`Bölge K${z} durak isteği göstergesi`),
-    b(`DBF_StsDoor${z}Open`,()=>dst(z)==='OPEN',`Kapı ${z} açık`),b(`DBF_StsDoor${z}Opg`,()=>dst(z)==='OPENING',`Kapı ${z} açılıyor`),
-    b(`BBC_StDoor${z}Libar`,()=>!!doorS[z].lb,`Kapı ${z} ışık bariyeri`),b(`DOM_StDoor${z}OldMBtn`,()=>ZR[z].elderly,`Bölge K${z} yaşlı yolcu isteği`)]),
-  ...[2,3].flatMap(z=>[b(`D${z}PB_StStrqDoor${z}FromPrmBtn`,()=>ZR[z].stroller,`Kapı ${z} bebek arabası isteği`),
-    b(`D${z}W_StStrqDoor${z}FromWhlchrBtn`,()=>ZR[z].prm,`Kapı ${z} tekerlekli sandalye isteği`),
-    b(`D${z}A_StDoorOpngRqst`,()=>V.release&&dst(z)==='OPENING',`Kapı ${z} otomatik modda açılma isteği`),
-    b(`D${z}A_StDoorClsngRqst`,()=>V.release&&dst(z)==='CLOSING',`Kapı ${z} otomatik modda kapanma isteği`),
-    b(`D${z}A_StDoorClsngBlkgRqst`,()=>!!doorS[z].hold,`Kapı ${z} kapanma bloklama (açık tutma)`),
-    b(`DBF_StDoor${z}OpgRqst`,()=>dst(z)==='OPENING',`Kapı ${z} ana açılma isteği`),
-    b(`BD${z<3?12:34}_ReqDoor${z}Opg_OC`,()=>dst(z)==='OPENING',`Kapı ${z} açılma isteği, gövde CAN çıkışı`),
-    b(`D${z}M_StDrvrBtnOpgDoor${z}`,pulse('DrvBtn_K'+z),`Sürücü kapı ${z} butonu basışı`),
-    e(`BBC_StDoor${z}`,()=>BBC[dst(z)],`Kapı ${z} durumu (CAN): CLOSED=1, OPEN=2, CLOSING=3, OPENING=4`)]),
-  b('D1A_StDoorWngfrOpngRqst',()=>V.release&&dst(1)==='OPENING','Kapı 1 ön kanat otomatik açılma isteği'),
-  b('DBF_StDoor1WngfrOpgRqst',()=>dst(1)==='OPENING','Kapı 1 ön kanat ana açılma isteği'),
-  b('D1M_StDrvrBtnOpgWngfrDoor1',pulse('DrvBtn_K1'),'Sürücü kapı 1 butonu basışı'),
-  e('BBC_StDoor1Wngfr',()=>BBC[dst(1)],'Kapı 1 ön kanat durumu (CAN)'),e('BBC_StDoor1Wngre',()=>BBC[dst(1)],'Kapı 1 arka kanat durumu (CAN)')];
- L.forEach(x=>{x.aswLive=true;const k=SIG_DB.findIndex(s=>s.n===x.n);if(k>=0){x.listReqs=SIG_DB[k].listReqs;SIG_DB.splice(k,1);}});SIG_DB.push(...L);}
+/* Tüm sinyaller B24 ASW envanterindeki (Excel) gerçek adlarla. Değerler simülatörden okunur (eşleme). */
+const SIG_DB=[];
+{const dst=z=>doorS[z].state,BBC={CLOSED:'CLOSED=1',OPEN:'OPEN=2',CLOSING:'CLOSING=3',OPENING:'OPENING=4'};
+ const b=(n,g,get,note)=>Object.assign(sB(n,g,note,'',get),{note}),e=(n,g,get,act,note)=>Object.assign(sE(n,g,note,'',get,act),{note}),
+   num=(n,g,get,u,note,o)=>Object.assign(sN(n,g,note,'',get,u,o),{note}),closed=v=>v!=='CLOSED=1';
+ const GA='Araç (Gateway)',GR='Türfreigabe',GS='Durak isteği',GP='Bebek arabası / engelli / yaşlı',GD='Kapı durumu (temel fonksiyon / CAN)',GO='Otomatik kapı',GM='Sürücü butonları',GC='Kabin kapısı ve buzzer',GRp='Rampa',GPa='Parametre durumları';
+ SIG_DB.push(
+  b('GW_StClmp15On',GA,()=>true,'Kontak KL15 (simülatörde hep açık)'),
+  num('GW_SpdVehSig',GA,()=>V.speed,'km/h','Araç hızı',{fmt:v=>v.toFixed(1)}),
+  b('GW_SpdLess1On',GA,()=>V.speed<1,'Hız < 1 km/h'),b('GW_SpdLess3On',GA,()=>V.speed<3,'Hız < 3 km/h'),
+  b('GW_StEngRungOn',GA,()=>V.engine,'Motor çalışıyor'),e('GW_ValActGear',GA,()=>V.gear,v=>v!=='N','Aktif vites'),
+  b('GW_StPrkgBrkEngdOn',GA,()=>V.park,'Park freni çekili'),b('GW_AcvBstbrkOn',GA,()=>V.stopBrake,'Durak freni aktif'),
+  b('GW_StEcasKneeAcvOn',GA,()=>V.kneel,'ECAS kneeling aktif'),
+  b('DR_StDoorRelsBtnPosn1_I',GR,pulse('Dash_B01'),'Türfreigabe tuşu (B01) basışı, 300 ms darbe'),
+  b('DR_StDoorRelsActv',GR,()=>V.release,'Türfreigabe aktif'),
+  ...[1,2,3].map(z=>b('DR_StDoorRelsActvForDoor'+z,GR,()=>V.release,`Türfreigabe, kapı ${z} bölgesi`)),
+  b('DR_StKneeLvlDmnd',GR,()=>V.kneel,'Kneeling talebi'),b('DR_StBstbrkByDoorRels',GR,()=>V.stopBrake&&V.release,'Türfreigabe ile durak freni'),
+  b('DSRD_StDoorsStopReqDisp',GS,()=>V.stopReq,'Herhangi bir kapıda durak isteği (gösterge)'),
+  ...[1,2,3].flatMap(z=>[b(`D${z}SR_StDoor${z}StrqBtn`,GS,pulse('StopBtn_K'+z),`Bölge K${z} STOP butonu basışı`),
+    b(`D${z}SR_StStrqDoor${z}Saved`,GS,()=>ZR[z].stop,`Kapı ${z} durak isteği kayıtlı (Vorspeicherung)`),
+    b(`D${z}SR_StDoor${z}StrqDisp`,GS,()=>ZR[z].stop,`Kapı ${z} durak isteği göstergesi`),
+    b(`D${z}SR_StBtnIntDoor${z}`,GS,pulse('OeffBtn_K'+z),`Kapı ${z} iç AÇ (Öffnung) butonu basışı`)]),
+  ...[2,3].flatMap(z=>[b(`D${z}PB_StDoor${z}IntPrmBtn`,GP,pulse('stroller_K'+z),`Kapı ${z} bebek arabası butonu basışı`),
+    b(`D${z}PB_StStrqDoor${z}FromPrmBtn`,GP,()=>ZR[z].stroller,`Kapı ${z} bebek arabası isteği`),
+    b(`D${z}W_StDoor${z}IntWhlchrBtn`,GP,pulse('prm_K'+z),`Kapı ${z} tekerlekli sandalye butonu basışı`),
+    b(`D${z}W_StStrqDoor${z}FromWhlchrBtn`,GP,()=>ZR[z].prm,`Kapı ${z} tekerlekli sandalye isteği`)]),
+  ...[1,2,3].flatMap(z=>[b(`DOM_StDoor${z}OldMBtn`,GP,()=>ZR[z].elderly,`Kapı ${z} yaşlı yolcu butonu`),b(`DOM_StStrqDoor${z}FromOldMBtn`,GP,()=>ZR[z].elderly,`Kapı ${z} yaşlı yolcu isteği`)]),
+  e('BBC_StDoor1Wngfr',GD,()=>BBC[dst(1)],closed,'Kapı 1 ön kanat durumu (CAN): CLOSED=1, OPEN=2, CLOSING=3, OPENING=4'),
+  e('BBC_StDoor1Wngre',GD,()=>BBC[dst(1)],closed,'Kapı 1 arka kanat durumu (CAN)'),
+  ...[2,3].map(z=>e(`BBC_StDoor${z}`,GD,()=>BBC[dst(z)],closed,`Kapı ${z} durumu (CAN): CLOSED=1, OPEN=2, CLOSING=3, OPENING=4`)),
+  ...[1,2,3].flatMap(z=>[b(`DBF_StsDoor${z}Open`,GD,()=>dst(z)==='OPEN',`Kapı ${z} açık`),b(`DBF_StsDoor${z}Opg`,GD,()=>dst(z)==='OPENING',`Kapı ${z} açılıyor`),
+    b(`BBC_StDoor${z}Libar`,GD,()=>!!doorS[z].lb,`Kapı ${z} ışık bariyeri`)]),
+  b('DBF_StDoor1WngfrOpgRqst',GD,()=>dst(1)==='OPENING','Kapı 1 ön kanat ana açılma isteği'),
+  ...[2,3].flatMap(z=>[b(`DBF_StDoor${z}OpgRqst`,GD,()=>dst(z)==='OPENING',`Kapı ${z} ana açılma isteği`),
+    b(`DBF_StDoor${z}ClsgRqst`,GD,()=>dst(z)==='CLOSING',`Kapı ${z} ana kapanma isteği`),
+    b(`BD${z<3?12:34}_ReqDoor${z}Opg_OC`,GD,()=>dst(z)==='OPENING',`Kapı ${z} açılma isteği, gövde CAN çıkışı`)]),
+  b('DBF_StMinOneDoorOpnd',GD,()=>DOORS.some(d=>doorS[d.id].state!=='CLOSED'),'En az bir kapı açık'),
+  b('DBF_StAllDoorsOpnd',GD,()=>DOORS.every(d=>doorS[d.id].state==='OPEN'),'Tüm kapılar açık'),
+  b('CLS_StDoorVlvLockd',GD,()=>V.doorLock,'Kapı valfi kilitli'),
+  b('D1A_StDoorWngfrOpngRqst',GO,()=>V.release&&dst(1)==='OPENING','Kapı 1 ön kanat otomatik açılma isteği'),
+  b('D1A_StDoorWngfrClsngBlkgRqst',GO,()=>!!doorS[1].hold,'Kapı 1 ön kanat kapanma bloklama (açık tutma)'),
+  ...[2,3].flatMap(z=>[b(`D${z}A_StDoorOpngRqst`,GO,()=>V.release&&dst(z)==='OPENING',`Kapı ${z} otomatik modda açılma isteği`),
+    b(`D${z}A_StDoorClsngRqst`,GO,()=>V.release&&dst(z)==='CLOSING',`Kapı ${z} otomatik modda kapanma isteği`),
+    b(`D${z}A_StDoorClsngBlkgRqst`,GO,()=>!!doorS[z].hold,`Kapı ${z} kapanma bloklama (açık tutma)`)]),
+  ...[1,2,3].map(z=>b(`D${z}A_StDoor${z}OpndByAutoMode`,GO,()=>V.release&&dst(z)==='OPEN',`Kapı ${z} otomatik modda açıldı`)),
+  b('D1M_StDrvrBtnOpgWngfrDoor1',GM,pulse('DrvBtn_K1'),'Sürücü kapı 1 butonu basışı'),
+  ...[2,3].map(z=>b(`D${z}M_StDrvrBtnOpgDoor${z}`,GM,pulse('DrvBtn_K'+z),`Sürücü kapı ${z} butonu basışı`)),
+  e('DAD_StDrvrDoorOpnd',GC,()=>CAB.pos===0?'Close=0':'Open=1',v=>v!=='Close=0','Kabin kapısı: 0 = kapalı, 1 = açık'),
+  b('DAD_StDrvrDoorLockRqst',GC,()=>CAB.lock,'Kabin kapısı kilit isteği (mıknatıs)'),
+  b('DRB_StDrvrBuzActv',GC,()=>!!CAB.buzzOn,'Sürücü buzzer’ı aktif'),
+  b('ER_StRampAllOpnd',GRp,()=>rampState()==='DEPLOYED','Rampa tamamen açık'),b('ER_StRampClsd',GRp,()=>rampState()==='STOWED','Rampa kapalı'),
+  ...[1,2,3].map(z=>num(`D${z}A_StDoor${z}AutoOpndTiGp`,GPa,()=>AUTO_T,'s',`Kapı ${z} otomatik modda açık kalma süresi (MTS T08)`)));
+ SIG_DB.forEach(x=>x.aswLive=true);}
+
 SIG_DB.forEach(s=>{if(s.sim===undefined)s.sim=true;s.hist=[];s.changes=0;s.lastT=0;s.prev=undefined;s.cur=undefined;
   s.reqs=[...REQS.filter(r=>(r.signals||[]).includes(s.n)).map(r=>r.id),...(s.listReqs||[])];});
 const SIG_GROUPS=[...new Set(SIG_DB.map(s=>s.g))];
@@ -1929,8 +1905,8 @@ function sampleSignals(){
     if(k!==s.prev){if(s.prev!==undefined){s.changes++;s.lastT=t;if(s.t!=='num'){s.hist.unshift({t:now_s(),v:sigFmt(s,v)});if(s.hist.length>12)s.hist.pop();}}s.prev=k;}});
 }
 /* ---------- yan panel tablosu ---------- */
-const SIDE_SIG=SIG_DB.filter(s=>s.sim&&!s.aswLive&&!/^DoorPos_|^StopReq_(Stroller|PRM|Elderly)_K1$|^DoorHold_K1$|^AutoCloseTimer_K1$/.test(s.n));
-function sideHtml(s){const v=s.cur;if(s.n.startsWith('DoorState_')){const cls=v==='CLOSED'?'ok':v==='OPEN'?'open':'move';return `<span class="st ${cls}">${esc(v)}</span>`;}
+const SIDE_SIG=['GW_SpdVehSig','GW_StEngRungOn','GW_StPrkgBrkEngdOn','GW_AcvBstbrkOn','GW_StEcasKneeAcvOn','DR_StDoorRelsActv','BBC_StDoor1Wngfr','BBC_StDoor2','BBC_StDoor3','DSRD_StDoorsStopReqDisp','D1SR_StStrqDoor1Saved','D2SR_StStrqDoor2Saved','D3SR_StStrqDoor3Saved','D2A_StDoorClsngBlkgRqst','D3A_StDoorClsngBlkgRqst','ER_StRampAllOpnd','DAD_StDrvrDoorOpnd','DAD_StDrvrDoorLockRqst','DRB_StDrvrBuzActv','D2A_StDoor2AutoOpndTiGp'].map(n=>SIG_DB.find(s=>s.n===n)).filter(Boolean);
+function sideHtml(s){const v=s.cur;if(/^BBC_StDoor\d(Wngfr)?$/.test(s.n)){const cls=v==='CLOSED=1'?'ok':v==='OPEN=2'?'open':'move';return `<span class="st ${cls}">${esc(v)}</span>`;}
   if(s.t==='num')return esc(sigFmt(s,v));return `<span class="st ${sigActive(s,v)?'on':''}">${esc(sigFmt(s,v))}</span>`;}
 $('#sig').innerHTML=SIDE_SIG.map((s,i)=>`<tr><td>${s.n}</td><td id="sg${i}"></td></tr>`).join('');
 const sigCells=SIDE_SIG.map((_,i)=>$('#sg'+i));
@@ -1942,7 +1918,7 @@ function renderSigView(){
   const act=SIG_DB.filter(s=>sigActive(s,s.cur)).length;
   $('#dtoc').innerHTML=`<div class="tochead">Gruplar</div><a class="tocg${SIG_G===''?' cur':''}" href="#" data-tsg=""><span>Tümü</span><em>${SIG_DB.length}</em></a>`+
     SIG_GROUPS.map(g=>`<a class="tocg${SIG_G===g?' cur':''}" href="#" data-tsg="${esc(g)}"><span>${esc(g)}</span><em>${SIG_DB.filter(s=>s.g===g).length}</em></a>`).join('')+
-    `<p class="note tocnote">“ASW (gerçek isim)” grubu, B24 envanterindeki sinyallerin simülatördeki karşılığıdır. 6.082 sinyalin tamamı için “ASW envanteri” sekmesine bakın.</p>`;
+    `<p class="note tocnote">Buradaki tüm sinyaller B24 ASW envanterindeki gerçek adlardır; değerler simülatörden okunur. 6.082 sinyalin tamamı için “ASW envanteri” sekmesine bakın.</p>`;
   $('#dmain').innerHTML=`<div class="dwrap wide">${modeBar()}
     <div class="dsum"><div><div class="eyebrow">Sinyal kataloğu · Signal catalogue</div><h3>${SIG_DB.length} sinyal · <span id="sigActN">${act}</span> aktif</h3>
       <p>Değerler simülatörden canlı okunur. Satıra tıklayınca son değişimler ve bağlı gereksinimler açılır.</p></div>
@@ -2110,10 +2086,10 @@ function chainPlot(c){CH.sel=[...new Set([...c.cond,...c.steps.map(s=>s[0])])].f
 /* ---------- Sinyal kaydı ve zaman grafiği ---------- */
 const REC={t:[],v:[],sigs:null,max:12000,t0:performance.now(),acc:0,now(){return (performance.now()-this.t0)/1000;}};
 function recSample(){if(!REC.sigs)REC.sigs=SIG_DB.filter(s=>s.sim);REC.t.push(REC.now());REC.v.push(REC.sigs.map(s=>s.get()));if(REC.t.length>REC.max){REC.t.splice(0,1500);REC.v.splice(0,1500);}}
-const CH={sel:['DashBtn_B01','DoorRelease','StopBtn_K2','OeffBtn_K2','DrvBtn_K2','DoorState_K2','StopReq_K2','BusStopBrake'],win:10,live:true,start:null,end:0,hx:null,title:''};
+const CH={sel:['DR_StDoorRelsBtnPosn1_I','DR_StDoorRelsActv','D2SR_StDoor2StrqBtn','D2SR_StBtnIntDoor2','D2M_StDrvrBtnOpgDoor2','BBC_StDoor2','D2SR_StStrqDoor2Saved','GW_AcvBstbrkOn'],win:10,live:true,start:null,end:0,hx:null,title:''};
 function chartRange(){if(!CH.live&&CH.start!=null)return [CH.start,CH.end];const e=CH.live?REC.now():CH.end;return [e-CH.win,e];}
 function idxAt(t){const T=REC.t;let lo=0,hi=T.length-1;if(hi<0)return -1;if(t<=T[0])return 0;while(lo<hi){const m=(lo+hi+1)>>1;if(T[m]<=t)lo=m;else hi=m-1;}return lo;}
-const ENUMCOL={CLOSED:'--chip',OPEN:'--warn',OPENING:'--accent',CLOSING:'--accent',AUTO:'--ok',MANUAL:'--chip',STOWED:'--chip',DEPLOYED:'--warn',DEPLOYING:'--accent',STOWING:'--accent',N:'--chip',D:'--ok'};
+const ENUMCOL={'CLOSED=1':'--chip','OPEN=2':'--warn','OPENING=4':'--accent','CLOSING=3':'--accent','Close=0':'--chip','Open=1':'--warn',CLOSED:'--chip',OPEN:'--warn',OPENING:'--accent',CLOSING:'--accent',AUTO:'--ok',MANUAL:'--chip',STOWED:'--chip',DEPLOYED:'--warn',DEPLOYING:'--accent',STOWING:'--accent',N:'--chip',D:'--ok'};
 function chartHTML(){
   const opts=SIG_DB.filter(s=>s.sim&&!CH.sel.includes(s.n)).map(s=>`<option value="${s.n}">${s.n}</option>`).join('');
   return `<section class="chart"><div class="chead"><div><div class="eyebrow">Zaman grafiği · lojik analizör</div><h4 id="chTitle">${esc(CH.title||'Canlı kayıt')}</h4></div>
@@ -2165,8 +2141,8 @@ function drawChart(){
     const tip=$('#ctip');if(tip&&i>=0){tip.hidden=false;tip.style.left=Math.min(W-200,CH.hx+10)+'px';tip.innerHTML=`<b>${(t-t0).toFixed(2)} s</b>`+rows.map(o=>`<div><span>${o.n}</span><code>${esc(sigFmt(o.s,REC.v[i][o.k]))}</code></div>`).join('');}}
   else{const tip=$('#ctip');if(tip)tip.hidden=true;}
 }
-function showRecording(r){if(!r.rec)return;const base=['DashBtn_B01','DoorRelease','BusStopBrake'];
-  CH.sel=[...new Set([...base,...(r.signals||[]).filter(n=>SIG_DB.some(s=>s.n===n&&s.sim)),...['DrvBtn_K2','OeffBtn_K2','StopBtn_K2','SpecBtn_K2','DoorState_K2'].filter(n=>JSON.stringify(r.signals||[]).includes(n.slice(-2))||n==='DoorState_K2')])];
+function showRecording(r){if(!r.rec)return;const base=['DR_StDoorRelsBtnPosn1_I','DR_StDoorRelsActv','GW_AcvBstbrkOn'];
+  CH.sel=[...new Set([...base,...(r.signals||[]).filter(n=>SIGN.has(n)),'D2SR_StDoor2StrqBtn','D2SR_StBtnIntDoor2','D2M_StDrvrBtnOpgDoor2','BBC_StDoor2'])].slice(0,14);
   CH.live=false;CH.start=r.rec.t0;CH.end=r.rec.t1;CH.title=r.id+' · otomatik test kaydı ('+(r.rec.t1-r.rec.t0).toFixed(1)+' s)';setView('sigs');}
 function updateSigView(force){
   if(SIG_MODE!=='live'){updateInvLive();return;}

@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev N)
+# Otobüs Tasarım Stüdyosu (konsept, Rev O)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -108,3 +108,8 @@ Sinyaller: DoorRelease, DoorState_K2
 - 9 fonksiyon zinciri (TF → kapı 2 açılır, Vorspeicherung, engelli, bebek arabası, yaşlı, otomatik kapanma, sürücü butonu, TF ile kneeling, TF ile durak freni). Her bağlantı envanterde kontrol edilir (✓ okuyor / ↻ aynı ASW / ↯ CAN üzerinden).
 - Yol bulucu: iki sinyal arasında ASW giriş/çıkış bağlantısıyla olası en kısa akış.
 - 59 gerçek ASW sinyali (DR_StDoorRelsActv, D2A_StDoorOpngRqst, BBC_StDoor2 …) simülatöre eşlendi; grafikte ve testlerde canlı izlenebilir.
+
+## Rev O
+- Simülatörün kendi sinyal adları (DoorRelease, DoorState_K2, StopReq_K2 …) kaldırıldı; tüm sinyaller B24 ASW envanterindeki gerçek adlarla (88 sinyal, hepsi envanterde doğrulandı).
+- Gereksinim testleri, otomatik test paneli, grafik, yan panel, olay kaydı ve buton açıklamaları yeni adları kullanıyor.
+- Envanterde karşılığı olmayan simülatör sinyalleri (silecek, sis farı, iç aydınlatma Kreis, direksiyon, motor devri, kapı açıklık %, otomatik kapanma sayacı) katalogdan çıkarıldı; fonksiyonlar çalışmaya devam ediyor.
