@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev O)
+# Otobüs Tasarım Stüdyosu (konsept, Rev P)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -113,3 +113,12 @@ Sinyaller: DoorRelease, DoorState_K2
 - Simülatörün kendi sinyal adları (DoorRelease, DoorState_K2, StopReq_K2 …) kaldırıldı; tüm sinyaller B24 ASW envanterindeki gerçek adlarla (88 sinyal, hepsi envanterde doğrulandı).
 - Gereksinim testleri, otomatik test paneli, grafik, yan panel, olay kaydı ve buton açıklamaları yeni adları kullanıyor.
 - Envanterde karşılığı olmayan simülatör sinyalleri (silecek, sis farı, iç aydınlatma Kreis, direksiyon, motor devri, kapı açıklık %, otomatik kapanma sayacı) katalogdan çıkarıldı; fonksiyonlar çalışmaya devam ediyor.
+
+## Rev P
+- **C Kod** sekmesi: ASW'nin üretilmiş C dosyaları (.c/.h) sürükle-bırak ile yüklenir, tarayıcıda derlenir (C → JavaScript), step fonksiyonu (ör. `DR_100ms`) simülatörde periyodunda çalışır.
+- Girişler (Get_) her adımda simülatörden okunur; elle sabitlenebilir veya darbe verilebilir. Çıkışlar (Set_) sinyal kataloğuna ve grafiğe yansır; `DR_StDoorRelsActv` otobüsün Türfreigabe'sini sürer. TF tuşu C modunda koda `DR_StDoorRelsBtnPosn1_I` / `DR_StDoorRelsDisadBtnPosn1_I` darbesi gönderir.
+- Parametreler (_P / Nv) ekrandan değiştirilir; iç durum (B/DW/PrevZCX) izlenir; değişiklikler, orijinale dönüş ve zip indirme var.
+- Eksik sabitler için `SIM_varsayimlar.c` otomatik oluşur (S-R flip-flop tablosu, süre sabitleri; VARSAYIM). `…_data.c` eklenince silinmeli.
+- Kaynak kod yalnızca kullanıcının tarayıcısında saklanır, yayınlanan sayfaya eklenmez.
+- Derleyici gcc ile karşılaştırıldı (`tools/ctest`): Doors_DoorsRels, 200.000 adım, 0 fark.
+- Düzeltme: Gereksinimler/Sinyaller sayfasından simülatöre dönünce örtü gizlenmiyordu (`[hidden]` kuralı).

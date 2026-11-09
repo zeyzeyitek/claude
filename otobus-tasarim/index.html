@@ -149,6 +149,7 @@ body.demo-on #panel{visibility:hidden}
 .ctools select{border:1px solid var(--line);border-radius:5px;background:var(--chip);color:var(--ink);font:500 12px var(--f-mono);padding:5px 6px;max-width:220px}
 .cchips{display:flex;flex-wrap:wrap;gap:4px}
 .cwrap{position:relative;overflow-x:auto}#chart{display:block;width:100%;min-width:520px;cursor:crosshair}
+[hidden]{display:none!important}
 #ctip[hidden]{display:none}
 #ctip{position:absolute;top:6px;min-width:180px;background:var(--panel-a);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:400 11px var(--f-mono);pointer-events:none;display:grid;gap:2px;box-shadow:0 4px 12px rgba(0,0,0,.18)}
 #ctip div{display:flex;justify-content:space-between;gap:10px}#ctip code{font:600 11px var(--f-mono)}
@@ -310,6 +311,28 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
 .cchips2{display:grid;gap:6px;margin-top:6px} .cchip{display:flex;gap:8px;flex-wrap:wrap;align-items:center} .cchip em{font-style:normal;font-size:12.5px;color:var(--muted)}
 .pf{display:flex;gap:10px;flex-wrap:wrap;align-items:end} .pf label{display:grid;gap:4px;font:600 11px var(--f-mono);color:var(--muted);flex:1;min-width:220px}
 .pf input{font:500 13px var(--f-mono);padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
+.cwrap .dsum{grid-template-columns:1fr}
+.cctl{display:flex;flex-wrap:wrap;gap:8px}
+.cstat{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.cst-chip{font:600 12px var(--f-mono);padding:3px 8px;border-radius:4px;background:var(--chip);color:var(--ink)} .cst-chip.ok{background:var(--ok-soft);color:var(--ok)} .cst-chip.bad,.cst-chip.warn{background:var(--fail-soft);color:var(--warn)}
+#cMsgs:empty{display:none} #cMsgs{display:grid;gap:8px}
+.cmsg{border:1px solid var(--line);border-left-width:4px;border-radius:8px;padding:10px 12px;background:var(--panel);display:grid;gap:6px;justify-items:start;font-size:14px;line-height:1.45}
+.cmsg.bad{border-left-color:var(--warn);background:var(--fail-soft)} .cmsg.warn{border-left-color:var(--door)} .cmsg.info{border-left-color:var(--prm)} .cmsg summary{cursor:pointer;font-weight:600}
+.ccard{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden;min-width:0}
+.chd2{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)} .chd2 .sp{flex:1}
+#cSel{font:500 13px var(--f-mono);padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);max-width:100%}
+.ced{display:grid;grid-template-columns:auto minmax(0,1fr);height:min(62vh,640px)}
+.cgut{margin:0;padding:10px 8px 10px 10px;overflow:hidden;text-align:right;color:var(--muted);font:12.5px/1.5 var(--f-mono);background:var(--chip);user-select:none;border-right:1px solid var(--line);min-width:3.2em}
+#cTa{margin:0;padding:10px 12px;border:0;resize:none;outline:none;font:12.5px/1.5 var(--f-mono);color:var(--ink);background:var(--bg);white-space:pre;overflow:auto;tab-size:2;width:100%;box-sizing:border-box;height:100%}
+#cTa:focus{box-shadow:inset 0 0 0 2px var(--accent)}
+.ctabs{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--line)}
+.ccard .stable-wrap{border:0;border-radius:0;max-height:60vh;overflow:auto} .ccard .stable-wrap>.note{padding:8px 12px;margin:0}
+.cforce{white-space:nowrap} .cforce input[type=number],.cpar{width:84px;font:500 12.5px var(--f-mono);padding:4px 6px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);margin-left:6px}
+.cdrop{display:grid;gap:10px;place-items:center;text-align:center;border:2px dashed var(--line);border-radius:10px;padding:44px 20px;cursor:pointer;background:var(--panel)} .cdrop:hover,.cdrop.over{border-color:var(--accent)} .cdrop span{color:var(--muted);font-size:13.5px;max-width:60ch}
+.cadd{cursor:pointer}
+#cDiff{padding:10px 12px;border-bottom:1px solid var(--line);max-height:40vh;overflow:auto}
+.cdiff{margin:6px 0 0;font:12px/1.55 var(--f-mono);white-space:pre} .cdiff button{all:unset;cursor:pointer} .cdiff button:hover{text-decoration:underline} .dl-add{color:var(--ok)} .dl-del{color:var(--warn)}
+#hC{background:var(--prm);color:#fff}
 </style>
 
 <div id="app">
@@ -318,9 +341,9 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev O</div>
+    <div class="eyebrow">Konsept · Rev P</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
-    <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button></nav>
+    <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
   </div>
 
   <div id="modebar" class="float" role="toolbar" aria-label="Görünüm">
@@ -340,6 +363,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hud">
     <div id="hudBar">
       <button class="hbtn" id="hRelease" aria-pressed="false"><canvas width="44" height="44" id="hRelIcon"></canvas>Türfreigabe<span class="lamp"></span></button>
+      <button class="hbtn" id="hC" hidden title="C kodu simülatöre bağlı; tıklayınca C Kod sayfası açılır">C kodu</button>
       <button class="hbtn" id="hDrive" aria-pressed="false"><canvas width="44" height="44" id="hDrvIcon"></canvas>Sür<span class="lamp"></span></button>
       <button class="hbtn" id="hHome" hidden>Durağa dön</button>
       <button class="hbtn" id="hLight" aria-pressed="true"><canvas width="44" height="44" id="hLightIcon"></canvas>İç aydınlatma<span class="lamp"></span></button>
@@ -420,7 +444,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="docs" hidden>
     <header class="dhead">
       <h2 id="docTitle">Gereksinimler</h2>
-      <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="false">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button></nav>
+      <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="false">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
       <input type="search" id="docSearch" placeholder="Ara…" aria-label="Ara">
     </header>
     <div class="dbody"><nav class="dtoc" id="dtoc" aria-label="İçindekiler"></nav><main class="dmain" id="dmain"></main></div>
@@ -450,7 +474,7 @@ const AXLES=[3.3,-2.6], ARCH=0.65;
 const KIND={stroller:{name:'Bebek arabası',sig:z=>`D${z}PB_StStrqDoor${z}FromPrmBtn`,code:'BTN-STR'},prm:{name:'Engelli',sig:z=>`D${z}W_StStrqDoor${z}FromWhlchrBtn`,code:'BTN-PRM'},elderly:{name:'Yaşlı yolcu',sig:z=>`DOM_StStrqDoor${z}FromOldMBtn`,code:'BTN-ELD'}};
 
 /* ================= Araç durumu ================= */
-const PRS={};const pulse=k=>()=>performance.now()-(PRS[k]||-1e9)<300;
+const PRS={};const CSIM={files:{},cur:null,build:null,G:{},on:false,paused:false,acc:0,steps:0,period:100,step:null,forces:{},params:{},err:null,tab:'out',added:[],dirty:false};const pulse=k=>()=>performance.now()-(PRS[k]||-1e9)<300;
 const V={speed:0,rpm:620,gear:'N',stopReq:false,req:{stroller:false,prm:false,elderly:false},temp:17,odo:47389,stopBrake:false,intLight:true,night:false,
   release:false,kneel:false,kneelPos:0,fog:false,wiper:false,ramp:false,rampPos:0,dim:false,engine:true,hazard:false,head:false,park:true,stopBrakeMan:false,doorLock:false};
 const DOOR_T=2.4;
@@ -1330,9 +1354,10 @@ function setView(v,query){
   $('#docs').hidden=v==='sim';
   const s=$('#docSearch');s.value=query||'';
   if(v==='reqs'){$('#docTitle').textContent='Gereksinimler';s.placeholder='Ara: REQ no, metin, sinyal…';renderDocReqs();}
+  if(v==='code'){$('#docTitle').textContent='C Kod';s.placeholder='Ara: giriş, çıkış, parametre…';renderCode();}
   if(v==='sigs'){$('#docTitle').textContent='Sinyaller';s.placeholder='Ara: sinyal adı, açıklama (envanterde 6.082 sinyal)…';loadInv().catch(()=>{});renderSigView();}
   if(v!=='sim'){$('#dmain').scrollTop=0;}else $('#view').focus({preventScroll:true});
-  try{const h=v==='reqs'?'#gereksinimler':v==='sigs'?'#sinyaller':'';if(location.hash!==h)history.replaceState(null,'',h||location.pathname+location.search);}catch(e){}
+  try{const h=v==='reqs'?'#gereksinimler':v==='sigs'?'#sinyaller':v==='code'?'#ckod':'';if(location.hash!==h)history.replaceState(null,'',h||location.pathname+location.search);}catch(e){}
 }
 function applyDocSearch(){
   const q=$('#docSearch').value.trim().toLowerCase();
@@ -1343,6 +1368,7 @@ function applyDocSearch(){
       if(q){const n=list.filter(r=>r.group===gid&&qOf(r).includes(q)).length;sec.hidden=!n;if(n){d.open=true;fillChapter(gid,q);}}
       else{sec.hidden=false;d.open=OPEN_G.has(gid);const el=sec.querySelector('[data-gl]');if(d.open)fillChapter(gid,'');else{el.innerHTML='';el.dataset.filled='';}}});}
   if(VIEW==='sigs'){if(SIG_MODE==='inv')renderInvMain();else updateSigView(true);}
+  if(VIEW==='code'){const io=$('#cIO');if(io)io.innerHTML=cIOHTML();}
 }
 let searchT=0;$('#docSearch').addEventListener('input',()=>{clearTimeout(searchT);searchT=setTimeout(applyDocSearch,160);});
 document.addEventListener('click',e=>{const b=e.target.closest('.vbtn');if(b)setView(b.dataset.view);const g=e.target.closest('[data-goview]');if(g)setView(g.dataset.goview);});
@@ -1351,11 +1377,19 @@ $('#dmain').addEventListener('mouseleave',()=>{CH.hx=null;},true);
 $('#dmain').addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classList.contains('aswd')&&d.open)fillAsw(d);if(!d.classList||!d.classList.contains('gdet')||d.dataset.g==='_add')return;const gid=d.dataset.g;
   if(d.open){if(!$('#docSearch').value.trim())OPEN_G.add(gid);const el=d.querySelector('[data-gl]');if(el&&!el.dataset.filled)fillChapter(gid,$('#docSearch').value.trim().toLowerCase());}
   else if(!$('#docSearch').value.trim())OPEN_G.delete(gid);},true);
-$('#dmain').addEventListener('change',e=>{
+$('#dmain').addEventListener('input',e=>{if(VIEW==='code')cCodeInput(e);});
+$('#dmain').addEventListener('scroll',e=>{if(e.target.id==='cTa'){const g=$('#cGut');if(g)g.scrollTop=e.target.scrollTop;}},true);
+$('#dmain').addEventListener('keydown',e=>{if(e.target.id==='cTa'&&e.key==='Tab'&&!e.shiftKey){e.preventDefault();const t=e.target,a=t.selectionStart;t.setRangeText('  ',a,t.selectionEnd,'end');cCodeInput({target:t});}
+  if(e.target.id==='cTa'&&(e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();cBuild();if(CSIM.build&&!CSIM.on)cSetOn(true);renderCode();}});
+$('#dmain').addEventListener('dragover',e=>{if(VIEW!=='code')return;e.preventDefault();const d=$('#cDrop');if(d)d.classList.add('over');});
+$('#dmain').addEventListener('dragleave',()=>{const d=$('#cDrop');if(d)d.classList.remove('over');});
+$('#dmain').addEventListener('drop',e=>{if(VIEW!=='code')return;e.preventDefault();if(e.dataTransfer&&e.dataTransfer.files.length)cAddFiles(e.dataTransfer.files);});
+$('#dmain').addEventListener('change',e=>{if(VIEW==='code'&&cCodeChange(e))return;
   if(e.target.id==='cwin'){const v=+e.target.value;if(v){CH.win=v;CH.start=null;if(!CH.live)CH.end=REC.now();CH.title='';renderSigView();}return;}
   if(e.target.id==='cadd'){if(e.target.value){CH.sel.push(e.target.value);renderSigView();}return;}const s=e.target.closest('select[data-mv]');if(!s)return;const r=IMPORTED.find(x=>x.id===s.dataset.mv);if(!r)return;
   r.group=s.value;LST[r.id]=Object.assign(LST[r.id]||{},{g:s.value});saveLST();log(`${r.id} → bölüm: ${REQ_GROUPS.find(g=>g.id===s.value).tr}`);renderDocReqs();openReq(r.id);});
 $('#dmain').addEventListener('click',e=>{
+  if(VIEW==='code'&&cCodeClick(e))return;
   const t=e.target.closest('button,a');if(!t)return;
   if(t.dataset.sig){e.preventDefault();const n=t.dataset.sig;if(SIGN.has(n)){SIG_MODE='live';setView('sigs',n);}else{setView('sigs');openInvSig(n);}}
   if(t.id==='runAll'){runAllDemos();return;}
@@ -1391,6 +1425,7 @@ $('#dmain').addEventListener('submit',e=>{if(e.target.id!=='reqForm2')return;e.p
   const used=new Set(allReqs().map(r=>r.id));let n=11;while(used.has('REQ-'+String(n).padStart(3,'0')))n++;const nid='REQ-'+String(n).padStart(3,'0'),grp=$('#rfGroup').value;
   manual.push({id:nid,group:grp,en,tr,desc:$('#rfDesc').value.trim(),status:'untested'});saveManual();OPEN_G.add(grp);renderDocReqs();openReq(nid);});
 $('#dtoc').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();
+  if(a.dataset.cfile){CSIM.cur=a.dataset.cfile;renderCode();return;}
   if(a.dataset.tsg!==undefined){SIG_G=a.dataset.tsg;renderSigView();return;}
   if(a.dataset.invfn!==undefined){INV_F=+a.dataset.invfn;$('#docSearch').value='';renderInvToc();renderInvMain();$('#dmain').scrollTop=0;return;}
   if(a.dataset.chain){const el=document.getElementById('ch-'+a.dataset.chain);if(el)el.scrollIntoView({block:'start',behavior:'smooth'});return;}
@@ -1434,7 +1469,8 @@ function autoOpen(ids,src,forceHold){
     if(openDoor(id,src,true))s.hold=hold;});
 }
 function setRelease(on,src){
-  if(on&&V.speed>0.5){log(`${src} → Türfreigabe verilemedi: araç duruyor olmalı (2021.18715)`,'warn');{const r=reqFor('tfstand18715');if(r){r.seen.ref=true;setReq(r,'progress',`Araç ${V.speed.toFixed(0)} km/h iken Türfreigabe reddedildi`);}}return false;}
+  if(src!=='C kodu'&&cDrivesRelease()){cRelease(on,src);return true;}
+  if(on&&V.speed>0.5&&src!=='C kodu'){log(`${src} → Türfreigabe verilemedi: araç duruyor olmalı (2021.18715)`,'warn');{const r=reqFor('tfstand18715');if(r){r.seen.ref=true;setReq(r,'progress',`Araç ${V.speed.toFixed(0)} km/h iken Türfreigabe reddedildi`);}}return false;}
   V.release=on;
   if(on){const r=reqFor('tfstand18715');if(r&&r.seen.ref)setReq(r,'pass','Araç durduktan sonra Türfreigabe kabul edildi');RQ('tfled03870','pass','Türfreigabe aktif → B01 LED’i yandı, kapı tabelalarında “KAPI SERBEST”');}log(`${src} → DR_StDoorRelsActv=${on?1:0}`);
   if(on){const pend=[1,2,3].filter(z=>ZR[z].stop||doorS[z].reqOpen),hadOeff=[1,2,3].filter(z=>doorS[z].reqOpen);
@@ -1599,6 +1635,7 @@ const cam=n=>{const c=CAMS[n];teleport(c[0],c[1],c[2],c[3],c[4]);};
 const TF=on=>{if(V.release!==on)pressBtn(BTN[0],'Demo · Gösterge B01');};
 const HOLDW=()=>2400+AUTO_T*1000;
 function resetSim(){
+  if(CSIM.on&&CSIM.build)cInitG();
   st.driving=false;$('#hDrive').setAttribute('aria-pressed',false);V.speed=0;DRV.force=null;rig.position.set(0,0,0);rig.rotation.y=0;
   DOORS.forEach(d=>{Object.assign(doorS[d.id],{state:'CLOSED',pos:0,auto:false,hold:false,timer:0,reqOpen:false,lb:false,lbHit:false});doorS[d.id].pivots.forEach(q=>q.pv.rotation.y=0);});
   [1,2,3].forEach(z=>Object.keys(ZR[z]).forEach(k=>ZR[z][k]=false));recompute();refreshStop();
@@ -1832,7 +1869,7 @@ function renderCluster(){drawCluster(hudG,880,330);drawCluster(c3G,880,330);clus
 [1,2,3].forEach(k=>{const el=document.getElementById('kr'+k);el.addEventListener('input',()=>{KREIS[k].set=+el.value;applyLighting();});el.addEventListener('change',()=>log(`İç aydınlatma Kreis ${k} ayarı = ${KREIS[k].set} %`));});
 $('#hDrive').onclick=()=>toggleDrive('Gösterge HUD');$('#hHome').onclick=()=>goHome();$('#demoStop').onclick=()=>{if(DEMO)DEMO.cancel=true;};
 (()=>{const g=$('#hDrvIcon').getContext('2d');g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();g.arc(22,22,15,0,7);g.stroke();g.beginPath();g.arc(22,22,4,0,7);g.fill();g.fillStyle='#fff';g.fill();[0,2.1,4.2].forEach(a=>{g.beginPath();g.moveTo(22,22);g.lineTo(22+15*Math.cos(a+1.57),22+15*Math.sin(a+1.57));g.stroke();});})();
-$('#hLight').onclick=()=>pressBtn(BTN[4],'Gösterge HUD');$('#hRelease').onclick=()=>pressBtn(BTN[0],'Gösterge HUD');
+$('#hLight').onclick=()=>pressBtn(BTN[4],'Gösterge HUD');$('#hC').onclick=()=>setView('code');$('#hRelease').onclick=()=>pressBtn(BTN[0],'Gösterge HUD');
 (()=>{const g=$('#hRelIcon').getContext('2d');g.strokeStyle='#fff';g.lineWidth=3;g.strokeRect(9,6,26,32);g.beginPath();g.moveTo(22,6);g.lineTo(22,38);g.stroke();g.fillStyle='#3ddc84';g.font='bold 13px sans-serif';g.textAlign='center';g.fillText('A',22,26);})();
 
 /* ================= Sinyal kataloğu ================= */
@@ -1852,7 +1889,13 @@ const SIG_DB=[];
   b('GW_SpdLess1On',GA,()=>V.speed<1,'Hız < 1 km/h'),b('GW_SpdLess3On',GA,()=>V.speed<3,'Hız < 3 km/h'),
   b('GW_StEngRungOn',GA,()=>V.engine,'Motor çalışıyor'),e('GW_ValActGear',GA,()=>V.gear,v=>v!=='N','Aktif vites'),
   b('GW_StPrkgBrkEngdOn',GA,()=>V.park,'Park freni çekili'),b('GW_AcvBstbrkOn',GA,()=>V.stopBrake,'Durak freni aktif'),
-  b('GW_StEcasKneeAcvOn',GA,()=>V.kneel,'ECAS kneeling aktif'),
+  b('GW_StEcasKneeAcvOn',GA,()=>V.kneel,'ECAS kneeling aktif'),b('GW_StEcasKneeAcv',GA,()=>V.kneel,'ECAS kneeling aktif'),
+  num('GW_SpdVehSigOn',GA,()=>Math.round(V.speed),'km/h','Araç hızı (tam sayı)'),b('GW_StClmpRdoOn',GA,()=>true,'Kontak radyo konumu (simülatörde hep açık)'),
+  num('DPS_StDoorsPwrSpply',GA,()=>1,'','Kapı güç beslemesi: 1 = aktif (simülatörde hep var)'),
+  b('DR_StDoorRelsDisadBtnPosn1_I','Türfreigabe',pulse('Dash_B01_off'),'Türfreigabe kapatma tuşu basışı (C modunda TF tuşuna ikinci basış)'),
+  b('DBF_StAllDoorsClsd','Kapı durumu (temel fonksiyon / CAN)',()=>DOORS.every(d=>doorS[d.id].state==='CLOSED'),'Tüm kapılar kapalı'),
+  ...[1,2,3].map(z=>b(`DBF_StsDoor${z}Clsd`,'Kapı durumu (temel fonksiyon / CAN)',()=>doorS[z].state==='CLOSED',`Kapı ${z} kapalı`)),
+  b('DBF_StLastDoorClsng','Kapı durumu (temel fonksiyon / CAN)',()=>{const c=DOORS.filter(d=>doorS[d.id].state==='CLOSING').length;return c===1&&DOORS.every(d=>['CLOSED','CLOSING'].includes(doorS[d.id].state));},'Son açık kapı kapanıyor'),
   b('DR_StDoorRelsBtnPosn1_I',GR,pulse('Dash_B01'),'Türfreigabe tuşu (B01) basışı, 300 ms darbe'),
   b('DR_StDoorRelsActv',GR,()=>V.release,'Türfreigabe aktif'),
   ...[1,2,3].map(z=>b('DR_StDoorRelsActvForDoor'+z,GR,()=>V.release,`Türfreigabe, kapı ${z} bölgesi`)),
@@ -2083,6 +2126,587 @@ function updateInvLive(){document.querySelectorAll('[data-live]').forEach(el=>{c
   document.querySelectorAll('.cst').forEach(li=>{const s=SIGN.get(li.dataset.cs);li.classList.toggle('on',!!(s&&s.sim&&sigActive(s,s.cur)));});}
 function chainPlot(c){CH.sel=[...new Set([...c.cond,...c.steps.map(s=>s[0])])].filter(n=>{const s=SIGN.get(n);return s&&s.sim;}).slice(0,12);
   SIG_MODE='live';CH.live=true;CH.start=null;CH.title=c.t;$('#docSearch').value='';renderSigView();}
+/* ===== Tarayıcı içi C derleyicisi (Simulink/ERT üretilmiş kod alt kümesi → JavaScript) ===== */
+const CC=(()=>{
+const KW=new Set(['if','else','switch','case','default','break','continue','return','for','while','do','goto','typedef','struct','union','enum','sizeof','static','extern','const','volatile','register','inline','auto','signed','unsigned','void','char','short','int','long','float','double','_Bool']);
+const PUN=['>>=','<<=','...','->','++','--','&&','||','==','!=','<=','>=','<<','>>','+=','-=','*=','/=','%=','&=','|=','^=','##','{','}','(',')','[',']',';',',','.','?',':','=','<','>','+','-','*','/','%','&','|','^','!','~','#'];
+const T=(k,bits,signed)=>({k,bits,signed});
+const TY={bool:T('bool',8,false),u8:T('int',8,false),i8:T('int',8,true),u16:T('int',16,false),i16:T('int',16,true),u32:T('int',32,false),i32:T('int',32,true),f64:T('float',64),f32:T('float',32),void:T('void'),unk:T('unk')};
+const BUILTIN_TYPEDEF={boolean_T:TY.bool,uint8_T:TY.u8,int8_T:TY.i8,uint16_T:TY.u16,int16_T:TY.i16,uint32_T:TY.u32,int32_T:TY.i32,real_T:TY.f64,real64_T:TY.f64,time_T:TY.f64,real32_T:TY.f32,int_T:TY.i32,uint_T:TY.u32,char_T:TY.i8,uchar_T:TY.u8,byte_T:TY.u8,ZCSigState:TY.u8,ZCEventType:TY.i32,ulong_T:TY.u32,long_T:TY.i32,bool:TY.bool};
+const BUILTIN_DEF={true:'1',false:'0',TRUE:'1',FALSE:'0',NULL:'0',MAX_uint32_T:'4294967295U',MAX_uint16_T:'65535U',MAX_uint8_T:'255U',MAX_int32_T:'2147483647',MIN_int32_T:'(-2147483647-1)',MAX_int16_T:'32767',MIN_int16_T:'(-32768)',MAX_int8_T:'127',MIN_int8_T:'(-128)',
+  POS_ZCSIG:'1U',ZERO_ZCSIG:'0U',NEG_ZCSIG:'2U',UNINITIALIZED_ZCSIG:'3U',FALLING_ZCEVENT:'(-1)',NO_ZCEVENT:'0',RISING_ZCEVENT:'1'};
+const MATH={fabs:'Math.abs',floor:'Math.floor',ceil:'Math.ceil',sqrt:'Math.sqrt',pow:'Math.pow',sin:'Math.sin',cos:'Math.cos',tan:'Math.tan',exp:'Math.exp',log:'Math.log',log10:'Math.log10',atan2:'Math.atan2',atan:'Math.atan',fmod:'((a,b)=>a%b)',rt_roundd:'Math.round',fmax:'Math.max',fmin:'Math.min',abs:'Math.abs'};
+class CErr extends Error{constructor(msg,tok){super(msg);this.file=tok&&tok.f;this.line=tok&&tok.l;}}
+
+/* ---------- lexer ---------- */
+function lex(src,file){
+  const out=[];let i=0,l=1;const n=src.length;
+  while(i<n){const c=src[i];
+    if(c==='\n'){out.push({t:'nl',f:file,l});l++;i++;continue;}
+    if(c===' '||c==='\t'||c==='\r'||c==='\f'||c==='\v'){i++;continue;}
+    if(c==='\\'&&src[i+1]==='\n'){i+=2;l++;continue;}
+    if(c==='\\'&&src[i+1]==='\r'&&src[i+2]==='\n'){i+=3;l++;continue;}
+    if(c==='/'&&src[i+1]==='*'){const e=src.indexOf('*/',i+2);const end=e<0?n:e+2;for(let k=i;k<end;k++)if(src[k]==='\n')l++;i=end;continue;}
+    if(c==='/'&&src[i+1]==='/'){while(i<n&&src[i]!=='\n')i++;continue;}
+    if(/[A-Za-z_]/.test(c)){let j=i+1;while(j<n&&/[A-Za-z0-9_]/.test(src[j]))j++;out.push({t:'id',v:src.slice(i,j),f:file,l});i=j;continue;}
+    if(/[0-9]/.test(c)||(c==='.'&&/[0-9]/.test(src[i+1]))){let j=i;
+      if(c==='0'&&/[xX]/.test(src[i+1])){j=i+2;while(j<n&&/[0-9a-fA-F]/.test(src[j]))j++;}
+      else{while(j<n&&/[0-9.]/.test(src[j]))j++;if(/[eE]/.test(src[j])){j++;if(/[+-]/.test(src[j]))j++;while(j<n&&/[0-9]/.test(src[j]))j++;}}
+      let k=j;while(k<n&&/[uUlLfF]/.test(src[k]))k++;out.push({t:'num',v:src.slice(i,k),f:file,l});i=k;continue;}
+    if(c==='"'||c==="'"){let j=i+1;while(j<n&&src[j]!==c){if(src[j]==='\\')j++;j++;}out.push({t:c==='"'?'str':'chr',v:src.slice(i,j+1),f:file,l});i=j+1;continue;}
+    let p=PUN.find(p=>src.startsWith(p,i));if(!p)throw new CErr(`Tanınmayan karakter “${c}”`,{f:file,l});
+    out.push({t:'p',v:p,f:file,l});i+=p.length;}
+  out.push({t:'nl',f:file,l});return out;}
+
+/* ---------- önişlemci ---------- */
+function preprocess(files,mainName,ctx){
+  const macros=new Map();
+  Object.entries(BUILTIN_DEF).forEach(([k,v])=>macros.set(k,{body:lex(v,'<builtin>').filter(t=>t.t!=='nl')}));
+  macros.set('CALIB',{params:['t','s'],body:lex('t','<builtin>').filter(t=>t.t!=='nl')});
+  const out=[];const stackInc=[];
+  function expand(toks,hide){const res=[];
+    for(let i=0;i<toks.length;i++){const t=toks[i];
+      if(t.t!=='id'||hide.has(t.v)||!macros.has(t.v)){res.push(t);continue;}
+      const m=macros.get(t.v);
+      if(!m.params){const h=new Set(hide);h.add(t.v);res.push(...expand(m.body.map(b=>({...b,f:t.f,l:t.l})),h));continue;}
+      if(!(toks[i+1]&&toks[i+1].v==='(')){res.push(t);continue;}
+      let d=0,j=i+1;const args=[[]];
+      for(;j<toks.length;j++){const a=toks[j];if(a.v==='('){if(d++>0)args[args.length-1].push(a);continue;}
+        if(a.v===')'){if(--d===0)break;args[args.length-1].push(a);continue;}
+        if(a.v===','&&d===1){args.push([]);continue;}args[args.length-1].push(a);}
+      if(j>=toks.length)throw new CErr(`Makro ${t.v} için kapanmayan parantez`,t);
+      const ea=args.map(a=>expand(a,hide));const body=[];
+      m.body.forEach(b=>{const k=b.t==='id'?m.params.indexOf(b.v):-1;if(k>=0)body.push(...(ea[k]||[]));else body.push({...b,f:t.f,l:t.l});});
+      const h=new Set(hide);h.add(t.v);res.push(...expand(body,h));i=j;}
+    return res;}
+  function evalCond(toks){const tt=[];
+    for(let i=0;i<toks.length;i++){const t=toks[i];
+      if(t.t==='id'&&t.v==='defined'){let nm;if(toks[i+1]&&toks[i+1].v==='('){nm=toks[i+2].v;i+=3;}else{nm=toks[i+1].v;i++;}tt.push({t:'num',v:macros.has(nm)?'1':'0'});continue;}tt.push(t);}
+    const ex=expand(tt,new Set()).map(t=>t.t==='id'?{t:'num',v:'0'}:t);
+    let s=ex.map(t=>t.t==='num'?String(parseInt(t.v.replace(/[uUlL]+$/,''))):t.v).join(' ');
+    if(/[^0-9\s()+\-*/%<>=!&|~^?:]/.test(s))return false;
+    try{return !!Function('return ('+s.replace(/&&/g,'&&').replace(/!(?!=)/g,'!')+')')();}catch(e){return false;}}
+  function run(name){
+    if(stackInc.includes(name)||stackInc.length>40)return;
+    const src=files.get(name);if(src==null){ctx.missingInc.add(name);return;}
+    stackInc.push(name);const toks=lex(src,name);const cond=[];let line=[];
+    const active=()=>cond.every(c=>c.on);
+    for(const t of toks){if(t.t!=='nl'){line.push(t);continue;}
+      const L=line;line=[];if(!L.length)continue;
+      if(L[0].v==='#'){const d=L[1]&&L[1].v,rest=L.slice(2);
+        if(d==='ifdef'||d==='ifndef'){const on=macros.has(rest[0]&&rest[0].v);const v=d==='ifdef'?on:!on;cond.push({on:active()?v:false,taken:v,par:active()});continue;}
+        if(d==='if'){const v=active()&&evalCond(rest);cond.push({on:v,taken:v,par:active()});continue;}
+        if(d==='elif'){const c=cond[cond.length-1];if(!c)throw new CErr('#elif eşleşmiyor',L[0]);if(c.taken||!c.par){c.on=false;}else{const v=evalCond(rest);c.on=v;c.taken=v;}continue;}
+        if(d==='else'){const c=cond[cond.length-1];if(!c)throw new CErr('#else eşleşmiyor',L[0]);c.on=c.par&&!c.taken;c.taken=true;continue;}
+        if(d==='endif'){cond.pop();continue;}
+        if(!active())continue;
+        if(d==='include'){let nm=rest.map(x=>x.v).join('');nm=nm.replace(/^["<]|[">]$/g,'');run(nm.split('/').pop());continue;}
+        if(d==='define'){const nm=rest[0]&&rest[0].v;if(!nm)continue;
+          if(rest[1]&&rest[1].v==='('&&rest[1].l===rest[0].l&&isAdj(rest[0],rest[1],src)){let j=2;const ps=[];while(j<rest.length&&rest[j].v!==')'){if(rest[j].t==='id')ps.push(rest[j].v);j++;}
+            macros.set(nm,{params:ps,body:rest.slice(j+1)});}
+          else{macros.set(nm,{body:rest.slice(1)});if(nm==='RUNNABLE_ID'&&rest[1])ctx.runnables.add(rest[1].v);}
+          continue;}
+        if(d==='undef'){if(rest[0])macros.delete(rest[0].v);continue;}
+        continue;}
+      if(!active())continue;
+      out.push(...expand(L,new Set()));}
+    stackInc.pop();}
+  function isAdj(a,b,src){return true;}
+  run(mainName);return out;}
+
+/* ---------- ayrıştırıcı ---------- */
+function parse(toks,ctx){
+  let p=0;const peek=(o=0)=>toks[p+o]||{t:'eof',v:'<eof>'},next=()=>toks[p++]||{t:'eof',v:'<eof>'};
+  const is=v=>peek().v===v&&peek().t!=='str';
+  const expect=v=>{const t=next();if(t.v!==v)throw new CErr(`“${v}” bekleniyordu, “${t.v}” bulundu`,t);return t;};
+  const typedefs=ctx.typedefs;
+  const isTypeStart=(o=0)=>{const t=peek(o);if(t.t!=='id')return false;
+    if(['static','extern','const','volatile','register','inline','auto','signed','unsigned','void','char','short','int','long','float','double','_Bool','struct','union','enum','typedef'].includes(t.v))return true;
+    return typedefs.has(t.v);};
+  const looksDecl=()=>{if(isTypeStart())return true;const a=peek(),b=peek(1),c=peek(2);
+    if(a.t==='id'&&!KW.has(a.v)&&b.t==='id'&&!KW.has(b.v))return true;
+    if(a.t==='id'&&!KW.has(a.v)&&b.v==='*'&&c.t==='id'&&(peek(3).v===';'||peek(3).v===','||peek(3).v==='='||peek(3).v===')'))return true;
+    return false;};
+  function parseBaseType(){let storage=null,signed=null,base=null,cnt={short:0,long:0};const tok=peek();
+    for(;;){const t=peek();if(t.t!=='id')break;
+      if(['static','extern','register','inline','auto','typedef'].includes(t.v)){storage=storage||t.v;next();continue;}
+      if(['const','volatile'].includes(t.v)){next();continue;}
+      if(t.v==='signed'||t.v==='unsigned'){signed=t.v==='signed';next();continue;}
+      if(t.v==='short'||t.v==='long'){cnt[t.v]++;next();continue;}
+      if(base)break;
+      if(['void','char','int','float','double','_Bool'].includes(t.v)){base=t.v;next();continue;}
+      if(t.v==='struct'||t.v==='union'){next();base=parseStruct();continue;}
+      if(t.v==='enum'){next();base=parseEnum();continue;}
+      if(signed===null&&!cnt.short&&!cnt.long&&!KW.has(t.v)){base={name:t.v};next();continue;}
+      break;}
+    let ty;
+    if(base&&typeof base==='object'&&base.name){ty=typedefs.get(base.name)||{k:'struct',name:base.name,fields:null};}
+    else if(base&&typeof base==='object'){ty=base;}
+    else if(base==='void')ty=TY.void;else if(base==='float')ty=TY.f32;else if(base==='double')ty=TY.f64;else if(base==='_Bool')ty=TY.bool;
+    else if(base==='char')ty=signed===false?TY.u8:TY.i8;
+    else if(cnt.short)ty=signed===false?TY.u16:TY.i16;
+    else if(base==='int'||cnt.long||signed!==null)ty=signed===false?TY.u32:TY.i32;
+    else throw new CErr(`Tip bekleniyordu, “${tok.v}” bulundu`,tok);
+    return {ty,storage};}
+  function parseStruct(){let tag=null;if(peek().t==='id'&&!is('{'))tag=next().v;
+    if(!is('{')){return {name:tag}; }
+    next();const fields=[];
+    while(!is('}')){const {ty}=parseBaseType();
+      for(;;){const d=parseDeclarator(ty);fields.push({name:d.name,ty:d.ty});if(is(',')){next();continue;}break;}
+      expect(';');}
+    expect('}');const st={k:'struct',name:tag,fields};if(tag)ctx.structTags.set(tag,st);return st;}
+  function parseEnum(){let tag=null;if(peek().t==='id'&&!is('{'))tag=next().v;
+    if(is('{')){next();let v=0;while(!is('}')){const nm=next().v;if(is('=')){next();const e=parseAssign();v=constEval(e);}ctx.enums.set(nm,v);v++;if(is(','))next();}expect('}');}
+    return TY.i32;}
+  function constEval(e){
+    if(e.k==='num')return e.val;if(e.k==='un'&&e.op==='-')return -constEval(e.e);if(e.k==='un'&&e.op==='~')return ~constEval(e.e);
+    if(e.k==='cast')return constEval(e.e);
+    if(e.k==='id'&&ctx.enums.has(e.name))return ctx.enums.get(e.name);
+    if(e.k==='bin'){const a=constEval(e.a),b=constEval(e.b);return Function('a','b','return a'+e.op+'b')(a,b);}
+    throw new CErr('Sabit ifade bekleniyordu',e.tok);}
+  function parseDeclarator(base){let ty=base;let ptr=0;while(is('*')){next();ptr++;while(is('const')||is('volatile'))next();}
+    for(let i=0;i<ptr;i++)ty={k:'ptr',to:ty};
+    let name=null,tok=peek(),params=null;
+    if(is('(')&&peek(1).v==='*'){next();next();name=next().v;expect(')');ty={k:'ptr',to:ty};if(is('(')){skipParens();}return {name,ty,tok};}
+    if(peek().t==='id'&&!KW.has(peek().v))name=next().v;
+    if(is('(')){next();params=[];
+      if(is('void')&&peek(1).v===')'){next();}
+      while(!is(')')){if(is('...')){next();continue;}const {ty:pt}=parseBaseType();const d=parseDeclarator(pt);params.push({name:d.name,ty:d.ty});if(is(','))next();}
+      expect(')');return {name,ty,params,tok};}
+    while(is('[')){next();let len=null;if(!is(']'))len=constEval(parseExpr());expect(']');ty={k:'arr',of:ty,len};}
+    return {name,ty,tok};}
+  function skipParens(){let d=0;do{const t=next();if(t.v==='(')d++;else if(t.v===')')d--;}while(d>0);}
+  function parseInit(){if(is('{')){const t=next();const items=[];while(!is('}')){if(is('.')){next();const f=next().v;expect('=');items.push({field:f,v:parseInit()});}else if(is('[')){next();const ix=constEval(parseExpr());expect(']');expect('=');items.push({index:ix,v:parseInit()});}else items.push({v:parseInit()});if(is(','))next();}expect('}');return {k:'list',items,tok:t};}
+    return parseAssign();}
+  /* ifadeler */
+  const BIN=[['||'],['&&'],['|'],['^'],['&'],['==','!='],['<','>','<=','>='],['<<','>>'],['+','-'],['*','/','%']];
+  function parseExpr(){let e=parseAssign();while(is(',')){const t=next();e={k:'comma',a:e,b:parseAssign(),tok:t};}return e;}
+  function parseAssign(){const l=parseCond();const t=peek();
+    if(t.t==='p'&&['=','+=','-=','*=','/=','%=','&=','|=','^=','<<=','>>='].includes(t.v)){next();return {k:'asg',op:t.v,l,r:parseAssign(),tok:t};}
+    return l;}
+  function parseCond(){const c=parseBin(0);if(is('?')){const t=next();const a=parseExpr();expect(':');const b=parseCond();return {k:'cond',c,a,b,tok:t};}return c;}
+  function parseBin(lv){if(lv>=BIN.length)return parseCast();let a=parseBin(lv+1);
+    while(peek().t==='p'&&BIN[lv].includes(peek().v)){const t=next();a={k:'bin',op:t.v,a,b:parseBin(lv+1),tok:t};}return a;}
+  function isTypeName(o){const t=peek(o);if(t.t!=='id')return false;
+    if(['const','volatile','signed','unsigned','void','char','short','int','long','float','double','_Bool','struct','union','enum'].includes(t.v))return true;return typedefs.has(t.v);}
+  function parseCast(){
+    if(is('(')&&isTypeName(1)){const t=next();const {ty}=parseBaseType();let ty2=ty;while(is('*')){next();ty2={k:'ptr',to:ty2};}expect(')');
+      if(is('{'))throw new CErr('Bileşik sabitler desteklenmiyor',t);return {k:'cast',ty:ty2,e:parseCast(),tok:t};}
+    return parseUnary();}
+  function parseUnary(){const t=peek();
+    if(t.t==='p'&&['!','~','-','+','&','*'].includes(t.v)){next();return {k:'un',op:t.v,e:parseCast(),tok:t};}
+    if(t.t==='p'&&(t.v==='++'||t.v==='--')){next();return {k:'pre',op:t.v,e:parseUnary(),tok:t};}
+    if(t.v==='sizeof'){next();if(is('(')&&isTypeName(1)){next();const {ty}=parseBaseType();while(is('*'))next();expect(')');return {k:'num',val:sizeOf(ty),ty:TY.u32,tok:t};}
+      const e=parseUnary();return {k:'sizeofE',e,tok:t};}
+    return parsePostfix(parsePrimary());}
+  function sizeOf(ty){return ty.k==='float'?ty.bits/8:ty.k==='int'||ty.k==='bool'?ty.bits/8:4;}
+  function parsePrimary(){const t=next();
+    if(t.t==='num'){const s=t.v;let ty=TY.i32,val;
+      if(/[.eE]/.test(s)&&!/^0[xX]/.test(s)){ty=/[fF]$/.test(s)?TY.f32:TY.f64;val=parseFloat(s);}
+      else{val=Number(s.replace(/[uUlL]+$/,''));if(/^0[0-7]+/.test(s.replace(/[uUlL]+$/,''))&&!/^0[xX]/.test(s))val=parseInt(s,8);if(/[uU]/.test(s)||val>2147483647)ty=TY.u32;}
+      return {k:'num',val,ty,tok:t};}
+    if(t.t==='id'){if(KW.has(t.v))throw new CErr(`Beklenmeyen anahtar kelime “${t.v}”`,t);return {k:'id',name:t.v,tok:t};}
+    if(t.v==='('){const e=parseExpr();expect(')');return e;}
+    if(t.t==='str'||t.t==='chr'){if(t.t==='chr')return {k:'num',val:(t.v.length===3?t.v.charCodeAt(1):0),ty:TY.i32,tok:t};throw new CErr('Metin sabitleri desteklenmiyor',t);}
+    throw new CErr(`Beklenmeyen “${t.v}”`,t);}
+  function parsePostfix(e){
+    for(;;){const t=peek();
+      if(t.v==='('){next();const args=[];while(!is(')')){args.push(parseAssign());if(is(','))next();}expect(')');e={k:'call',f:e,args,tok:t};continue;}
+      if(t.v==='['){next();const ix=parseExpr();expect(']');e={k:'idx',a:e,i:ix,tok:t};continue;}
+      if(t.v==='.'||t.v==='->'){next();const f=next();e={k:'mem',e,f:f.v,arrow:t.v==='->',tok:f};continue;}
+      if(t.v==='++'||t.v==='--'){next();e={k:'post',op:t.v,e,tok:t};continue;}
+      return e;}}
+  /* deyimler */
+  function parseStmt(){const t=peek();
+    if(is('{'))return parseBlock();
+    if(is(';')){next();return {k:'empty'};}
+    if(t.v==='if'){next();expect('(');const c=parseExpr();expect(')');const a=parseStmt();let b=null;if(is('else')){next();b=parseStmt();}return {k:'if',c,a,b,tok:t};}
+    if(t.v==='while'){next();expect('(');const c=parseExpr();expect(')');return {k:'while',c,s:parseStmt(),tok:t};}
+    if(t.v==='do'){next();const s=parseStmt();expect('while');expect('(');const c=parseExpr();expect(')');expect(';');return {k:'do',c,s,tok:t};}
+    if(t.v==='for'){next();expect('(');let init=null;if(!is(';')){init=looksDecl()?parseDecl():{k:'expr',e:parseExpr()};if(init.k==='expr')expect(';');}else next();
+      const c=is(';')?null:parseExpr();expect(';');const st=is(')')?null:parseExpr();expect(')');return {k:'for',init,c,st,s:parseStmt(),tok:t};}
+    if(t.v==='switch'){next();expect('(');const c=parseExpr();expect(')');return {k:'switch',c,s:parseStmt(),tok:t};}
+    if(t.v==='case'){next();const e=parseCond();expect(':');return {k:'case',e,tok:t};}
+    if(t.v==='default'){next();expect(':');return {k:'default',tok:t};}
+    if(t.v==='break'){next();expect(';');return {k:'break'};}
+    if(t.v==='continue'){next();expect(';');return {k:'continue'};}
+    if(t.v==='return'){next();const e=is(';')?null:parseExpr();expect(';');return {k:'return',e,tok:t};}
+    if(t.v==='goto')throw new CErr('goto desteklenmiyor',t);
+    if(looksDecl())return parseDecl();
+    const e=parseExpr();expect(';');return {k:'expr',e,tok:t};}
+  function parseBlock(){expect('{');const body=[];while(!is('}')){if(peek().t==='eof')throw new CErr('Kapanmayan blok “{”',peek());body.push(parseStmt());}expect('}');return {k:'block',body};}
+  function parseDecl(){const {ty,storage}=parseBaseType();const ds=[];
+    if(is(';')){next();return {k:'decl',ds,storage};}
+    for(;;){const d=parseDeclarator(ty);if(is('=')){next();d.init=parseInit();}ds.push(d);if(is(',')){next();continue;}break;}
+    expect(';');return {k:'decl',ds,storage};}
+  /* üst düzey */
+  const items=[];
+  while(peek().t!=='eof'){
+    if(is(';')){next();continue;}
+    const st=p;const {ty,storage}=parseBaseType();
+    if(is(';')){next();continue;}
+    for(;;){const d=parseDeclarator(ty);
+      if(storage==='typedef'){typedefs.set(d.name,d.ty.k==='struct'&&!d.ty.name?Object.assign(d.ty,{name:d.name}):resolveTD(d.ty));}
+      else if(d.params&&is('{')){const body=parseBlock();items.push({k:'func',name:d.name,ret:d.ty,params:d.params,body,tok:d.tok});break;}
+      else if(d.params){items.push({k:'proto',name:d.name,ret:d.ty,params:d.params,tok:d.tok});}
+      else{if(is('=')){next();d.init=parseInit();}items.push({k:'gvar',name:d.name,ty:d.ty,init:d.init,storage,tok:d.tok});}
+      if(is(',')){next();continue;}expect(';');break;}}
+  function resolveTD(ty){if(ty.k==='struct'&&ty.name&&!ty.fields&&ctx.structTags.has(ty.name))return ctx.structTags.get(ty.name);return ty;}
+  return items;}
+
+/* ---------- kod üretimi (C → JS) ---------- */
+function compile(fileMap,opts){
+  opts=opts||{};const files=new Map(Object.entries(fileMap));
+  const ctx={missingInc:new Set(),runnables:new Set(),typedefs:new Map(Object.entries(BUILTIN_TYPEDEF)),structTags:new Map(),enums:new Map(),warnings:[]};
+  const cfiles=[...files.keys()].filter(n=>/\.c$/i.test(n));
+  if(!cfiles.length)throw new CErr('Derlenecek .c dosyası yok',null);
+  /* extern ipuçları: önişlemci dallarından bağımsız tüm dosyalardan */
+  const externTy=new Map();
+  for(const [n,src] of files){const re=/extern\s+(?:const\s+)?([A-Za-z_]\w*)\s+([A-Za-z_]\w*)\s*;/g;let m;while((m=re.exec(src))){const t=BUILTIN_TYPEDEF[m[1]];if(t)externTy.set(m[2],t);}}
+  /* sırayla: önce .h tipleri için tüm .c dosyaları aynı bağlamda */
+  let items=[];
+  for(const cf of cfiles){const toks=preprocess(files,cf,ctx);items=items.concat(parse(toks,ctx));}
+  const G=new Map();const F=new Map();const protos=new Map();
+  items.forEach(it=>{if(it.k==='gvar'){const old=G.get(it.name);if(!old||it.storage!=='extern'||old.storage==='extern')G.set(it.name,Object.assign({},old||{},it,{init:it.init||(old&&old.init)}));if(it.storage==='extern'&&old&&old.storage!=='extern')G.set(it.name,old);}
+    else if(it.k==='func'){if(F.has(it.name))throw new CErr(`${it.name} iki kez tanımlanmış`,it.tok);F.set(it.name,it);}else if(it.k==='proto')protos.set(it.name,it);});
+  const typeOfGlobal=n=>{const g=G.get(n);if(g)return g.ty;if(externTy.has(n))return externTy.get(n);if(opts.typeHint){const h=opts.typeHint(n);if(h&&BUILTIN_TYPEDEF[h])return BUILTIN_TYPEDEF[h];}return null;};
+  const io={inputs:new Set(),outputs:new Set(),params:new Set(),funcsCalled:new Set()};
+  const runnables=[...ctx.runnables].sort((a,b)=>b.length-a.length);
+  function resolveGetSet(name){const m=/^(Get|Set)_(.+)$/.exec(name);if(!m)return null;let rest=m[2];
+    for(const r of runnables){if(rest.startsWith(r+'_')){return {set:m[1]==='Set',sig:rest.slice(r.length+1)};}}
+    const parts=rest.split('_');for(let i=1;i<parts.length;i++){const cand=parts.slice(i).join('_');if(typeOfGlobal(cand)||(opts.known&&opts.known(cand)))return {set:m[1]==='Set',sig:cand};}
+    return null;}
+  const isUnsigned32=t=>t&&t.k==='int'&&t.bits===32&&!t.signed;
+  const arith=(a,b)=>{if(a.k==='float'||b.k==='float')return TY.f64;if(isUnsigned32(a)||isUnsigned32(b))return TY.u32;return TY.i32;};
+  const promote=t=>t.k==='float'?TY.f64:isUnsigned32(t)?TY.u32:(t.k==='int'||t.k==='bool')?TY.i32:TY.unk;
+  function conv(ty,js,from){if(!ty)return js;
+    const fl=from&&from.k==='float';const tr=fl?`Math.trunc(${js})`:js;
+    switch(ty.k){case 'bool':return `((${js})?1:0)`;
+      case 'int':if(ty.bits===32)return ty.signed?`((${tr})|0)`:`((${tr})>>>0)`;
+        if(ty.bits===16)return ty.signed?`((${tr})<<16>>16)`:`((${tr})&65535)`;
+        return ty.signed?`((${tr})<<24>>24)`:`((${tr})&255)`;
+      case 'float':return ty.bits===32?`Math.fround(${js})`:(from&&from.k!=='float'&&from.k!=='unk'?js:`(+(${js}))`);
+      default:return js;}}
+  const id=n=>'$'+n;
+  let fnCtx=null;
+  function lookup(name,tok){if(fnCtx){for(let i=fnCtx.scopes.length-1;i>=0;i--){const s=fnCtx.scopes[i];if(s.has(name))return {kind:'local',ty:s.get(name),js:id(name)};}}
+    if(ctx.enums.has(name))return {kind:'const',ty:TY.i32,js:String(ctx.enums.get(name))};
+    const gt=typeOfGlobal(name);if(G.has(name)||gt){return {kind:'global',ty:gt||TY.unk,js:`G[${JSON.stringify(name)}]`};}
+    if(opts.known&&opts.known(name)){return {kind:'global',ty:TY.unk,js:`G[${JSON.stringify(name)}]`};}
+    ctx.warnings.push({msg:`Tanımsız değişken ${name} → 0 kabul edildi`,file:tok&&tok.f,line:tok&&tok.l});
+    return {kind:'global',ty:TY.unk,js:`G[${JSON.stringify(name)}]`};}
+  /* bir ifadeyi "nesne/dizi tabanı" olarak üret (struct/dizi) */
+  function genBase(e){
+    if(e.k==='id'){const r=lookup(e.name,e.tok);if(r.kind==='local')return {js:r.js,ty:r.ty};return {js:`$o(G,${JSON.stringify(e.name)})`,ty:r.ty};}
+    if(e.k==='mem'){const b=genBase(e.e);const st=structOf(b.ty);const fty=fieldTy(st,e.f);return {js:`$o(${b.js},${JSON.stringify(e.f)})`,ty:fty};}
+    if(e.k==='idx'){const b=genBase(e.a);const i=gen(e.i);const et=b.ty&&b.ty.k==='arr'?b.ty.of:TY.unk;return {js:`$o(${b.js},${i.js})`,ty:et};}
+    if(e.k==='un'&&e.op==='*'){return genBase(e.e);}
+    throw new CErr('Bu ifade nesne olarak kullanılamaz',e.tok);}
+  function structOf(ty){if(!ty)return null;if(ty.k==='ptr')ty=ty.to;if(ty.k==='struct'){if(!ty.fields&&ty.name){const td=ctx.typedefs.get(ty.name)||ctx.structTags.get(ty.name);if(td&&td.fields)return td;}return ty;}return null;}
+  function fieldTy(st,f){if(st&&st.fields){const fd=st.fields.find(x=>x.name===f);if(fd)return fd.ty;}return TY.unk;}
+  function lval(e){
+    if(e.k==='id'){const r=lookup(e.name,e.tok);if(r.kind==='const')throw new CErr(`${e.name} sabittir, atanamaz`,e.tok);if(r.kind==='global')io.writes&&io.writes.add(e.name);return {js:r.js,ty:r.ty};}
+    if(e.k==='mem'){const b=genBase(e.e);const st=structOf(b.ty);return {js:`${b.js}[${JSON.stringify(e.f)}]`,ty:fieldTy(st,e.f)};}
+    if(e.k==='idx'){const b=genBase(e.a);const i=gen(e.i);return {js:`${b.js}[${i.js}]`,ty:b.ty&&b.ty.k==='arr'?b.ty.of:TY.unk};}
+    if(e.k==='un'&&e.op==='*')throw new CErr('İşaretçi üzerinden atama desteklenmiyor',e.tok);
+    throw new CErr('Atanamayan ifade',e.tok);}
+  function binop(op,a,b){const at=promote(a.ty),bt=promote(b.ty);
+    if(['==','!=','<','>','<=','>='].includes(op)){const jop=op==='=='?'===':op==='!='?'!==':op;return {js:`((${a.js})${jop}(${b.js})?1:0)`,ty:TY.i32};}
+    if(op==='&&'||op==='||')return {js:`((${a.js})${op}(${b.js})?1:0)`,ty:TY.i32};
+    const rt=(op==='<<'||op==='>>')?at:arith(at,bt);
+    if(rt.k==='float'||rt.k==='unk'){if(op==='%')return {js:`((${a.js})%(${b.js}))`,ty:rt};return {js:`((${a.js})${op}(${b.js}))`,ty:rt.k==='unk'?TY.f64:rt};}
+    const u=!rt.signed;let js;
+    switch(op){case '+':case '-':js=`((${a.js})${op}(${b.js}))`;break;
+      case '*':js=`Math.imul(${a.js},${b.js})`;break;
+      case '/':js=`Math.trunc((${a.js})/(${b.js}))`;break;case '%':js=`((${a.js})%(${b.js}))`;break;
+      case '<<':js=`((${a.js})<<(${b.js}))`;break;case '>>':js=u?`((${a.js})>>>(${b.js}))`:`((${a.js})>>(${b.js}))`;break;
+      case '&':case '|':case '^':js=`((${a.js})${op}(${b.js}))`;break;default:throw new CErr('Bilinmeyen işleç '+op);}
+    return {js:u?`((${js})>>>0)`:`((${js})|0)`,ty:rt};}
+  function gen(e){switch(e.k){
+    case 'num':return {js:String(e.val),ty:e.ty};
+    case 'id':{const r=lookup(e.name,e.tok);if(r.kind==='global')io.reads&&io.reads.add(e.name);
+      if(r.kind==='global'&&r.ty&&(r.ty.k==='struct'||r.ty.k==='arr'))return {js:`$o(G,${JSON.stringify(e.name)})`,ty:r.ty};
+      if(r.kind==='global')return {js:`(${r.js}??0)`,ty:r.ty};return {js:r.js,ty:r.ty};}
+    case 'mem':{const b=genBase(e.e);const st=structOf(b.ty);const ft=fieldTy(st,e.f);if(ft.k==='struct'||ft.k==='arr')return {js:`$o(${b.js},${JSON.stringify(e.f)})`,ty:ft};return {js:`(${b.js}[${JSON.stringify(e.f)}]??0)`,ty:ft};}
+    case 'idx':{const b=genBase(e.a);const i=gen(e.i);const et=b.ty&&b.ty.k==='arr'?b.ty.of:TY.unk;return {js:`(${b.js}[${i.js}]??0)`,ty:et};}
+    case 'un':{if(e.op==='&'){const b=genBase(e.e);return {js:b.js,ty:{k:'ptr',to:b.ty}};}
+      if(e.op==='*'){const b=genBase(e.e);return {js:b.js,ty:b.ty&&b.ty.k==='ptr'?b.ty.to:TY.unk};}
+      const x=gen(e.e);const t=promote(x.ty);
+      if(e.op==='!')return {js:`((${x.js})?0:1)`,ty:TY.i32};
+      if(e.op==='+')return {js:x.js,ty:t};
+      if(e.op==='-'){if(t.k==='float'||t.k==='unk')return {js:`(-(${x.js}))`,ty:t.k==='unk'?TY.f64:t};return {js:t.signed?`((-(${x.js}))|0)`:`((-(${x.js}))>>>0)`,ty:t};}
+      if(e.op==='~')return {js:t.signed===false?`((~(${x.js}))>>>0)`:`(~(${x.js}))`,ty:t};
+      throw new CErr('Bilinmeyen tekli işleç',e.tok);}
+    case 'bin':return binop(e.op,gen(e.a),gen(e.b));
+    case 'cond':{const c=gen(e.c),a=gen(e.a),b=gen(e.b);return {js:`((${c.js})?(${a.js}):(${b.js}))`,ty:(a.ty.k==='float'||b.ty.k==='float')?TY.f64:arith(promote(a.ty),promote(b.ty))};}
+    case 'cast':{const x=gen(e.e);if(e.ty.k==='ptr'||e.ty.k==='struct'||e.ty.k==='void')return {js:x.js,ty:e.ty};return {js:conv(e.ty,x.js,x.ty),ty:e.ty};}
+    case 'comma':{const a=gen(e.a),b=gen(e.b);return {js:`((${a.js}),(${b.js}))`,ty:b.ty};}
+    case 'asg':{const l=lval(e.l);const r=gen(e.r);
+      if(e.op==='=')return {js:`(${l.js}=${conv(l.ty.k==='unk'?null:l.ty,r.js,r.ty)})`,ty:l.ty};
+      const cur={js:`(${l.js}??0)`,ty:l.ty};const v=binop(e.op.slice(0,-1),cur,r);return {js:`(${l.js}=${conv(l.ty.k==='unk'?null:l.ty,v.js,v.ty)})`,ty:l.ty};}
+    case 'pre':case 'post':{const l=lval(e.e);const one={js:'1',ty:TY.i32};const v=binop(e.op==='++'?'+':'-',{js:`(${l.js}??0)`,ty:l.ty},one);const nv=conv(l.ty.k==='unk'?null:l.ty,v.js,v.ty);
+      if(e.k==='pre')return {js:`(${l.js}=${nv})`,ty:l.ty};return {js:`(($t=(${l.js}??0)),(${l.js}=${nv}),$t)`,ty:l.ty};}
+    case 'call':{if(e.f.k!=='id')throw new CErr('Fonksiyon işaretçileri desteklenmiyor',e.tok);const name=e.f.name;
+      if(F.has(name)||protos.has(name)){const fd=F.get(name)||protos.get(name);if(!F.has(name))throw new CErr(`${name} fonksiyonunun gövdesi yok (yalnızca bildirim)`,e.tok);
+        io.funcsCalled.add(name);const args=e.args.map((a,i)=>{const x=gen(a);const pt=fd.params[i]&&fd.params[i].ty;return pt&&pt.k!=='ptr'&&pt.k!=='struct'&&pt.k!=='arr'?conv(pt,x.js,x.ty):x.js;});
+        return {js:`F.${id(name)}(${args.join(',')})`,ty:fd.ret};}
+      const gs=resolveGetSet(name);
+      if(gs){if(gs.set){if(e.args.length!==1)throw new CErr(`${name} tek argüman almalı`,e.tok);const x=gen(e.args[0]);const ty=typeOfGlobal(gs.sig)||TY.unk;io.outputs.add(gs.sig);
+          return {js:`(G[${JSON.stringify(gs.sig)}]=${conv(ty.k==='unk'?null:ty,x.js,x.ty)})`,ty};}
+        const ty=typeOfGlobal(gs.sig)||TY.unk;if(/(_P|Nv)$/.test(gs.sig))io.params.add(gs.sig);else io.inputs.add(gs.sig);return {js:`(G[${JSON.stringify(gs.sig)}]??0)`,ty};}
+      if(MATH[name]){const args=e.args.map(a=>gen(a).js);return {js:`${MATH[name]}(${args.join(',')})`,ty:TY.f64};}
+      throw new CErr(`Tanımsız fonksiyon: ${name}`,e.tok);}
+    case 'sizeofE':return {js:'4',ty:TY.u32};
+    default:throw new CErr('Desteklenmeyen ifade',e.tok);}}
+  function genStmt(s,ind){const I='  '.repeat(ind);
+    switch(s.k){case 'block':{fnCtx.scopes.push(new Map());const r=s.body.map(x=>genStmt(x,ind+1)).join('\n');fnCtx.scopes.pop();return `${I}{\n${r}\n${I}}`;}
+      case 'empty':return I+';';
+      case 'decl':return s.ds.map(d=>{fnCtx.scopes[fnCtx.scopes.length-1].set(d.name,d.ty);
+        if(d.ty.k==='struct'||d.ty.k==='arr'){return `${I}let ${id(d.name)}=${d.init?initJS(d.ty,d.init):(d.ty.k==='arr'?'[]':'{}')};`;}
+        let v='0';if(d.init){const x=gen(d.init);v=conv(d.ty,x.js,x.ty);}return `${I}let ${id(d.name)}=${v};`;}).join('\n');
+      case 'expr':return `${I}${gen(s.e).js};`;
+      case 'if':return `${I}if(${gen(s.c).js}){\n${genStmt(s.a,ind+1)}\n${I}}`+(s.b?`else{\n${genStmt(s.b,ind+1)}\n${I}}`:'');
+      case 'while':return `${I}while(${gen(s.c).js}){if(++$it>5e6)throw new Error('Sonsuz döngü?');\n${genStmt(s.s,ind+1)}\n${I}}`;
+      case 'do':return `${I}do{if(++$it>5e6)throw new Error('Sonsuz döngü?');\n${genStmt(s.s,ind+1)}\n${I}}while(${gen(s.c).js});`;
+      case 'for':{fnCtx.scopes.push(new Map());const init=s.init?(s.init.k==='decl'?genStmt(s.init,0).trim():gen(s.init.e).js+';'):';';
+        const r=`${I}{${init}for(;${s.c?gen(s.c).js:'true'};${s.st?gen(s.st).js:''}){if(++$it>5e6)throw new Error('Sonsuz döngü?');\n${genStmt(s.s,ind+1)}\n${I}}}`;fnCtx.scopes.pop();return r;}
+      case 'switch':{let inner;if(s.s.k==='block'){fnCtx.scopes.push(new Map());inner=s.s.body.map(x=>genStmt(x,ind+1)).join('\n');fnCtx.scopes.pop();}else inner=genStmt(s.s,ind+1);return `${I}switch(${gen(s.c).js}){\n${inner}\n${I}}`;}
+      case 'case':return `${I}case ${gen(s.e).js}:`;case 'default':return `${I}default:`;
+      case 'break':return I+'break;';case 'continue':return I+'continue;';
+      case 'return':{if(!s.e)return I+'return;';const x=gen(s.e);return `${I}return ${fnCtx.ret.k==='void'?x.js:conv(fnCtx.ret,x.js,x.ty)};`;}
+      default:throw new CErr('Desteklenmeyen deyim',s.tok);}}
+  function initJS(ty,init){
+    if(init.k!=='list'){if(ty&&(ty.k==='int'||ty.k==='bool'||ty.k==='float')){const x=gen(init);return conv(ty,x.js,x.ty);}return gen(init).js;}
+    if(ty&&ty.k==='arr'){const a=[];let k=0;init.items.forEach(it=>{if(it.index!=null)k=it.index;a[k++]=initJS(ty.of,it.v);});return '['+a.map(x=>x==null?'0':x).join(',')+']';}
+    const st=structOf(ty);
+    if(st&&st.fields){const o=[];let k=0;init.items.forEach(it=>{let fi=it.field!=null?st.fields.findIndex(f=>f.name===it.field):k;if(fi<0)throw new CErr(`Alan bulunamadı: ${it.field}`,init.tok);const f=st.fields[fi];o.push(`${JSON.stringify(f.name)}:${initJS(f.ty,it.v)}`);k=fi+1;});return '{'+o.join(',')+'}';}
+    ctx.warnings.push({msg:`Yapı tanımı bilinmeyen ${ty&&ty.name||'?'} için başlangıç değeri sırayla saklandı (struct tanımı içeren .h dosyasını ekleyin)`,file:init.tok&&init.tok.f,line:init.tok&&init.tok.l});
+    return '{__pos:['+init.items.map(it=>initJS(null,it.v)).join(',')+']}';}
+  /* fonksiyonlar */
+  const fnJS=[];
+  for(const [name,f] of F){fnCtx={scopes:[new Map(f.params.map(p=>[p.name,p.ty]))],ret:f.ret};
+    const body=genStmt(f.body,1);fnJS.push(`F.${id(name)}=function(${f.params.map(p=>id(p.name)).join(',')}){let $t;\n${body}\n};`);fnCtx=null;}
+  /* global başlangıç */
+  const gInit=[];
+  for(const [name,g] of G){if(g.storage==='extern'&&!g.init)continue;const ty=g.ty;
+    if(g.init)gInit.push(`G[${JSON.stringify(name)}]=${initJS(ty,g.init)};`);
+    else if(ty.k==='struct')gInit.push(`G[${JSON.stringify(name)}]={};`);else if(ty.k==='arr')gInit.push(`G[${JSON.stringify(name)}]=[];`);
+    else gInit.push(`G[${JSON.stringify(name)}]=0;`);}
+  const js=`"use strict";const $o=(o,k)=>{let v=o[k];if(v==null||typeof v!=='object'){v=o[k]={};}return v;};let $it=0;const F={};let G={};\n${fnJS.join('\n')}\nfunction $init(g){G=g;${gInit.join('\n')}}\nreturn {F,$init,resetIt(){$it=0;}};`;
+  /* adım / init / reset fonksiyonları */
+  const called=io.funcsCalled;const roots=[...F.values()].filter(f=>!called.has(f.name)&&f.params.length===0);
+  const steps=roots.filter(f=>/(\d+)ms$/i.test(f.name)||/step/i.test(f.name)).map(f=>({name:f.name,period:+(/(\d+)ms$/i.exec(f.name)||[0,10])[1]}));
+  const init=roots.filter(f=>/init(ialize)?$/i.test(f.name)).map(f=>f.name),reset=roots.filter(f=>/reset$/i.test(f.name)).map(f=>f.name);
+  const assume=roots.filter(f=>/^SIM_/i.test(f.name)).map(f=>f.name);
+  /* çıktılar: Output.c içinde tanımlanan globaller de çıkıştır */
+  for(const [name,g] of G){if(g.tok&&/_Output\.c$/i.test(g.tok.f))io.outputs.add(name);if(g.tok&&/_Local\.c$/i.test(g.tok.f)&&/(_P|Nv)$/.test(name))io.params.add(name);}
+  io.inputs.forEach(n=>{if(io.outputs.has(n))io.inputs.delete(n);});
+  const globals={};for(const [n,g] of G)globals[n]={ty:g.ty,file:g.tok&&g.tok.f,line:g.tok&&g.tok.l,calib:!!(g.tok&&/_Local\.c$/i.test(g.tok.f)&&/_P$/.test(n))};
+  let mod;try{mod=Function(js)();}catch(e){throw new CErr('İç hata (üretilen JS): '+e.message,null);}
+  return {mod,js,steps,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.warnings),globals,typeOf:n=>typeOfGlobal(n)};}
+function dedupe(w){const s=new Set();return w.filter(x=>{const k=x.msg;if(s.has(k))return false;s.add(k);return true;});}
+const tyName=t=>!t?'?':t.k==='bool'?'boolean':t.k==='int'?(t.signed?'int':'uint')+t.bits:t.k==='float'?'real'+(t.bits===32?'32':''):t.k;
+return {compile,CErr,tyName};
+})();
+/* ================= C kodu: tarayıcıda derleme, simülatöre bağlama ================= */
+const C_KEY='otobus.ccode.v1';
+/* Simülatörde karşılığı olmayan ve kodun beklediği girişler için varsayılanlar (VARSAYIM; ekranda değiştirilebilir) */
+const C_DEFAULTS={DOP_ModeDoor1AutGp:1,DOP_ModeDoor2AutGp:1,DOP_ModeDoor3AutGp:1,DOP_ModeDoor4AutGp:1};
+const C_DEF_NOTE={DOP_ModeDoor1AutGp:'Kapı 1 otomatik mod parametresi (Doors_BasicFct)',DOP_ModeDoor2AutGp:'Kapı 2 otomatik mod parametresi',DOP_ModeDoor3AutGp:'Kapı 3 otomatik mod parametresi',DOP_ModeDoor4AutGp:'Kapı 4 otomatik mod parametresi'};
+function cSave(){try{localStorage.setItem(C_KEY,JSON.stringify({files:CSIM.files,cur:CSIM.cur,forces:CSIM.forces,params:CSIM.params,on:CSIM.on}));}catch(e){CSIM.saveErr=true;}}
+let cSaveT=0;const cSaveSoon=()=>{clearTimeout(cSaveT);cSaveT=setTimeout(cSave,400);};
+function cLoad(){try{const d=JSON.parse(localStorage.getItem(C_KEY)||'null');if(!d||!d.files)return;
+  Object.assign(CSIM,{files:d.files,cur:d.cur,forces:d.forces||{},params:d.params||{}});
+  if(Object.keys(CSIM.files).length&&cBuild()&&d.on)cSetOn(true);}catch(e){}}
+const cNum=v=>v===true?1:v===false||v==null?0:typeof v==='number'?v:typeof v==='string'?(/=(-?\d+)$/.exec(v)?+/=(-?\d+)$/.exec(v)[1]:0):+v||0;
+function cSimVal(n){const s=SIGN.get(n);if(!s||s.cOut||s.cAdded)return undefined;return cNum((s._get||s.get)());}
+function cSrc(n){if(CSIM.forces[n]!=null)return 'Elle';if(cSimVal(n)!==undefined)return 'Simülatör';if(n in C_DEFAULTS)return 'Varsayılan';return '0 (bağlı değil)';}
+function cTypeHint(n){const i=INV&&INV.byName.get(n);return i!=null?INV.s[i][7].split('/').pop():null;}
+/* ---- varsayım dosyası: eksik sabitler (…_data.c gelene kadar) ---- */
+function cAssumeFile(b){
+  const src=Object.entries(CSIM.files).filter(([n])=>!/^SIM_/i.test(n)).map(([,f])=>f.cur).join('\n');
+  const undef=[...new Set(b.warnings.map(w=>(/Tanımsız değişken (\w+)/.exec(w.msg)||[])[1]).filter(Boolean))];
+  if(!undef.length)return null;
+  const L=['/* SIM_varsayimlar.c — simülatörün eklediği VARSAYIM dosyası.',' * Kodun kullandığı ama yüklenen dosyalarda tanımı olmayan sabitler burada.',' * Gerçek değerler Simulink’in ürettiği …_data.c ve ortak başlıklarda.',' * O dosyaları eklediğinizde bu dosyayı silin. */','void SIM_varsayimlar(void)','{'];
+  undef.forEach(root=>{const re=new RegExp(root+'\\.(\\w+)(\\[)?','g');const fields=new Map();let m;while((m=re.exec(src)))fields.set(m[1],!!m[2]);
+    if(fields.size){fields.forEach((arr,f)=>{
+      if(arr){L.push(`  /* VARSAYIM: ${root}.${f} = Simulink S-R Flip-Flop doğruluk tablosu (Q sütunu, sonra !Q) */`);[0,1,0,0,1,1,0,0,1,0,1,1,0,0,0,0].forEach((v,i)=>L.push(`  ${root}.${f}[${i}] = ${v}U;`));}
+      else L.push(`  ${root}.${f} = 1000U;  /* VARSAYIM: süre sabiti (ms). Gerçek değer …_data.c içinde */`);});}
+    else L.push(`  ${root} = ${/Off_C$/.test(root)?0:/On_C$/.test(root)?1:0}U;  /* VARSAYIM: ortak başlıktaki sabit */`);});
+  L.push('}');return L.join('\n')+'\n';}
+function cBuild(){const t0=performance.now();CSIM.err=null;
+  let b;try{b=CC.compile(Object.fromEntries(Object.entries(CSIM.files).map(([n,f])=>[n,f.cur])),{known:n=>SIGN.has(n)||!!(INV&&INV.byName.has(n)),typeHint:cTypeHint});}
+  catch(e){CSIM.err={msg:e.message,file:e.file,line:e.line};CSIM.build=null;if(CSIM.on)cSetOn(false);CSIM.dirty=false;return false;}
+  if(!Object.keys(CSIM.files).some(n=>/^SIM_/i.test(n))){const a=cAssumeFile(b);if(a){CSIM.files['SIM_varsayimlar.c']={orig:a,cur:a,added:true};return cBuild();}}
+  b.ms=Math.round(performance.now()-t0);
+  if(!b.steps.length){CSIM.err={msg:'Adım (step) fonksiyonu bulunamadı. Parametresiz ve “…_100ms” / “…step” adlı bir fonksiyon bekleniyor.'};CSIM.build=null;return false;}
+  const was=CSIM.on;if(was)cUnhook();
+  CSIM.build=b;CSIM.step=b.steps[0];CSIM.period=b.steps[0].period||100;CSIM.dirty=false;CSIM.builtAt=new Date();
+  cInitG();if(was)cHook();cSave();return true;}
+function cInitG(){const b=CSIM.build;if(!b)return;const G={};b.mod.$init(G);CSIM.G=G;
+  b.assume.forEach(f=>b.mod.F['$'+f]());
+  CSIM.paramInit={};b.params.forEach(n=>CSIM.paramInit[n]=G[n]??0);
+  Object.entries(CSIM.params).forEach(([n,v])=>{if(b.params.includes(n))G[n]=v;});
+  b.reset.forEach(f=>b.mod.F['$'+f]());b.init.forEach(f=>b.mod.F['$'+f]());CSIM.steps=0;CSIM.acc=0;}
+function cStep(){const b=CSIM.build,G=CSIM.G;if(!b)return;
+  for(const n of b.inputs){let v=CSIM.forces[n];if(v==null){v=cSimVal(n);if(v===undefined)v=C_DEFAULTS[n]??0;}G[n]=v;}
+  try{b.mod.resetIt();b.mod.F['$'+CSIM.step.name]();}
+  catch(e){CSIM.err={msg:'Çalışma hatası: '+e.message};log('C kodu durdu: '+e.message,'warn');cSetOn(false);return;}
+  CSIM.steps++;
+  if(b.outputs.includes('DR_StDoorRelsActv')){const r=!!G.DR_StDoorRelsActv;if(r!==V.release)setRelease(r,'C kodu');}}
+/* simülatördeki TF tuşu C modunda koda darbe olarak gider */
+function cRelease(on,src){const t=performance.now();if(on){PRS['Dash_B01']=t;PRS['Dash_B01_off']=-1e9;}else{PRS['Dash_B01_off']=t;PRS['Dash_B01']=-1e9;}
+  log(`${src} → C kodu girişi ${on?'DR_StDoorRelsBtnPosn1_I':'DR_StDoorRelsDisadBtnPosn1_I'} = 1 (300 ms); karar C kodunda`);}
+const cDrivesRelease=()=>CSIM.on&&CSIM.build&&CSIM.build.outputs.includes('DR_StDoorRelsActv');
+/* sinyal kataloğuna bağla */
+function cHook(){const b=CSIM.build;if(!b)return;CSIM.added=[];
+  const mk=(n,g,isOut)=>{const ty=b.typeOf(n)||(cTypeHint(n)?{k:/boolean/.test(cTypeHint(n))?'bool':'int'}:{k:'int'});const get=()=>CSIM.G[n]??0;
+    const s=ty.k==='bool'?sB(n,g,'C kodu',isOut?'C kodunun ürettiği çıkış':'C kodunun okuduğu giriş',get):sN(n,g,'C kodu',isOut?'C kodunun ürettiği çıkış':'C kodunun okuduğu giriş',get,'');
+    const i=INV&&INV.byName.get(n);if(i!=null){s.tr=INV.s[i][1];s.en=INV.s[i][2];}
+    Object.assign(s,{sim:true,cAdded:true,aswLive:true,hist:[],changes:0,lastT:0,prev:undefined,cur:undefined,reqs:[]});SIG_DB.push(s);SIGN.set(n,s);CSIM.added.push(s);};
+  b.outputs.forEach(n=>{const s=SIGN.get(n);if(s){s._get=s.get;s.get=()=>CSIM.G[n]??0;s.cOut=true;}else mk(n,'C kodu · çıkış',true);});
+  b.inputs.forEach(n=>{const s=SIGN.get(n);if(s){s._get=s.get;s.get=()=>CSIM.forces[n]!=null?CSIM.forces[n]:s._get();s.cIn=true;}else mk(n,'C kodu · giriş',false);});
+  cRegroup();}
+function cUnhook(){SIG_DB.forEach(s=>{if(s._get){s.get=s._get;delete s._get;}delete s.cOut;delete s.cIn;});
+  (CSIM.added||[]).forEach(s=>{const k=SIG_DB.indexOf(s);if(k>=0)SIG_DB.splice(k,1);if(SIGN.get(s.n)===s)SIGN.delete(s.n);});CSIM.added=[];cRegroup();}
+function cRegroup(){const g=[...new Set(SIG_DB.map(s=>s.g))];SIG_GROUPS.length=0;SIG_GROUPS.push(...g);REC.sigs=null;REC.t.length=0;REC.v.length=0;REC.t0=performance.now();}
+function cSetOn(on){if(on&&!CSIM.build)return;if(on===CSIM.on)return;CSIM.on=on;
+  if(on){cHook();cInitG();log(`C kodu simülatöre bağlandı: ${CSIM.step.name} her ${CSIM.period} ms`);}
+  else{cUnhook();log('C kodu bağlantısı kapatıldı, simülatör kendi mantığına döndü');}
+  const h=$('#hC');if(h){h.hidden=!on;h.textContent='C kodu · '+(CSIM.step?CSIM.step.name:'');}cSave();}
+/* ---- diff (satır bazlı LCS) ---- */
+function cDiff(a,b){const A=a.split('\n'),B=b.split('\n');let s=0;while(s<A.length&&s<B.length&&A[s]===B[s])s++;let ea=A.length,eb=B.length;while(ea>s&&eb>s&&A[ea-1]===B[eb-1]){ea--;eb--;}
+  const X=A.slice(s,ea),Y=B.slice(s,eb);if(X.length*Y.length>4e6)return [{t:'~',a:s+1,txt:`${X.length} satır → ${Y.length} satır (fark çok büyük)`}];
+  const n=X.length,m=Y.length,D=Array.from({length:n+1},()=>new Uint16Array(m+1));
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)D[i][j]=X[i]===Y[j]?D[i+1][j+1]+1:Math.max(D[i+1][j],D[i][j+1]);
+  const out=[];let i=0,j=0;while(i<n||j<m){if(i<n&&j<m&&X[i]===Y[j]){i++;j++;}else if(j<m&&(i>=n||D[i][j+1]>=D[i+1][j])){out.push({t:'+',b:s+j+1,txt:Y[j]});j++;}else{out.push({t:'-',a:s+i+1,txt:X[i]});i++;}}
+  return out;}
+/* ---- arayüz ---- */
+const cRank=n=>/^SIM_/i.test(n)?3:/\.h$/i.test(n)?2:/_(Local|Output|Input|data)\.c$/i.test(n)?1:0;
+const cFileNames=()=>Object.keys(CSIM.files).sort((a,b)=>cRank(a)-cRank(b)||(a<b?-1:1));
+function cAddFiles(list){const fs=[...list].filter(f=>/\.(c|h)$/i.test(f.name));if(!fs.length){alert('Yalnızca .c ve .h dosyaları eklenebilir.');return;}
+  Promise.all(fs.map(f=>f.text().then(t=>[f.name,t]))).then(arr=>{arr.forEach(([n,t])=>{t=t.replace(/\r\n/g,'\n');CSIM.files[n]={orig:t,cur:t};});
+    if(!CSIM.cur||!CSIM.files[CSIM.cur])CSIM.cur=cFileNames().find(n=>/\.c$/i.test(n)&&!/^SIM_/.test(n)&&!/_(Local|Output|Input|data)\.c$/i.test(n))||cFileNames()[0];
+    cBuild();cSave();renderCode();});}
+function cStatusHTML(){const b=CSIM.build;
+  if(CSIM.err)return `<span class="cst-chip bad">Hata</span>`;
+  if(!b)return `<span class="cst-chip">Derlenmedi</span>`;
+  return `<span class="cst-chip ${CSIM.dirty?'warn':'ok'}">${CSIM.dirty?'Değişiklik var, derleyin':'Derlendi'}</span><span class="note">${b.ms} ms · ${esc(CSIM.step.name)} her ${CSIM.period} ms · <span id="cSteps">${CSIM.on?CSIM.steps+' adım':'simülatöre bağlı değil'}</span></span>`;}
+function cMsgsHTML(){const b=CSIM.build,o=[];
+  if(CSIM.err)o.push(`<div class="cmsg bad"><b>Derleme durdu</b><div>${esc(CSIM.err.msg)}</div>${CSIM.err.file?`<button class="linkbtn" data-cjump="${esc(CSIM.err.file)}:${CSIM.err.line}">${esc(CSIM.err.file)} · satır ${CSIM.err.line}</button>`:''}</div>`);
+  if(b){const off=b.params.filter(n=>/StsFctEna_P$/.test(n)&&!(CSIM.G[n])&&!(CSIM.G[n.replace(/_P$/,'Nv')]));
+    if(off.length)o.push(`<div class="cmsg warn"><b>Fonksiyon kapalı: ${off.map(esc).join(', ')} = 0</b><div>Koddaki başlangıç değeri 0; gerçek araçta değer kalibrasyon verisinden gelir. Simülasyonda denemek için değeri 1 yapın.</div><button class="pbtn" data-cact="fcten">${off.map(esc).join(', ')} = 1 yap</button></div>`);
+    if(CSIM.files['SIM_varsayimlar.c'])o.push(`<div class="cmsg info"><b>Varsayım dosyası kullanılıyor: SIM_varsayimlar.c</b><div>Kodun kullandığı bazı sabitlerin tanımı yüklenen dosyalarda yok (ör. S-R flip-flop tablosu, süre sabitleri). Tahmini değerlerle çalışıyor; gerçek değerler için Simulink’in ürettiği <code>…_data.c</code> dosyasını ekleyip bu dosyayı silin.</div><button class="linkbtn" data-cfile="SIM_varsayimlar.c">Dosyayı aç</button></div>`);
+    const miss=b.missingInc.filter(n=>!/MemMap/i.test(n));
+    if(miss.length)o.push(`<details class="cmsg"><summary>${miss.length} başlık dosyası yok; sorun değil</summary><div class="note">Tipler Excel envanterinden ve koddaki kullanımdan çıkarıldı: ${miss.map(esc).join(', ')}</div></details>`);
+    const w=b.warnings.filter(x=>!/Tanımsız değişken \w+_(Const[BP])|_C →/.test(x.msg)||!CSIM.files['SIM_varsayimlar.c']);
+    if(w.length)o.push(`<details class="cmsg"><summary>${w.length} uyarı</summary>${w.slice(0,40).map(x=>`<div class="note">${x.file?`<button class="linkbtn" data-cjump="${esc(x.file)}:${x.line}">${esc(x.file)}:${x.line}</button> `:''}${esc(x.msg)}</div>`).join('')}</details>`);}
+  return o.join('');}
+function cIOHTML(){const b=CSIM.build;if(!b)return '<p class="note">Önce kodu derleyin.</p>';const q=($('#docSearch').value||'').trim().toLowerCase(),f=n=>!q||n.toLowerCase().includes(q);const G=CSIM.G;
+  const val=n=>`<span class="sv" data-cv="${esc(n)}">${esc(String(G[n]??0))}</span>`;
+  const tr=n=>{const i=INV&&INV.byName.get(n);return i!=null?`<div class="en">${esc(INV.s[i][1])}</div>`:'';};
+  const tabs=[['out','Çıkışlar',b.outputs.length],['in','Girişler',b.inputs.length],['par','Parametreler',b.params.length],['st','İç durum','']];
+  let body='';
+  if(CSIM.tab==='out')body=`<table class="stable"><thead><tr><th>Çıkış (Set_)</th><th>Değer</th><th></th></tr></thead><tbody>${b.outputs.filter(f).map(n=>`<tr><td><code>${esc(n)}</code>${tr(n)}</td><td>${val(n)}</td><td><button class="sigchip" data-cplot="${esc(n)}">Grafik</button></td></tr>`).join('')}</tbody></table>`;
+  if(CSIM.tab==='in')body=`<p class="note">Girişler her adımda simülatörden okunur. “Elle” kutusunu işaretleyip değer girerek bir girişi sabitleyebilir, “Darbe” ile 0,3 s 1 verebilirsiniz.</p><table class="stable"><thead><tr><th>Giriş (Get_)</th><th>Kaynak</th><th>Değer</th><th>Elle</th><th></th></tr></thead><tbody>${b.inputs.filter(f).sort((x,y)=>{const r=n=>['Elle','Simülatör','Varsayılan'].indexOf(cSrc(n));const a=r(x),c=r(y);return (a<0?9:a)-(c<0?9:c)||(x<y?-1:1);}).map(n=>{const fo=CSIM.forces[n];
+    return `<tr><td><code>${esc(n)}</code>${tr(n)}${C_DEF_NOTE[n]?`<div class="en">Varsayılan ${C_DEFAULTS[n]} (VARSAYIM): ${esc(C_DEF_NOTE[n])}</div>`:''}</td><td class="stype" data-csrc="${esc(n)}">${cSrc(n)}</td><td>${val(n)}</td>
+      <td class="cforce"><input type="checkbox" data-cforce="${esc(n)}" ${fo!=null?'checked':''} aria-label="${esc(n)} elle"><input type="number" data-cfv="${esc(n)}" value="${fo!=null?fo:''}" placeholder="—" ${fo!=null?'':'disabled'} aria-label="${esc(n)} değeri"></td>
+      <td><button class="sigchip" data-cpulse="${esc(n)}">Darbe</button></td></tr>`;}).join('')}</tbody></table>`;
+  if(CSIM.tab==='par')body=`<p class="note">Kalibrasyon (_P) ve NV kodlama (Nv) değerleri. Kod, Nv ≠ 0 ise onu, değilse _P’yi kullanır. Değişiklik hemen uygulanır ve bu tarayıcıda saklanır.</p><table class="stable"><thead><tr><th>Parametre</th><th>Koddaki başlangıç</th><th>Değer</th></tr></thead><tbody>${b.params.filter(f).map(n=>`<tr><td><code>${esc(n)}</code>${tr(n)}</td><td class="stype">${esc(String(CSIM.paramInit?CSIM.paramInit[n]:0))}</td><td><input class="cpar" type="number" data-cpar="${esc(n)}" value="${esc(String(G[n]??0))}" aria-label="${esc(n)}">${CSIM.params[n]!=null?' <button class="linkbtn" data-cparrst="'+esc(n)+'">geri al</button>':''}</td></tr>`).join('')}</tbody></table>`;
+  if(CSIM.tab==='st'){const rows=[];Object.entries(G).forEach(([k,v])=>{if(v&&typeof v==='object'){const walk=(o,p)=>Object.entries(o).forEach(([kk,vv])=>{if(vv&&typeof vv==='object'&&!Array.isArray(vv))walk(vv,p+'.'+kk);else if(Array.isArray(vv))rows.push([p+'.'+kk,'['+vv.join(',')+']']);else rows.push([p+'.'+kk,vv]);});walk(v,k);}});
+    body=`<p class="note">Simulink blok sinyalleri (B), durumlar (DW) ve sıfır geçiş durumları (PrevZCX). Hata ayıklamak için.</p><table class="stable"><thead><tr><th>Değişken</th><th>Değer</th></tr></thead><tbody>${rows.filter(r=>f(r[0])).map(r=>`<tr><td><code>${esc(r[0])}</code></td><td><span class="sv" data-cst="${esc(r[0])}">${esc(String(r[1]))}</span></td></tr>`).join('')}</tbody></table>`;}
+  return `<div class="ctabs" role="tablist">${tabs.map(([k,l,c])=>`<button class="sfb" data-ctab="${k}" aria-pressed="${CSIM.tab===k}">${l}${c!==''?' ('+c+')':''}</button>`).join('')}</div><div class="stable-wrap cio">${body}</div>`;}
+function renderCode(){
+  const names=cFileNames();
+  $('#dtoc').innerHTML=`<div class="tochead">Dosyalar</div>${names.length?names.map(n=>{const f=CSIM.files[n];return `<a class="tocg${CSIM.cur===n?' cur':''}" href="#" data-cfile="${esc(n)}"><span>${esc(n)}</span><em>${f.cur!==f.orig?'değişti':''}</em></a>`;}).join(''):'<p class="note tocnote">Henüz dosya yok.</p>'}
+    <p class="note tocnote">Dosyalar yalnızca bu tarayıcıda saklanır; yayınlanan sayfaya eklenmez.</p>`;
+  const m=$('#dmain');
+  if(!names.length){m.innerHTML=`<div class="dwrap wide"><div class="dsum"><div><div class="eyebrow">C kodu · tarayıcıda derlenir, simülatöre bağlanır</div><h3>C kodunu yükleyin</h3>
+    <p>Bir ASW’nin üretilmiş C dosyalarını ekleyin. Kod bu tarayıcıda derlenir; girişler simülatörden okunur, çıkışlar otobüsü sürer. Kodu değiştirip yeniden derleyerek sonucu hemen simülatörde, sinyal grafiğinde ve otomatik testlerde görebilirsiniz.</p></div></div>
+    <label class="cdrop" id="cDrop"><input type="file" id="cFiles" multiple accept=".c,.h" hidden><b>Dosyaları buraya bırakın veya tıklayıp seçin</b>
+      <span>Örnek: <code>Doors_DoorsRels.c</code>, <code>…_Local.c</code>, <code>…_Output.c</code>, <code>…_Input.h</code>; varsa <code>…_data.c</code>, <code>Doors_DoorsRels.h</code>, <code>rtwtypes.h</code>.</span>
+      <span>Dosyalar yalnızca bu tarayıcıda saklanır, kimseyle paylaşılmaz.</span></label></div>`;return;}
+  if(!CSIM.cur||!CSIM.files[CSIM.cur])CSIM.cur=names[0];
+  const f=CSIM.files[CSIM.cur],chg=f.cur!==f.orig;
+  m.innerHTML=`<div class="dwrap wide cwrap">
+    <div class="dsum"><div><div class="eyebrow">C kodu · tarayıcıda derlenir, simülatöre bağlanır</div><h3>${esc((names.find(n=>cRank(n)===0)||names[0]).replace(/\.c$/i,''))}</h3>
+      <div class="cstat" id="cStat">${cStatusHTML()}</div></div>
+      <div class="cctl"><button class="pbtn" data-cact="build">Derle ve çalıştır</button>
+        <button class="sfb" data-cact="on" aria-pressed="${CSIM.on}" ${CSIM.build?'':'disabled'}>Simülatörde kullan: ${CSIM.on?'Açık':'Kapalı'}</button>
+        <button class="sfb" data-cact="pause" aria-pressed="${CSIM.paused}" ${CSIM.on?'':'disabled'}>${CSIM.paused?'Devam et':'Duraklat'}</button>
+        <button class="sfb" data-cact="step" ${CSIM.on?'':'disabled'}>Tek adım</button>
+        <button class="sfb" data-cact="reset" ${CSIM.build?'':'disabled'}>Durumu sıfırla</button>
+        <button class="sfb" data-cact="gosim">Simülatöre git</button></div></div>
+    <div id="cMsgs">${cMsgsHTML()}</div>
+    <section class="ccard"><div class="chd2"><select id="cSel" aria-label="Dosya">${names.map(n=>`<option${n===CSIM.cur?' selected':''}>${esc(n)}</option>`).join('')}</select>
+        <span class="note" id="cChg">${chg?'Orijinalden farklı':'Orijinal'}</span><span class="sp"></span>
+        <button class="sfb" data-cact="diff" ${chg?'':'disabled'}>Değişiklikler</button><button class="sfb" data-cact="orig" ${chg?'':'disabled'}>Orijinale dön</button>
+        <button class="sfb" data-cact="dl" title="Tüm dosyaların güncel hali, tek zip">İndir (.zip)</button><button class="sfb" data-cact="copy">Kopyala</button>
+        <label class="sfb cadd">+ Dosya ekle<input type="file" id="cFiles" multiple accept=".c,.h" hidden></label><button class="sfb" data-cact="rm">Dosyayı kaldır</button></div>
+      <div id="cDiff" hidden></div>
+      <div class="ced"><pre class="cgut" id="cGut" aria-hidden="true"></pre><textarea id="cTa" spellcheck="false" wrap="off" aria-label="${esc(CSIM.cur)} içeriği"></textarea></div></section>
+    <section class="ccard" id="cIO">${cIOHTML()}</section></div>`;
+  const ta=$('#cTa');ta.value=f.cur;cGutter();}
+function cGutter(){const ta=$('#cTa'),g=$('#cGut');if(!ta||!g)return;const n=ta.value.split('\n').length;let s='';for(let i=1;i<=n;i++)s+=i+'\n';g.textContent=s;g.scrollTop=ta.scrollTop;}
+function cJump(file,line){if(CSIM.files[file]){CSIM.cur=file;renderCode();}const ta=$('#cTa');if(!ta)return;const L=ta.value.split('\n');let pos=0;for(let i=0;i<line-1&&i<L.length;i++)pos+=L[i].length+1;
+  ta.focus();ta.setSelectionRange(pos,pos+(L[line-1]||'').length);const lh=parseFloat(getComputedStyle(ta).lineHeight)||18;ta.scrollTop=Math.max(0,(line-6)*lh);cGutter();ta.scrollIntoView({block:'center',behavior:'smooth'});}
+function updateCodeView(){if(VIEW!=='code'||!CSIM.build)return;const G=CSIM.G;
+  const s=$('#cSteps');if(s)s.textContent=CSIM.on?CSIM.steps+' adım':'simülatöre bağlı değil';
+  document.querySelectorAll('[data-cv]').forEach(el=>{const v=String(G[el.dataset.cv]??0);if(el.textContent!==v)el.textContent=v;el.classList.toggle('on',v!=='0');});
+  document.querySelectorAll('[data-csrc]').forEach(el=>{const v=cSrc(el.dataset.csrc);if(el.textContent!==v)el.textContent=v;});
+  if(CSIM.tab==='st')document.querySelectorAll('[data-cst]').forEach(el=>{const p=el.dataset.cst.split('.');let o=G;for(const k of p)o=o&&o[k];const v=Array.isArray(o)?'['+o.join(',')+']':String(o??0);if(el.textContent!==v)el.textContent=v;});}
+function cRefreshTop(){const s=$('#cStat');if(s)s.innerHTML=cStatusHTML();const m=$('#cMsgs');if(m)m.innerHTML=cMsgsHTML();const io=$('#cIO');if(io)io.innerHTML=cIOHTML();
+  document.querySelectorAll('[data-cact="on"]').forEach(b=>{b.setAttribute('aria-pressed',CSIM.on);b.textContent='Simülatörde kullan: '+(CSIM.on?'Açık':'Kapalı');b.disabled=!CSIM.build;});
+  ['pause','step'].forEach(k=>document.querySelectorAll(`[data-cact="${k}"]`).forEach(b=>b.disabled=!CSIM.on));}
+function cZip(files){/* sıkıştırmasız (store) zip */
+  const enc=new TextEncoder(),crcT=cZip.t||(cZip.t=Array.from({length:256},(_,n)=>{let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;return c>>>0;}));
+  const crc=u=>{let c=~0;for(let i=0;i<u.length;i++)c=crcT[(c^u[i])&255]^(c>>>8);return (~c)>>>0;};
+  const parts=[],cen=[];let off=0;
+  files.forEach(([name,txt])=>{const nm=enc.encode(name),d=enc.encode(txt),c=crc(d);
+    const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x800,true);h.setUint32(14,c,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,nm.length,true);
+    parts.push(new Uint8Array(h.buffer),nm,d);
+    const ch=new DataView(new ArrayBuffer(46));ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x800,true);ch.setUint32(16,c,true);ch.setUint32(20,d.length,true);ch.setUint32(24,d.length,true);ch.setUint16(28,nm.length,true);ch.setUint32(42,off,true);
+    cen.push(new Uint8Array(ch.buffer),nm);off+=30+nm.length+d.length;});
+  const cl=cen.reduce((a,x)=>a+x.length,0),e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cl,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...cen,new Uint8Array(e.buffer)],{type:'application/zip'});}
+async function cDownload(btn){const names=cFileNames().filter(n=>!/^SIM_/i.test(n)||CSIM.files[n].cur!==CSIM.files[n].orig),blob=cZip(names.map(n=>[n,CSIM.files[n].cur]));
+  const base=(names.find(n=>cRank(n)===0)||'c_kodu').replace(/\.c$/i,''),fn=base+'_'+new Date().toISOString().slice(0,16).replace(/[-:T]/g,'')+'.zip';
+  let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){}
+  if(dl){try{await dl.save({filename:fn,data:blob});btn.textContent='İndirildi';}catch(e){btn.textContent=e&&e.code==='declined'?'İptal edildi':'İndirilemedi';}setTimeout(()=>btn.textContent='İndir (.zip)',1500);return;}
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}catch(e){btn.textContent='İndirilemedi; Kopyala’yı kullanın';}}
+function cCodeClick(e){const t=e.target.closest('button,a');if(!t)return false;
+  const a=t.dataset.cact;
+  if(a){e.preventDefault();const f=CSIM.files[CSIM.cur];
+    if(a==='build'){cBuild();if(CSIM.build&&!CSIM.on)cSetOn(true);renderCode();}
+    else if(a==='on'){cSetOn(!CSIM.on);cRefreshTop();}
+    else if(a==='pause'){CSIM.paused=!CSIM.paused;t.setAttribute('aria-pressed',CSIM.paused);t.textContent=CSIM.paused?'Devam et':'Duraklat';}
+    else if(a==='step'){CSIM.paused=true;cStep();cRefreshTop();updateCodeView();}
+    else if(a==='reset'){cInitG();cRefreshTop();log('C kodu durumu sıfırlandı');}
+    else if(a==='gosim')setView('sim');
+    else if(a==='fcten'){CSIM.build.params.filter(n=>/StsFctEna_P$/.test(n)).forEach(n=>{CSIM.params[n]=1;CSIM.G[n]=1;});cSave();cRefreshTop();}
+    else if(a==='orig'&&f){if(confirm(`${CSIM.cur} orijinal haline dönsün mü? Değişiklikleriniz silinir.`)){f.cur=f.orig;CSIM.dirty=true;cSave();renderCode();}}
+    else if(a==='diff'&&f){const d=$('#cDiff');if(!d.hidden){d.hidden=true;return true;}const ds=cDiff(f.orig,f.cur);d.hidden=false;
+      d.innerHTML=`<div class="dlbl">${ds.filter(x=>x.t==='+').length} satır eklendi/değişti · ${ds.filter(x=>x.t==='-').length} satır silindi/değişti</div><pre class="cdiff">${ds.slice(0,400).map(x=>x.t==='+'?`<button class="dl-add" data-cjump="${esc(CSIM.cur)}:${x.b}">+ ${String(x.b).padStart(4)} │ ${esc(x.txt)}</button>`:x.t==='-'?`<span class="dl-del">− ${String(x.a).padStart(4)} │ ${esc(x.txt)}</span>`:`<span>${esc(x.txt)}</span>`).join('\n')}</pre>`;}
+    else if(a==='dl')cDownload(t);
+    else if(a==='copy'&&f){(navigator.clipboard?navigator.clipboard.writeText(f.cur):Promise.reject()).then(()=>{t.textContent='Kopyalandı';setTimeout(()=>t.textContent='Kopyala',1200);}).catch(()=>{const ta=$('#cTa');ta.select();document.execCommand&&document.execCommand('copy');});}
+    else if(a==='rm'&&f){if(confirm(`${CSIM.cur} kaldırılsın mı?`)){delete CSIM.files[CSIM.cur];CSIM.cur=null;if(Object.keys(CSIM.files).length)cBuild();else{CSIM.build=null;if(CSIM.on)cSetOn(false);}cSave();renderCode();}}
+    return true;}
+  if(t.dataset.cfile){e.preventDefault();CSIM.cur=t.dataset.cfile;renderCode();return true;}
+  if(t.dataset.cjump){const [fl,ln]=t.dataset.cjump.split(':');cJump(fl,+ln);return true;}
+  if(t.dataset.ctab){CSIM.tab=t.dataset.ctab;$('#cIO').innerHTML=cIOHTML();return true;}
+  if(t.dataset.cpulse){const n=t.dataset.cpulse,old=CSIM.forces[n];CSIM.forces[n]=1;setTimeout(()=>{if(old==null)delete CSIM.forces[n];else CSIM.forces[n]=old;},300);return true;}
+  if(t.dataset.cplot){const n=t.dataset.cplot;if(!CSIM.on)cSetOn(true);if(!CH.sel.includes(n))CH.sel.push(n);SIG_MODE='live';CH.live=true;CH.start=null;setView('sigs');return true;}
+  if(t.dataset.cparrst){const n=t.dataset.cparrst;delete CSIM.params[n];CSIM.G[n]=CSIM.paramInit[n]??0;cSave();$('#cIO').innerHTML=cIOHTML();return true;}
+  return false;}
+function cCodeChange(e){const t=e.target;
+  if(t.id==='cFiles'){cAddFiles(t.files);return true;}
+  if(t.id==='cSel'){CSIM.cur=t.value;renderCode();return true;}
+  if(t.dataset.cforce){const n=t.dataset.cforce,inp=document.querySelector(`[data-cfv="${CSS.escape(n)}"]`);if(t.checked){CSIM.forces[n]=+(inp.value||CSIM.G[n]||0);inp.disabled=false;inp.value=CSIM.forces[n];}else{delete CSIM.forces[n];inp.disabled=true;inp.value='';}cSave();return true;}
+  if(t.dataset.cfv){const n=t.dataset.cfv;if(CSIM.forces[n]!=null){CSIM.forces[n]=+t.value||0;cSave();}return true;}
+  if(t.dataset.cpar){const n=t.dataset.cpar,v=+t.value||0;CSIM.params[n]=v;if(CSIM.G)CSIM.G[n]=v;cSave();const m=$('#cMsgs');if(m)m.innerHTML=cMsgsHTML();return true;}
+  return false;}
+function cCodeInput(e){const t=e.target;if(t.id!=='cTa')return false;const f=CSIM.files[CSIM.cur];if(!f)return true;f.cur=t.value;CSIM.dirty=true;cGutter();cSaveSoon();
+  const c=$('#cChg');if(c)c.textContent=f.cur!==f.orig?'Orijinalden farklı':'Orijinal';const s=$('#cStat');if(s)s.innerHTML=cStatusHTML();return true;}
 /* ---------- Sinyal kaydı ve zaman grafiği ---------- */
 const REC={t:[],v:[],sigs:null,max:12000,t0:performance.now(),acc:0,now(){return (performance.now()-this.t0)/1000;}};
 function recSample(){if(!REC.sigs)REC.sigs=SIG_DB.filter(s=>s.sim);REC.t.push(REC.now());REC.v.push(REC.sigs.map(s=>s.get()));if(REC.t.length>REC.max){REC.t.splice(0,1500);REC.v.splice(0,1500);}}
@@ -2302,7 +2926,7 @@ new ResizeObserver(resize).observe(cv);resize();
 /* ================= Döngü ================= */
 let last=performance.now(),hoverT=0,slowT=0;const fwd=new THREE.Vector3();
 setMode('walk');applyLighting();
-const hashView=()=>{const h=location.hash;if(h==='#gereksinimler')setView('reqs');else if(h==='#sinyaller')setView('sigs');};hashView();addEventListener('hashchange',hashView);
+const hashView=()=>{const h=location.hash;if(h==='#gereksinimler')setView('reqs');else if(h==='#sinyaller')setView('sigs');else if(h==='#ckod')setView('code');};hashView();addEventListener('hashchange',hashView);
 function frame(now){
   const dt=Math.min(0.05,(now-last)/1000);last=now;const k=st.keys;
   updateDoors(dt);updateCab(dt);updateDrive(dt,k);
@@ -2329,11 +2953,13 @@ function frame(now){
     if(l.positionX){l.positionX.value=p.x;l.positionY.value=p.y;l.positionZ.value=p.z;l.forwardX.value=fwd.x;l.forwardY.value=fwd.y;l.forwardZ.value=fwd.z;l.upX.value=0;l.upY.value=1;l.upZ.value=0;}
     else{l.setPosition(p.x,p.y,p.z);l.setOrientation(fwd.x,fwd.y,fwd.z,0,1,0);}}
   REC.acc+=dt;if(REC.acc>=0.05){REC.acc=0;recSample();}
-  slowT-=dt;if(slowT<=0){slowT=0.08;renderCluster();renderSignals();refreshBtns();drawDoorSigns();renderDemoSig();}
+  if(CSIM.on&&CSIM.build&&!CSIM.paused){CSIM.acc+=dt*1000;let n=0;while(CSIM.acc>=CSIM.period&&n++<5){CSIM.acc-=CSIM.period;cStep();}}
+  slowT-=dt;if(slowT<=0){slowT=0.08;renderCluster();renderSignals();refreshBtns();drawDoorSigns();renderDemoSig();updateCodeView();}
   if(selHelper)selHelper.update();
   if(VIEW==='sim'){renderer.render(scene,camera);drawMap();}
   requestAnimationFrame(frame);
 }
+try{cLoad();}catch(e){}
 requestAnimationFrame(frame);
 })();
 </script>
