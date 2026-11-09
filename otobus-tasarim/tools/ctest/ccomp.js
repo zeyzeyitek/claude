@@ -1,5 +1,5 @@
 /* ===== Tarayıcı içi C derleyicisi (Simulink/ERT üretilmiş kod alt kümesi → JavaScript) ===== */
-const CC=(()=>{
+function CC_FACTORY(){
 const KW=new Set(['if','else','switch','case','default','break','continue','return','for','while','do','goto','typedef','struct','union','enum','sizeof','static','extern','const','volatile','register','inline','auto','signed','unsigned','void','char','short','int','long','float','double','_Bool']);
 const PUN=['>>=','<<=','...','->','++','--','&&','||','==','!=','<=','>=','<<','>>','+=','-=','*=','/=','%=','&=','|=','^=','##','{','}','(',')','[',']',';',',','.','?',':','=','<','>','+','-','*','/','%','&','|','^','!','~','#'];
 const T=(k,bits,signed)=>({k,bits,signed});
@@ -240,8 +240,8 @@ function compile(fileMap,opts){
   const cfiles=[...files.keys()].filter(n=>/\.c$/i.test(n));
   if(!cfiles.length)throw new CErr('Derlenecek .c dosyası yok',null);
   /* extern ipuçları: önişlemci dallarından bağımsız tüm dosyalardan */
-  const externTy=new Map();
-  for(const [n,src] of files){const re=/extern\s+(?:const\s+)?([A-Za-z_]\w*)\s+([A-Za-z_]\w*)\s*;/g;let m;while((m=re.exec(src))){const t=BUILTIN_TYPEDEF[m[1]];if(t)externTy.set(m[2],t);}}
+  const externTy=new Map(Object.entries(opts.externCommon||{}).map(([k,v])=>[k,BUILTIN_TYPEDEF[v]]).filter(x=>x[1]));
+  for(const [n,src] of files){if(opts.skipScan&&opts.skipScan.has(n))continue;const re=/extern\s+(?:const\s+)?([A-Za-z_]\w*)\s+([A-Za-z_]\w*)\s*;/g;let m;while((m=re.exec(src))){const t=BUILTIN_TYPEDEF[m[1]];if(t)externTy.set(m[2],t);}}
   /* sırayla: önce .h tipleri için tüm .c dosyaları aynı bağlamda */
   let items=[];
   for(const cf of cfiles){const toks=preprocess(files,cf,ctx);items=items.concat(parse(toks,ctx));}
@@ -381,10 +381,12 @@ function compile(fileMap,opts){
   for(const [name,g] of G){if(g.tok&&/_Output\.c$/i.test(g.tok.f))io.outputs.add(name);if(g.tok&&/_Local\.c$/i.test(g.tok.f)&&/(_P|Nv)$/.test(name))io.params.add(name);}
   io.inputs.forEach(n=>{if(io.outputs.has(n))io.inputs.delete(n);});
   const globals={};for(const [n,g] of G)globals[n]={ty:g.ty,file:g.tok&&g.tok.f,line:g.tok&&g.tok.l,calib:!!(g.tok&&/_Local\.c$/i.test(g.tok.f)&&/_P$/.test(n))};
-  let mod;try{mod=Function(js)();}catch(e){throw new CErr('İç hata (üretilen JS): '+e.message,null);}
-  return {mod,js,steps,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.warnings),globals,typeOf:n=>typeOfGlobal(n)};}
+  let mod=null;if(!opts.noMod)try{mod=Function(js)();}catch(e){throw new CErr('İç hata (üretilen JS): '+e.message,null);}
+  const types={};[...io.inputs,...io.outputs,...io.params].forEach(n=>{const t=typeOfGlobal(n);if(t)types[n]=tyName(t);});
+  const res={mod,js,steps,types,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.warnings),globals,typeOf:n=>typeOfGlobal(n)};if(opts.noMod){delete res.mod;delete res.typeOf;}return res;}
 function dedupe(w){const s=new Set();return w.filter(x=>{const k=x.msg;if(s.has(k))return false;s.add(k);return true;});}
 const tyName=t=>!t?'?':t.k==='bool'?'boolean':t.k==='int'?(t.signed?'int':'uint')+t.bits:t.k==='float'?'real'+(t.bits===32?'32':''):t.k;
 return {compile,CErr,tyName};
-})();
+}
+const CC=CC_FACTORY();
 if(typeof module!=='undefined')module.exports=CC;

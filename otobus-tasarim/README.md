@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev T)
+# Otobüs Tasarım Stüdyosu (konsept, Rev U)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -142,3 +142,10 @@ Sinyaller: DoorRelease, DoorState_K2
 - claude.ai çerçevesi alert/confirm pencerelerini engellediği için tüm uyarılar sayfa içi bildirime, onaylar sayfa içi onay kutusuna taşındı.
 - Zip dosya adına değil içeriğine (ilk baytlar) bakılarak tanınır; 7z/rar/gz arşivleri için açıklayıcı mesaj.
 - Motor sesi yenilendi: 6 silindirli dizel (ateşleme frekansı = devir/60×3), yumuşak harmonikler, yanma gürültüsü, dizel tıkırtısı, devirle turbo ıslığı; parametreler kademeli değişir (cızırtı yok); içeride daha boğuk. Marş ve kapı motoru sesleri yumuşatıldı.
+
+## Rev U
+- Derleme arka plan işçisinde (Web Worker) yapılır; toplu derleme sırasında sayfa donmaz (60 ASW: 1,9 s, 50 ms üstü donma yok). İşçi açılamazsa ana iş parçacığında ASW ASW devam eder; 45 s aşan derleme atlanır.
+- Ortak başlıklardaki extern tipleri bir kez taranır (her ASW için tekrar taranmaz).
+- Depolama ASW başına ayrı kayıt: kod düzenlenince yalnızca o ASW yazılır (eskiden tüm B24). Eski kayıtlar otomatik taşınır.
+- Grafik kaydı yalnızca grafikteki, testlerdeki ve yan paneldeki sinyalleri tutar (Tümünü çalıştır ile binlerce sinyal kaydedilip bellek doluyordu). Büyük sinyal tablosu 0,5 s aralıkla güncellenir.
+- Ölçüm: 59 ASW birlikte çalışırken JS yükü %1,4-2, bellek 15-26 MB.

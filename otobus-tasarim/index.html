@@ -350,7 +350,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev T</div>
+    <div class="eyebrow">Konsept · Rev U</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
   </div>
@@ -2181,7 +2181,7 @@ function updateInvLive(){document.querySelectorAll('[data-live]').forEach(el=>{c
 function chainPlot(c){CH.sel=[...new Set([...c.cond,...c.steps.map(s=>s[0])])].filter(n=>{const s=SIGN.get(n);return s&&s.sim;}).slice(0,12);
   SIG_MODE='live';CH.live=true;CH.start=null;CH.title=c.t;$('#docSearch').value='';renderSigView();}
 /* ===== Tarayıcı içi C derleyicisi (Simulink/ERT üretilmiş kod alt kümesi → JavaScript) ===== */
-const CC=(()=>{
+function CC_FACTORY(){
 const KW=new Set(['if','else','switch','case','default','break','continue','return','for','while','do','goto','typedef','struct','union','enum','sizeof','static','extern','const','volatile','register','inline','auto','signed','unsigned','void','char','short','int','long','float','double','_Bool']);
 const PUN=['>>=','<<=','...','->','++','--','&&','||','==','!=','<=','>=','<<','>>','+=','-=','*=','/=','%=','&=','|=','^=','##','{','}','(',')','[',']',';',',','.','?',':','=','<','>','+','-','*','/','%','&','|','^','!','~','#'];
 const T=(k,bits,signed)=>({k,bits,signed});
@@ -2422,8 +2422,8 @@ function compile(fileMap,opts){
   const cfiles=[...files.keys()].filter(n=>/\.c$/i.test(n));
   if(!cfiles.length)throw new CErr('Derlenecek .c dosyası yok',null);
   /* extern ipuçları: önişlemci dallarından bağımsız tüm dosyalardan */
-  const externTy=new Map();
-  for(const [n,src] of files){const re=/extern\s+(?:const\s+)?([A-Za-z_]\w*)\s+([A-Za-z_]\w*)\s*;/g;let m;while((m=re.exec(src))){const t=BUILTIN_TYPEDEF[m[1]];if(t)externTy.set(m[2],t);}}
+  const externTy=new Map(Object.entries(opts.externCommon||{}).map(([k,v])=>[k,BUILTIN_TYPEDEF[v]]).filter(x=>x[1]));
+  for(const [n,src] of files){if(opts.skipScan&&opts.skipScan.has(n))continue;const re=/extern\s+(?:const\s+)?([A-Za-z_]\w*)\s+([A-Za-z_]\w*)\s*;/g;let m;while((m=re.exec(src))){const t=BUILTIN_TYPEDEF[m[1]];if(t)externTy.set(m[2],t);}}
   /* sırayla: önce .h tipleri için tüm .c dosyaları aynı bağlamda */
   let items=[];
   for(const cf of cfiles){const toks=preprocess(files,cf,ctx);items=items.concat(parse(toks,ctx));}
@@ -2563,12 +2563,14 @@ function compile(fileMap,opts){
   for(const [name,g] of G){if(g.tok&&/_Output\.c$/i.test(g.tok.f))io.outputs.add(name);if(g.tok&&/_Local\.c$/i.test(g.tok.f)&&/(_P|Nv)$/.test(name))io.params.add(name);}
   io.inputs.forEach(n=>{if(io.outputs.has(n))io.inputs.delete(n);});
   const globals={};for(const [n,g] of G)globals[n]={ty:g.ty,file:g.tok&&g.tok.f,line:g.tok&&g.tok.l,calib:!!(g.tok&&/_Local\.c$/i.test(g.tok.f)&&/_P$/.test(n))};
-  let mod;try{mod=Function(js)();}catch(e){throw new CErr('İç hata (üretilen JS): '+e.message,null);}
-  return {mod,js,steps,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.warnings),globals,typeOf:n=>typeOfGlobal(n)};}
+  let mod=null;if(!opts.noMod)try{mod=Function(js)();}catch(e){throw new CErr('İç hata (üretilen JS): '+e.message,null);}
+  const types={};[...io.inputs,...io.outputs,...io.params].forEach(n=>{const t=typeOfGlobal(n);if(t)types[n]=tyName(t);});
+  const res={mod,js,steps,types,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.warnings),globals,typeOf:n=>typeOfGlobal(n)};if(opts.noMod){delete res.mod;delete res.typeOf;}return res;}
 function dedupe(w){const s=new Set();return w.filter(x=>{const k=x.msg;if(s.has(k))return false;s.add(k);return true;});}
 const tyName=t=>!t?'?':t.k==='bool'?'boolean':t.k==='int'?(t.signed?'int':'uint')+t.bits:t.k==='float'?'real'+(t.bits===32?'32':''):t.k;
 return {compile,CErr,tyName};
-})();
+}
+const CC=CC_FACTORY();
 /* ================= C kodu: B24 entegrasyonu, tarayıcıda derleme, çoklu ASW simülasyonu ================= */
 const C_KEY='otobus.ccode.v1';
 /* Simülatörde karşılığı olmayan ve kodun beklediği girişler için varsayılanlar (VARSAYIM; ekrandan değiştirilebilir) */
@@ -2579,15 +2581,21 @@ const IDB={db:null,open(){if(this.db)return Promise.resolve(this.db);return new 
   async get(k){const db=await this.open();return new Promise((res,rej)=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});},
   async set(k,v){const db=await this.open();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);});}};
 let cSrcT=0,cCfgT=0;
-function cSaveSrc(){clearTimeout(cSrcT);cSrcT=setTimeout(()=>{IDB.set('src',{asws:Object.fromEntries(Object.entries(CSIM.asws).map(([n,a])=>[n,{files:a.files}])),common:CSIM.common,src:CSIM.src}).catch(()=>{CSIM.saveErr=true;});},600);}
+/* depolama: her ASW ayrı kayıt; düzenlemede yalnızca o ASW yazılır */
+const cDirtySave=new Set();
+function cSaveMeta(){return IDB.set('meta',{names:Object.keys(CSIM.asws),common:CSIM.common,src:CSIM.src}).catch(()=>{CSIM.saveErr=true;});}
+function cSaveSrc(name){if(name)cDirtySave.add(name);else Object.keys(CSIM.asws).forEach(n=>cDirtySave.add(n));clearTimeout(cSrcT);
+  cSrcT=setTimeout(async()=>{const ns=[...cDirtySave];cDirtySave.clear();try{if(!name||ns.length>1)await cSaveMeta();for(const n of ns){if(CSIM.asws[n])await IDB.set('a:'+n,{files:CSIM.asws[n].files});}}catch(e){CSIM.saveErr=true;}},700);}
 function cSaveCfg(){clearTimeout(cCfgT);cCfgT=setTimeout(()=>{IDB.set('cfg',{active:Object.keys(CSIM.asws).filter(n=>CSIM.asws[n].active),sel:CSIM.sel,cur:CSIM.cur,forces:CSIM.forces,params:CSIM.params,on:CSIM.on,chk:CSIM.chk}).catch(()=>{});},300);}
 const cSave=()=>{cSaveSrc();cSaveCfg();};
 async function cLoad(){
   try{const old=JSON.parse(localStorage.getItem(C_KEY)||'null');if(old&&old.files&&Object.keys(old.files).length){const nm=cAswNameFromFiles(Object.keys(old.files));
       CSIM.asws[nm]={files:Object.fromEntries(Object.entries(old.files).map(([f,v])=>[f,{orig:v.orig,cur:v.cur,path:f}])),active:true};CSIM.forces=old.forces||{};CSIM.params=old.params||{};CSIM.sel=nm;CSIM.cur=old.cur;
-      await IDB.set('src',{asws:{[nm]:{files:CSIM.asws[nm].files}},common:{},src:null});await IDB.set('cfg',{active:[nm],sel:nm,cur:old.cur,forces:CSIM.forces,params:CSIM.params,on:old.on});localStorage.removeItem(C_KEY);}}catch(e){}
-  try{const s=await IDB.get('src'),c=await IDB.get('cfg');if(!s||!s.asws)return;
-    CSIM.common=s.common||{};CSIM.src=s.src||null;Object.entries(s.asws).forEach(([n,a])=>CSIM.asws[n]={files:a.files,active:false});
+      await IDB.set('meta',{names:[nm],common:{},src:null});await IDB.set('a:'+nm,{files:CSIM.asws[nm].files});await IDB.set('cfg',{active:[nm],sel:nm,cur:old.cur,forces:CSIM.forces,params:CSIM.params,on:old.on});localStorage.removeItem(C_KEY);}}catch(e){}
+  try{let m=await IDB.get('meta');const c=await IDB.get('cfg');
+    if(!m){const old=await IDB.get('src');if(old&&old.asws){m={names:Object.keys(old.asws),common:old.common||{},src:old.src||null};for(const [n,a] of Object.entries(old.asws))await IDB.set('a:'+n,{files:a.files});await IDB.set('meta',m);await IDB.set('src',null);}}
+    if(!m||!m.names||!m.names.length)return;
+    CSIM.common=m.common||{};CSIM.src=m.src||null;for(const n of m.names){const r=await IDB.get('a:'+n);if(r&&r.files)CSIM.asws[n]={files:r.files,active:false};}
     if(c){(c.active||[]).forEach(n=>{if(CSIM.asws[n])CSIM.asws[n].active=true;});Object.assign(CSIM,{sel:c.sel,cur:c.cur,forces:c.forces||{},params:c.params||{},chk:c.chk||{}});}
     await cBuildActive();if(c&&c.on&&cAnyRunning())cSetOn(true);if(VIEW==='code')renderCode();}catch(e){}}
 /* ---- yardımcılar ---- */
@@ -2654,7 +2662,7 @@ async function cImportEntries(entries,label){const st=$('#cImp');const say=t=>{i
         const prev=old[n]&&old[n].files[b];fs[b]={orig:t,cur:keepEdits&&prev&&prev.cur!==prev.orig?prev.cur:t,path:p};if(++done%40===0){say(`Dosyalar açılıyor… ${done}/${total}`);await new Promise(r=>setTimeout(r));}}
       nas[n]={files:fs,active:!!(old[n]&&old[n].active)};}
     for(const [b,p] of Object.entries(g.common)){common[b]=(await z.read(byName.get(p))).replace(/\r\n/g,'\n');}
-    if(CSIM.on)cSetOn(false);CSIM.asws=nas;CSIM.common=common;CSIM.mods={};CSIM.errs={};CSIM.cache={};CSIM.chk={};
+    if(CSIM.on)cSetOn(false);CSIM.asws=nas;CSIM.common=common;CSIM.mods={};CSIM.errs={};CSIM.cache={};CSIM.chk={};CW.commonRef=null;
     CSIM.src={name:file.name,date:new Date().toISOString(),asw:names.length,files:done,common:Object.keys(common).length,skipped:g.skipped.length};
     if(!CSIM.sel||!nas[CSIM.sel])CSIM.sel=names.includes('Doors_DoorsRels')?'Doors_DoorsRels':cAswNames()[0];CSIM.cur=null;
     cSave();renderCode();await cCheckAll();await cBuildActive();say('');renderCode();}}
@@ -2682,22 +2690,53 @@ function cAssumeFile(asw,b){
     else L.push(`  ${root} = ${/On_C$/.test(root)?1:0}U;  /* VARSAYIM: ortak başlıktaki sabit */`);});
   L.push('}');return L.join('\n')+'\n';}
 /* ---- derleme ---- */
-function cCompileAsw(name){const a=CSIM.asws[name];
-  const map={};Object.entries(CSIM.common).forEach(([b,t])=>map[b]=t);Object.entries(a.files).forEach(([b,f])=>map[b]=f.cur);
-  return CC.compile(map,{known:n=>SIGN.has(n)||!!(INV&&INV.byName.has(n)),typeHint:cTypeHint});}
+/* ---- derleme: arka plan işçisi (Web Worker); açılamazsa ana iş parçacığında ---- */
+const CW={w:null,state:'none',seq:0,jobs:new Map(),commonRef:null,initKey:''};
+function cCommonExtern(){if(CW.extRef===CSIM.common)return CW.ext;const ext={},re=/extern\s+(?:const\s+)?([A-Za-z_]\w*)\s+([A-Za-z_]\w*)\s*;/g;
+  for(const t of Object.values(CSIM.common)){let m;re.lastIndex=0;while((m=re.exec(t)))ext[m[2]]=m[1];}CW.ext=ext;CW.extRef=CSIM.common;return ext;}
+function cwKnown(){const k=[...SIGN.keys()];if(INV)INV.s.forEach(x=>k.push(x[0]));return k;}
+function cwHints(){const h={};if(INV)INV.s.forEach(x=>{h[x[0]]=x[7].split('/').pop();});return h;}
+function cwStart(){if(CW.state==='ok'||CW.state==='starting')return CW.ready;if(CW.state==='fail')return Promise.resolve(false);
+  CW.state='starting';CW.ready=new Promise(res=>{let w;try{
+      const src=CC_FACTORY.toString()+`
+const CC=CC_FACTORY();let K=new Set(),H={},COM={},CEXT={},SKIP=new Set();
+onmessage=e=>{const m=e.data;
+  if(m.t==='ping'){postMessage({t:'pong'});return;}
+  if(m.t==='init'){K=new Set(m.known);H=m.hints;return;}
+  if(m.t==='common'){COM=m.common;CEXT=m.ext;SKIP=new Set(Object.keys(COM));return;}
+  if(m.t==='compile'){const map=Object.assign({},COM,m.files);const t0=Date.now();
+    try{const r=CC.compile(map,{known:n=>K.has(n),typeHint:n=>H[n]||null,externCommon:CEXT,skipScan:SKIP,noMod:true});r.wms=Date.now()-t0;postMessage({t:'res',id:m.id,ok:true,r});}
+    catch(err){postMessage({t:'res',id:m.id,ok:false,err:{msg:String(err&&err.message||err),file:err&&err.file,line:err&&err.line}});}}};`;
+      w=new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})));}catch(e){CW.state='fail';res(false);return;}
+    const to=setTimeout(()=>{CW.state='fail';try{w.terminate();}catch(e){}res(false);},4000);
+    w.onmessage=e=>{const m=e.data;if(m.t==='pong'){clearTimeout(to);CW.w=w;CW.state='ok';res(true);return;}
+      if(m.t==='res'){const j=CW.jobs.get(m.id);if(j){CW.jobs.delete(m.id);clearTimeout(j.to);m.ok?j.res(m.r):j.rej(Object.assign(new Error(m.err.msg),{file:m.err.file,line:m.err.line}));}}};
+    w.onerror=e=>{e.preventDefault&&e.preventDefault();if(CW.state!=='ok'){clearTimeout(to);CW.state='fail';res(false);}};
+    w.postMessage({t:'ping'});});
+  return CW.ready;}
+function cwRestart(){try{CW.w&&CW.w.terminate();}catch(e){}CW.w=null;CW.state='none';CW.commonRef=null;CW.initKey='';CW.jobs.forEach(j=>{clearTimeout(j.to);j.rej(new Error('Derleyici yeniden başlatıldı'));});CW.jobs.clear();}
+async function cCompileAsw(name){const a=CSIM.asws[name];const files={};Object.entries(a.files).forEach(([b,f])=>files[b]=f.cur);
+  const finish=b=>{try{b.mod=Function(b.js)();}catch(e){throw new Error('İç hata (üretilen JS): '+e.message);}const T=b.types||{};
+    b.typeOf=n=>{const t=T[n];return t?{k:/^boolean/.test(t)?'bool':/^real/.test(t)?'float':'int'}:null;};return b;};
+  if(await cwStart()){const key=(INV?'i':'n')+SIGN.size;if(CW.initKey!==key){CW.w.postMessage({t:'init',known:cwKnown(),hints:cwHints()});CW.initKey=key;}
+    if(CW.commonRef!==CSIM.common){CW.w.postMessage({t:'common',common:CSIM.common,ext:cCommonExtern()});CW.commonRef=CSIM.common;}
+    const id=++CW.seq;const r=await new Promise((res,rej)=>{const to=setTimeout(()=>{CW.jobs.delete(id);cwRestart();rej(new Error('Derleme 45 saniyeyi aştı; bu ASW atlandı (derleyici yeniden başlatıldı).'));},45000);CW.jobs.set(id,{res,rej,to});CW.w.postMessage({t:'compile',id,files});});
+    return finish(r);}
+  const map=Object.assign({},CSIM.common,files);
+  return finish(CC.compile(map,{known:n=>SIGN.has(n)||!!(INV&&INV.byName.has(n)),typeHint:cTypeHint,externCommon:cCommonExtern(),skipScan:new Set(Object.keys(CSIM.common)),noMod:true}));}
 async function cBuildOne(name,check){const a=CSIM.asws[name];if(!a)return false;const t0=performance.now();const rev=a.rev||0;
   if(!check){delete CSIM.errs[name];delete CSIM.mods[name];const c=CSIM.cache[name];if(c&&c.rev===rev){CSIM.mods[name]=c;a.dirty=false;return true;}}
-  let b;try{b=cCompileAsw(name);
-    if(!Object.keys(a.files).some(n=>/^SIM_/i.test(n))){const s=cAssumeFile(name,b);if(s){a.files['SIM_varsayimlar.c']={orig:s,cur:s,path:'SIM_varsayimlar.c',added:true};b=cCompileAsw(name);cSaveSrc();}}
+  let b;try{b=await cCompileAsw(name);
+    if(!Object.keys(a.files).some(n=>/^SIM_/i.test(n))){const s=cAssumeFile(name,b);if(s){a.files['SIM_varsayimlar.c']={orig:s,cur:s,path:'SIM_varsayimlar.c',added:true};b=await cCompileAsw(name);cSaveSrc(name);}}
     if(!b.steps.length)throw Object.assign(new Error('Adım (step) fonksiyonu bulunamadı. Parametresiz ve “…_10ms / …_100ms / …step” adlı bir fonksiyon bekleniyor.'),{file:null});}
   catch(e){const er={msg:e.message,file:e.file,line:e.line};CSIM.chk[name]={ok:false,...er};delete CSIM.cache[name];if(!check)CSIM.errs[name]=er;a.dirty=false;return false;}
   b.ms=Math.round(performance.now()-t0);b.asw=name;b.rev=a.rev||0;CSIM.cache[name]=b;CSIM.chk[name]={ok:true,ms:b.ms,step:b.steps.map(x=>x.name).join(', ')};if(!check){CSIM.mods[name]=b;a.dirty=false;}return true;}
-async function cCheckAll(){const ns=cAswNames(),st=$('#cImp');let bad=0;
+async function cCheckAll(){const ns=cAswNames(),st=$('#cImp');let bad=0;try{await loadInv();}catch(e){}if(CSIM.checking)return 0;CSIM.checking=true;try{
   for(let i=0;i<ns.length;i++){const n=ns[i];if(!CSIM.cache[n]||CSIM.cache[n].rev!==(CSIM.asws[n].rev||0)){if(!(await cBuildOne(n,true)))bad++;}else if(!CSIM.chk[n].ok)bad++;
-    if(st)st.textContent=`ASW’ler kontrol ediliyor… ${i+1}/${ns.length} · ${n}`;if(i%2===1)await new Promise(r=>setTimeout(r));}
-  if(st)st.textContent='';cSaveCfg();return bad;}
+    const s2=$('#cImp');if(s2)s2.textContent=`ASW’ler derleniyor${CW.state==='ok'?' (arka planda)':''}… ${i+1}/${ns.length} · ${n}`;await new Promise(r=>setTimeout(r));}
+  }finally{CSIM.checking=false;}const s3=$('#cImp');if(s3)s3.textContent='';cSaveCfg();return bad;}
 async function cBuildActive(){const act=cAswNames().filter(n=>CSIM.asws[n].active);CSIM.mods={};CSIM.errs={};
-  for(let i=0;i<act.length;i++){await cBuildOne(act[i]);const st=$('#cImp');if(st&&act.length>3)st.textContent=`Derleniyor… ${i+1}/${act.length} · ${act[i]}`;if(act.length>3)await new Promise(r=>setTimeout(r));}
+  for(let i=0;i<act.length;i++){await cBuildOne(act[i]);const st=$('#cImp');if(st&&act.length>3)st.textContent=`Çalıştırılacak ASW’ler hazırlanıyor… ${i+1}/${act.length} · ${act[i]}`;if(act.length>3&&i%4===3)await new Promise(r=>setTimeout(r));}
   const st=$('#cImp');if(st)st.textContent='';cRewire();}
 /* ---- çalışma zamanı: ortak sinyal alanı, sıralama, zamanlama ---- */
 function cRewire(){const was=CSIM.on;if(was)cUnhook();
@@ -2872,12 +2911,12 @@ function cCodeClick(e){const t=e.target.closest('button,a');if(!t)return false;
     else if(a==='runall'){const bad=cAswNames().filter(n=>CSIM.chk[n]&&!CSIM.chk[n].ok);cAsk(`Derlenen tüm ASW’ler (${cAswNames().length-bad.length}) birlikte çalıştırılsın mı?${bad.length?` ${bad.length} ASW derlenemediği için dışarıda kalır.`:''}`,'Tümünü çalıştır').then(ok=>{if(!ok)return;
       cAswNames().forEach(n=>{CSIM.asws[n].active=!(CSIM.chk[n]&&!CSIM.chk[n].ok);});cSaveCfg();cBuildActive().then(()=>{if(CSIM.build&&!CSIM.on)cSetOn(true);renderCode();});});}
     else if(a==='selnone'){cAswNames().forEach(n=>CSIM.asws[n].active=false);if(CSIM.on)cSetOn(false);CSIM.mods={};CSIM.errs={};cRewire();cSaveCfg();renderCode();}
-    else if(a==='orig'&&f){cAsk(`${CSIM.cur} orijinal haline dönsün mü? Bu dosyadaki değişiklikleriniz silinir.`,'Orijinale dön').then(ok=>{if(ok){f.cur=f.orig;A.dirty=true;A.rev=(A.rev||0)+1;cSaveSrc();renderCode();}});}
+    else if(a==='orig'&&f){cAsk(`${CSIM.cur} orijinal haline dönsün mü? Bu dosyadaki değişiklikleriniz silinir.`,'Orijinale dön').then(ok=>{if(ok){f.cur=f.orig;A.dirty=true;A.rev=(A.rev||0)+1;cSaveSrc(CSIM.sel);renderCode();}});}
     else if(a==='diff'&&f){const d=$('#cDiff');if(!d.hidden){d.hidden=true;return true;}const ds=cDiff(f.orig,f.cur);d.hidden=false;
       d.innerHTML=`<div class="dlbl">${ds.filter(x=>x.t==='+').length} satır eklendi/değişti · ${ds.filter(x=>x.t==='-').length} satır silindi/değişti</div><pre class="cdiff">${ds.slice(0,400).map(x=>x.t==='+'?`<button class="dl-add" data-cjump="${esc(CSIM.cur)}:${x.b}">+ ${String(x.b).padStart(4)} │ ${esc(x.txt)}</button>`:x.t==='-'?`<span class="dl-del">− ${String(x.a).padStart(4)} │ ${esc(x.txt)}</span>`:`<span>${esc(x.txt)}</span>`).join('\n')}</pre>`;}
     else if(a==='dlchg')cDownload(t,'chg');else if(a==='dlall')cDownload(t,'all');
     else if(a==='copy'&&f){(navigator.clipboard?navigator.clipboard.writeText(f.cur):Promise.reject()).then(()=>{t.textContent='Kopyalandı';setTimeout(()=>t.textContent='Kopyala',1200);}).catch(()=>{const ta=$('#cTa');ta.select();document.execCommand&&document.execCommand('copy');});}
-    else if(a==='rm'&&f){cAsk(`${CSIM.cur} kaldırılsın mı?`,'Kaldır').then(ok=>{if(ok){delete A.files[CSIM.cur];CSIM.cur=null;if(!Object.keys(A.files).length){delete CSIM.asws[CSIM.sel];delete CSIM.mods[CSIM.sel];CSIM.sel=null;cRewire();cSave();renderCode();}else{A.dirty=true;cSaveSrc();cBuildOne(CSIM.sel).then(()=>{cRewire();renderCode();});}}});}
+    else if(a==='rm'&&f){cAsk(`${CSIM.cur} kaldırılsın mı?`,'Kaldır').then(ok=>{if(ok){delete A.files[CSIM.cur];CSIM.cur=null;if(!Object.keys(A.files).length){delete CSIM.asws[CSIM.sel];delete CSIM.mods[CSIM.sel];CSIM.sel=null;cRewire();cSave();renderCode();}else{A.dirty=true;cSaveSrc(CSIM.sel);cBuildOne(CSIM.sel).then(()=>{cRewire();renderCode();});}}});}
     return true;}
   if(t.dataset.casw){e.preventDefault();CSIM.sel=t.dataset.casw;CSIM.cur=null;cSaveCfg();renderCode();$('#dmain').scrollTop=0;return true;}
   if(t.dataset.cfile){e.preventDefault();CSIM.cur=t.dataset.cfile;renderCode();return true;}
@@ -2895,13 +2934,15 @@ function cCodeChange(e){const t=e.target;
   if(t.dataset.cfv){const n=t.dataset.cfv;if(CSIM.forces[n]!=null){CSIM.forces[n]=+t.value||0;cSaveCfg();}return true;}
   if(t.dataset.cpar){const n=t.dataset.cpar,v=+t.value||0;CSIM.params[n]=v;if(CSIM.G)CSIM.G[n]=v;cSaveCfg();const m=$('#cMsgs');if(m)m.innerHTML=cMsgsHTML();return true;}
   return false;}
-function cCodeInput(e){const t=e.target;if(t.id!=='cTa')return false;const A=CSIM.asws[CSIM.sel],f=A&&A.files[CSIM.cur];if(!f)return true;f.cur=t.value;A.dirty=true;A.rev=(A.rev||0)+1;cGutter();cSaveSrc();
+function cCodeInput(e){const t=e.target;if(t.id!=='cTa')return false;const A=CSIM.asws[CSIM.sel],f=A&&A.files[CSIM.cur];if(!f)return true;f.cur=t.value;A.dirty=true;A.rev=(A.rev||0)+1;cGutter();cSaveSrc(CSIM.sel);
   const c=$('#cChg');if(c)c.textContent=f.cur!==f.orig?'Orijinalden farklı':'Orijinal';const s=$('#cStat');if(s)s.innerHTML=cStatusHTML();return true;}
 /* eski adlarla uyumluluk */
 const cBuild=()=>{cRebuildDirty();return true;};
 /* ---------- Sinyal kaydı ve zaman grafiği ---------- */
 const REC={t:[],v:[],sigs:null,max:12000,t0:performance.now(),acc:0,now(){return (performance.now()-this.t0)/1000;}};
-function recSample(){if(!REC.sigs)REC.sigs=SIG_DB.filter(s=>s.sim);REC.t.push(REC.now());REC.v.push(REC.sigs.map(s=>s.get()));if(REC.t.length>REC.max){REC.t.splice(0,1500);REC.v.splice(0,1500);}}
+function recKeep(){const k=new Set(CH.sel);REQS.forEach(r=>(r.signals||[]).forEach(n=>k.add(n)));(DEMO&&DEMO.sigs||[]).forEach(s=>k.add(s.n));SIDE_SIG.forEach(s=>k.add(s.n));return k;}
+function recRebuild(){const keep=recKeep(),ns=SIG_DB.filter(s=>s.sim&&keep.has(s.n));if(REC.sigs&&REC.v.length){const old=new Map(REC.sigs.map((s,i)=>[s.n,i]));const ix=ns.map(s=>old.get(s.n));REC.v=REC.v.map(r=>ix.map(i=>i==null?undefined:r[i]));}REC.sigs=ns;REC.key=CH.sel.join('|');}
+function recSample(){if(!REC.sigs||REC.key!==CH.sel.join('|'))recRebuild();REC.t.push(REC.now());REC.v.push(REC.sigs.map(s=>s.get()));if(REC.t.length>REC.max){REC.t.splice(0,1500);REC.v.splice(0,1500);}}
 const CH={sel:['DR_StDoorRelsBtnPosn1_I','DR_StDoorRelsActv','D2SR_StDoor2StrqBtn','D2SR_StBtnIntDoor2','D2M_StDrvrBtnOpgDoor2','BBC_StDoor2','D2SR_StStrqDoor2Saved','GW_AcvBstbrkOn'],win:10,live:true,start:null,end:0,hx:null,title:''};
 function chartRange(){if(!CH.live&&CH.start!=null)return [CH.start,CH.end];const e=CH.live?REC.now():CH.end;return [e-CH.win,e];}
 function idxAt(t){const T=REC.t;let lo=0,hi=T.length-1;if(hi<0)return -1;if(t<=T[0])return 0;while(lo<hi){const m=(lo+hi+1)>>1;if(T[m]<=t)lo=m;else hi=m-1;}return lo;}
@@ -2963,6 +3004,7 @@ function showRecording(r){if(!r.rec)return;const base=['DR_StDoorRelsBtnPosn1_I'
 function updateSigView(force){
   if(SIG_MODE!=='live'){updateInvLive();return;}
   drawChart();
+  if(!force&&SIG_DB.length>400){const t=performance.now();if(t-(REC.tblT||0)<500)return;REC.tblT=t;}
   const tb=$('#sigBody');if(!tb)return;const q=$('#docSearch').value.trim().toLowerCase(),now=performance.now();let act=0;
   tb.querySelectorAll('tr.srow').forEach(tr=>{const s=SIG_DB[+tr.dataset.i],v=s.cur,a=sigActive(s,v);if(a)act++;
     const vis=(!SIG_G||s.g===SIG_G)&&(!q||(s.n+' '+s.tr+' '+s.en+' '+s.g).toLowerCase().includes(q))&&
