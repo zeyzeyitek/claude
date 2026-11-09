@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev R)
+# Otobüs Tasarım Stüdyosu (konsept, Rev S)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -133,3 +133,7 @@ Sinyaller: DoorRelease, DoorState_K2
 - Zip yüklenince tüm ASW'ler otomatik derlenip kontrol edilir ("59/60 ASW derlendi · 1 hata: …"); hatalı ASW'ler dosya ve satırla listelenir. Derleme sonuçları önbelleğe alınır, düzenlenmeyen ASW tekrar derlenmez.
 - **Tümünü çalıştır**: derlenen tüm ASW'leri birlikte simülasyona alır. **Tümünü kontrol et**: elle yeniden kontrol.
 - Sol listede durum: dolu yeşil çalışıyor, boş yeşil derlendi, turuncu derlenemedi.
+
+## Rev S
+- Dosya seçme penceresindeki tür filtresi kaldırıldı (bazı sistemlerde zip görünmüyordu).
+- **Klasör seç**: açılmış B24 klasörü doğrudan seçilebilir; klasör sürükle-bırak da desteklenir.

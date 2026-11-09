@@ -329,7 +329,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
 .ccard .stable-wrap{border:0;border-radius:0;max-height:60vh;overflow:auto} .ccard .stable-wrap>.note{padding:8px 12px;margin:0}
 .cforce{white-space:nowrap} .cforce input[type=number],.cpar{width:84px;font:500 12.5px var(--f-mono);padding:4px 6px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);margin-left:6px}
 .cdrop{display:grid;gap:10px;place-items:center;text-align:center;border:2px dashed var(--line);border-radius:10px;padding:44px 20px;cursor:pointer;background:var(--panel)} .cdrop:hover,.cdrop.over{border-color:var(--accent)} .cdrop span{color:var(--muted);font-size:13.5px;max-width:60ch}
-.cadd{cursor:pointer}
+.cadd{cursor:pointer} .cpick{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center} .cpick label{cursor:pointer} .cdrop{cursor:default}
 #cDiff{padding:10px 12px;border-bottom:1px solid var(--line);max-height:40vh;overflow:auto}
 .cdiff{margin:6px 0 0;font:12px/1.55 var(--f-mono);white-space:pre} .cdiff button{all:unset;cursor:pointer} .cdiff button:hover{text-decoration:underline} .dl-add{color:var(--ok)} .dl-del{color:var(--warn)}
 #hC{background:var(--prm);color:#fff}
@@ -345,7 +345,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev R</div>
+    <div class="eyebrow">Konsept · Rev S</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
   </div>
@@ -1390,7 +1390,12 @@ $('#dmain').addEventListener('keydown',e=>{if(e.target.id==='cTa'&&e.key==='Tab'
   if(e.target.id==='cTa'&&(e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();const A=CSIM.asws[CSIM.sel];if(A)A.active=true;cRebuildDirty().then(renderCode);}});
 $('#dmain').addEventListener('dragover',e=>{if(VIEW!=='code')return;e.preventDefault();const d=$('#cDrop');if(d)d.classList.add('over');});
 $('#dmain').addEventListener('dragleave',()=>{const d=$('#cDrop');if(d)d.classList.remove('over');});
-$('#dmain').addEventListener('drop',e=>{if(VIEW!=='code')return;e.preventDefault();if(e.dataTransfer&&e.dataTransfer.files.length)cAddFiles(e.dataTransfer.files);});
+$('#dmain').addEventListener('drop',e=>{if(VIEW!=='code')return;e.preventDefault();const dt=e.dataTransfer;if(!dt)return;
+  const ents=[...(dt.items||[])].map(i=>i.webkitGetAsEntry&&i.webkitGetAsEntry()).filter(Boolean);
+  if(ents.some(x=>x.isDirectory)){const out=[];const walk=en=>new Promise(res=>{if(en.isFile){en.file(f=>{if(/\.(c|h)$/i.test(f.name))out.push({name:en.fullPath.replace(/^\//,''),read:()=>f.text()});res();},()=>res());return;}
+      const r=en.createReader(),all=[];const more=()=>r.readEntries(b=>{if(!b.length){Promise.all(all.map(walk)).then(res);return;}all.push(...b);more();},()=>res());more();});
+    const st=$('#cImp');if(st)st.textContent='Klasör okunuyor…';Promise.all(ents.map(walk)).then(()=>cImportEntries(out,ents.find(x=>x.isDirectory).name+' (klasör)')).catch(err=>{if(st)st.textContent='';alert('Klasör içe aktarılamadı: '+err.message);});return;}
+  if(dt.files.length)cAddFiles(dt.files);});
 $('#dmain').addEventListener('change',e=>{if(VIEW==='code'&&cCodeChange(e))return;
   if(e.target.id==='cwin'){const v=+e.target.value;if(v){CH.win=v;CH.start=null;if(!CH.live)CH.end=REC.now();CH.title='';renderSigView();}return;}
   if(e.target.id==='cadd'){if(e.target.value){CH.sel.push(e.target.value);renderSigView();}return;}const s=e.target.closest('select[data-mv]');if(!s)return;const r=IMPORTED.find(x=>x.id===s.dataset.mv);if(!r)return;
@@ -2583,11 +2588,15 @@ function cGroup(paths){const asw={},common={},skipped=[];
     else if(/\.h$/i.test(base)){if(!common[base])common[base]=p;}
     else skipped.push(p);});
   return {asw,common,skipped};}
-async function cImportZip(file){const st=$('#cImp');const say=t=>{if(st)st.textContent=t;};
-  try{say('Zip okunuyor…');const z=await cUnzip(await file.arrayBuffer());
-    const files=z.entries.filter(e=>!/\/$/.test(e.name)&&/\.(c|h)$/i.test(e.name));const g=cGroup(files.map(e=>e.name));
-    const byName=new Map(files.map(e=>[e.name,e]));const names=Object.keys(g.asw);
-    if(!names.length)throw new Error('Zip içinde ASW kaynak dosyası bulunamadı (…/ASW/<ASW>/src/*.c beklenir).');
+async function cImportZip(file){const st=$('#cImp');if(st)st.textContent='Zip okunuyor…';
+  try{const z=await cUnzip(await file.arrayBuffer());await cImportEntries(z.entries.filter(e=>!/\/$/.test(e.name)).map(e=>({name:e.name,read:()=>z.read(e)})),file.name);}
+  catch(e){if(st)st.textContent='';alert('Zip içe aktarılamadı: '+e.message);}}
+async function cImportFolder(list){const fs=[...list].filter(f=>/\.(c|h)$/i.test(f.name));const root=((list[0]&&list[0].webkitRelativePath)||'').split('/')[0]||'klasör';
+  try{await cImportEntries(fs.map(f=>({name:f.webkitRelativePath||f.name,read:()=>f.text()})),root+' (klasör)');}catch(e){const st=$('#cImp');if(st)st.textContent='';alert('Klasör içe aktarılamadı: '+e.message);}}
+async function cImportEntries(entries,label){const st=$('#cImp');const say=t=>{if(st)st.textContent=t;};
+  {const files=entries.filter(e=>/\.(c|h)$/i.test(e.name));const g=cGroup(files.map(e=>e.name));
+    const byName=new Map(files.map(e=>[e.name,e]));const z={read:e=>e.read()};const file={name:label};const names=Object.keys(g.asw);
+    if(!names.length)throw new Error('ASW kaynak dosyası bulunamadı (…/ASW/<ASW>/src/*.c beklenir). Seçilen yerde .c dosyası olan klasörler yok.');
     const keepEdits=Object.keys(CSIM.asws).some(n=>cChanged(CSIM.asws[n]))&&confirm('Mevcut değişiklikleriniz var. Yeni zip’teki aynı dosyalar için değişiklikleriniz korunsun mu?\n\nTamam: korunur (yeni orijinal + sizin değişikliğiniz)\nİptal: zip’teki haline döner');
     const old=CSIM.asws,nas={},common={};let done=0;const total=files.length;
     for(const n of names){const fs={};for(const p of g.asw[n]){const t=(await z.read(byName.get(p))).replace(/\r\n/g,'\n');const b=p.split('/').pop();
@@ -2597,9 +2606,9 @@ async function cImportZip(file){const st=$('#cImp');const say=t=>{if(st)st.textC
     if(CSIM.on)cSetOn(false);CSIM.asws=nas;CSIM.common=common;CSIM.mods={};CSIM.errs={};CSIM.cache={};CSIM.chk={};
     CSIM.src={name:file.name,date:new Date().toISOString(),asw:names.length,files:done,common:Object.keys(common).length,skipped:g.skipped.length};
     if(!CSIM.sel||!nas[CSIM.sel])CSIM.sel=names.includes('Doors_DoorsRels')?'Doors_DoorsRels':cAswNames()[0];CSIM.cur=null;
-    cSave();renderCode();await cCheckAll();await cBuildActive();say('');renderCode();
-  }catch(e){say('');alert('Zip içe aktarılamadı: '+e.message);}}
+    cSave();renderCode();await cCheckAll();await cBuildActive();say('');renderCode();}}
 function cAddFiles(list){const fs=[...list];const zip=fs.find(f=>/\.zip$/i.test(f.name));if(zip){cImportZip(zip);return;}
+  if(fs.length>1&&fs.some(f=>(f.webkitRelativePath||'').includes('/'))){cImportFolder(fs);return;}
   const src=fs.filter(f=>/\.(c|h)$/i.test(f.name));if(!src.length){alert('B24 entegrasyonu için .zip, tek ASW için .c ve .h dosyaları eklenebilir.');return;}
   Promise.all(src.map(f=>f.text().then(t=>[f.name,t.replace(/\r\n/g,'\n')]))).then(async arr=>{
     let nm=CSIM.sel&&CSIM.asws[CSIM.sel]&&!CSIM.src?CSIM.sel:cAswNameFromFiles(arr.map(x=>x[0]));if(CSIM.src&&!CSIM.asws[nm])nm=cAswNameFromFiles(arr.map(x=>x[0]));
@@ -2748,8 +2757,9 @@ function cTocHTML(){const q=($('#docSearch').value||'').trim().toLowerCase();con
 function renderCode(){
   const names=cAswNames();$('#dtoc').innerHTML=names.length?cTocHTML():'<div class="tochead">ASW’ler</div><p class="note tocnote">Henüz kod yok.</p>';
   const m=$('#dmain');
-  const drop=(big)=>`<label class="cdrop${big?'':' small'}" id="cDrop"><input type="file" id="cFiles" multiple accept=".zip,.c,.h" hidden><b>${big?'B24 entegrasyon zip’ini veya ASW dosyalarını buraya bırakın ya da tıklayıp seçin':'Yeni zip veya dosya bırakın / seçin'}</b>
-      ${big?`<span>Zip içinde <code>…/ASW/&lt;ASW&gt;/src/*.c, *.h</code> yapısı aranır; tüm ASW’ler ayrılır, ortak başlıklar (rtwtypes.h, CmnAsw…) paylaşılır. Tek ASW için <code>.c</code> ve <code>.h</code> dosyalarını da ekleyebilirsiniz.</span><span>Dosyalar yalnızca bu tarayıcıda saklanır, kimseyle paylaşılmaz. Yeni sürüm geldiğinde zip’i tekrar yükleyin; değişiklikleriniz isterseniz korunur.</span>`:''}</label><div class="note" id="cImp" role="status"></div>`;
+  const drop=(big)=>`<div class="cdrop${big?'':' small'}" id="cDrop"><b>${big?'B24 entegrasyonunu yükleyin':'Yeni sürüm yükle'}</b>
+      <div class="cpick"><label class="pbtn">Zip seç<input type="file" id="cFiles" multiple hidden></label><label class="sfb">Klasör seç<input type="file" id="cDir" webkitdirectory directory multiple hidden></label><span class="note">ya da zip’i / klasörü buraya sürükleyin</span></div>
+      ${big?`<span>Zip veya açılmış B24 klasörü: içinde <code>…/ASW/&lt;ASW&gt;/src/*.c, *.h</code> yapısı aranır; ASW’ler ayrılır, ortak başlıklar (rtwtypes.h, CmnAsw…) paylaşılır. Tek ASW için <code>.c</code> ve <code>.h</code> dosyalarını “Zip seç” ile de ekleyebilirsiniz.</span><span>Dosyalar yalnızca bu tarayıcıda saklanır, kimseyle paylaşılmaz.</span>`:''}</div><div class="note" id="cImp" role="status"></div>`;
   if(!names.length){m.innerHTML=`<div class="dwrap wide"><div class="dsum"><div><div class="eyebrow">C kodu · tarayıcıda derlenir, simülatöre bağlanır</div><h3>B24 entegrasyonunu yükleyin</h3>
     <p>Entegrasyon zip’ini bir kez yükleyin; ASW’ler listelenir. Çalıştırmak istediklerinizi seçin, değiştirmek istediğiniz ASW’nin kodunu düzenleyip derleyin. Seçili ASW’ler birbirine bağlı çalışır: birinin çıkışı diğerinin girişine gider, kalan girişler simülatörden okunur.</p></div></div>${drop(true)}</div>`;return;}
   if(!CSIM.sel||!CSIM.asws[CSIM.sel])CSIM.sel=names[0];
@@ -2824,7 +2834,7 @@ function cCodeClick(e){const t=e.target.closest('button,a');if(!t)return false;
   if(t.dataset.cparrst){const n=t.dataset.cparrst;delete CSIM.params[n];CSIM.G[n]=CSIM.paramInit[n]??0;cSaveCfg();$('#cIO').innerHTML=cIOHTML();return true;}
   return false;}
 function cCodeChange(e){const t=e.target;
-  if(t.id==='cFiles'){cAddFiles(t.files);t.value='';return true;}
+  if(t.id==='cFiles'||t.id==='cDir'){const fl=[...t.files];t.value='';if(t.id==='cDir')cImportFolder(fl);else cAddFiles(fl);return true;}
   if(t.id==='cSel'){CSIM.cur=t.value;renderCode();return true;}
   if(t.dataset.cact2==='active'){cSetActive(CSIM.sel,t.checked).then(()=>{if(CSIM.build&&!CSIM.on&&t.checked)cSetOn(true);renderCode();});return true;}
   if(t.dataset.cforce){const n=t.dataset.cforce,inp=document.querySelector(`[data-cfv="${CSS.escape(n)}"]`);if(t.checked){CSIM.forces[n]=+(inp.value||CSIM.G[n]||0);inp.disabled=false;inp.value=CSIM.forces[n];}else{delete CSIM.forces[n];inp.disabled=true;inp.value='';}cSaveCfg();return true;}
