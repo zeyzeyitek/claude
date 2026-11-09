@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev S)
+# Otobüs Tasarım Stüdyosu (konsept, Rev T)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -137,3 +137,8 @@ Sinyaller: DoorRelease, DoorState_K2
 ## Rev S
 - Dosya seçme penceresindeki tür filtresi kaldırıldı (bazı sistemlerde zip görünmüyordu).
 - **Klasör seç**: açılmış B24 klasörü doğrudan seçilebilir; klasör sürükle-bırak da desteklenir.
+
+## Rev T
+- claude.ai çerçevesi alert/confirm pencerelerini engellediği için tüm uyarılar sayfa içi bildirime, onaylar sayfa içi onay kutusuna taşındı.
+- Zip dosya adına değil içeriğine (ilk baytlar) bakılarak tanınır; 7z/rar/gz arşivleri için açıklayıcı mesaj.
+- Motor sesi yenilendi: 6 silindirli dizel (ateşleme frekansı = devir/60×3), yumuşak harmonikler, yanma gürültüsü, dizel tıkırtısı, devirle turbo ıslığı; parametreler kademeli değişir (cızırtı yok); içeride daha boğuk. Marş ve kapı motoru sesleri yumuşatıldı.
