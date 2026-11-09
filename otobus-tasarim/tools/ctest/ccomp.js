@@ -4,9 +4,14 @@ const KW=new Set(['if','else','switch','case','default','break','continue','retu
 const PUN=['>>=','<<=','...','->','++','--','&&','||','==','!=','<=','>=','<<','>>','+=','-=','*=','/=','%=','&=','|=','^=','##','{','}','(',')','[',']',';',',','.','?',':','=','<','>','+','-','*','/','%','&','|','^','!','~','#'];
 const T=(k,bits,signed)=>({k,bits,signed});
 const TY={bool:T('bool',8,false),u8:T('int',8,false),i8:T('int',8,true),u16:T('int',16,false),i16:T('int',16,true),u32:T('int',32,false),i32:T('int',32,true),f64:T('float',64),f32:T('float',32),void:T('void'),unk:T('unk')};
-const BUILTIN_TYPEDEF={boolean_T:TY.bool,uint8_T:TY.u8,int8_T:TY.i8,uint16_T:TY.u16,int16_T:TY.i16,uint32_T:TY.u32,int32_T:TY.i32,real_T:TY.f64,real64_T:TY.f64,time_T:TY.f64,real32_T:TY.f32,int_T:TY.i32,uint_T:TY.u32,char_T:TY.i8,uchar_T:TY.u8,byte_T:TY.u8,ZCSigState:TY.u8,ZCEventType:TY.i32,ulong_T:TY.u32,long_T:TY.i32,bool:TY.bool};
+const BUILTIN_TYPEDEF={boolean_T:TY.bool,uint8_T:TY.u8,int8_T:TY.i8,uint16_T:TY.u16,int16_T:TY.i16,uint32_T:TY.u32,int32_T:TY.i32,real_T:TY.f64,real64_T:TY.f64,time_T:TY.f64,real32_T:TY.f32,int_T:TY.i32,uint_T:TY.u32,char_T:TY.i8,uchar_T:TY.u8,byte_T:TY.u8,ZCSigState:TY.u8,ZCEventType:TY.i32,ulong_T:TY.u32,long_T:TY.i32,bool:TY.bool,
+  uint8:TY.u8,uint16:TY.u16,uint32:TY.u32,sint8:TY.i8,sint16:TY.i16,sint32:TY.i32,boolean:TY.bool,float32:TY.f32,float64:TY.f64,uint8_least:TY.u8,uint16_least:TY.u16,uint32_least:TY.u32,sint8_least:TY.i8,sint16_least:TY.i16,sint32_least:TY.i32,
+  uint8_t:TY.u8,uint16_t:TY.u16,uint32_t:TY.u32,int8_t:TY.i8,int16_t:TY.i16,int32_t:TY.i32,Std_ReturnType:TY.u8,Ifx_UReg_8Bit:TY.u8,Ifx_UReg_16Bit:TY.u16,Ifx_UReg_32Bit:TY.u32,Ifx_SReg_32Bit:TY.i32};
 const BUILTIN_DEF={true:'1',false:'0',TRUE:'1',FALSE:'0',NULL:'0',MAX_uint32_T:'4294967295U',MAX_uint16_T:'65535U',MAX_uint8_T:'255U',MAX_int32_T:'2147483647',MIN_int32_T:'(-2147483647-1)',MAX_int16_T:'32767',MIN_int16_T:'(-32768)',MAX_int8_T:'127',MIN_int8_T:'(-128)',
-  POS_ZCSIG:'1U',ZERO_ZCSIG:'0U',NEG_ZCSIG:'2U',UNINITIALIZED_ZCSIG:'3U',FALLING_ZCEVENT:'(-1)',NO_ZCEVENT:'0',RISING_ZCEVENT:'1'};
+  POS_ZCSIG:'1U',ZERO_ZCSIG:'0U',NEG_ZCSIG:'2U',UNINITIALIZED_ZCSIG:'3U',FALLING_ZCEVENT:'(-1)',NO_ZCEVENT:'0',RISING_ZCEVENT:'1',
+  NULL_PTR:'0',E_OK:'0U',E_NOT_OK:'1U',STD_ON:'1U',STD_OFF:'0U',STD_HIGH:'1U',STD_LOW:'0U',STD_ACTIVE:'1U',STD_IDLE:'0U',INLINE:'inline',LOCAL_INLINE:'static inline',IFX_INLINE:'static inline',STATIC:'static',TYPEDEF:'typedef'};
+/* AUTOSAR Compiler.h makroları (başlıkta tanım yoksa) */
+const BUILTIN_FN={FUNC:[['rt','mc'],'rt'],FUNC_P2VAR:[['rt','pc','mc'],'rt *'],FUNC_P2CONST:[['rt','pc','mc'],'const rt *'],P2VAR:[['t','mc','pc'],'t *'],P2CONST:[['t','mc','pc'],'const t *'],CONSTP2VAR:[['t','mc','pc'],'t * const'],CONSTP2CONST:[['t','mc','pc'],'const t * const'],P2FUNC:[['rt','pc','fn'],'rt (*fn)'],VAR:[['t','mc'],'t'],CONST:[['t','mc'],'const t']};
 const MATH={fabs:'Math.abs',floor:'Math.floor',ceil:'Math.ceil',sqrt:'Math.sqrt',pow:'Math.pow',sin:'Math.sin',cos:'Math.cos',tan:'Math.tan',exp:'Math.exp',log:'Math.log',log10:'Math.log10',atan2:'Math.atan2',atan:'Math.atan',fmod:'((a,b)=>a%b)',rt_roundd:'Math.round',fmax:'Math.max',fmin:'Math.min',abs:'Math.abs'};
 class CErr extends Error{constructor(msg,tok){super(msg);this.file=tok&&tok.f;this.line=tok&&tok.l;}}
 
@@ -26,7 +31,7 @@ function lex(src,file){
       else{while(j<n&&/[0-9.]/.test(src[j]))j++;if(/[eE]/.test(src[j])){j++;if(/[+-]/.test(src[j]))j++;while(j<n&&/[0-9]/.test(src[j]))j++;}}
       let k=j;while(k<n&&/[uUlLfF]/.test(src[k]))k++;out.push({t:'num',v:src.slice(i,k),f:file,l});i=k;continue;}
     if(c==='"'||c==="'"){let j=i+1;while(j<n&&src[j]!==c){if(src[j]==='\\')j++;j++;}out.push({t:c==='"'?'str':'chr',v:src.slice(i,j+1),f:file,l});i=j+1;continue;}
-    let p=PUN.find(p=>src.startsWith(p,i));if(!p)throw new CErr(`Tanınmayan karakter “${c}”`,{f:file,l});
+    let p=PUN.find(p=>src.startsWith(p,i));if(!p){out.push({t:'p',v:c,f:file,l,junk:true});i++;continue;}
     out.push({t:'p',v:p,f:file,l});i+=p.length;}
   out.push({t:'nl',f:file,l});return out;}
 
@@ -35,6 +40,7 @@ function preprocess(files,mainName,ctx){
   const macros=new Map();
   Object.entries(BUILTIN_DEF).forEach(([k,v])=>macros.set(k,{body:lex(v,'<builtin>').filter(t=>t.t!=='nl')}));
   macros.set('CALIB',{params:['t','s'],body:lex('t','<builtin>').filter(t=>t.t!=='nl')});
+  Object.entries(BUILTIN_FN).forEach(([k,[ps,b]])=>macros.set(k,{params:ps,body:lex(b,'<builtin>').filter(t=>t.t!=='nl')}));
   const out=[];const stackInc=[];
   function expand(toks,hide){const res=[];
     for(let i=0;i<toks.length;i++){const t=toks[i];
@@ -94,8 +100,8 @@ function preprocess(files,mainName,ctx){
 /* ---------- ayrıştırıcı ---------- */
 function parse(toks,ctx){
   let p=0;const peek=(o=0)=>toks[p+o]||{t:'eof',v:'<eof>'},next=()=>toks[p++]||{t:'eof',v:'<eof>'};
-  for(let i=0;i<toks.length;i++){const t=toks[i];if(t.t==='id'&&(t.v==='__attribute__'||t.v==='__declspec'||t.v==='__asm__'||t.v==='asm')&&toks[i+1]&&toks[i+1].v==='('){let d=0,j=i+1;for(;j<toks.length;j++){if(toks[j].v==='(')d++;else if(toks[j].v===')'&&--d===0)break;}toks.splice(i,j-i+1);i--;continue;}
-    if(t.t==='id'&&['__inline','__inline__','__restrict','__restrict__','restrict','__extension__','__volatile__','__const'].includes(t.v)){toks.splice(i,1);i--;}}
+  for(let i=0;i<toks.length;i++){const t=toks[i];if(t.t==='id'&&['__attribute__','__declspec','__asm__','__asm','asm','_Pragma','__pragma'].includes(t.v)){let j=i+1;while(toks[j]&&toks[j].t==='id'&&['volatile','__volatile__','__volatile','goto','inline'].includes(toks[j].v))j++;if(!(toks[j]&&toks[j].v==='(')){if(t.v.startsWith('__asm')||t.v==='asm'){toks.splice(i,j-i);i--;}continue;}let d=0;for(;j<toks.length;j++){if(toks[j].v==='(')d++;else if(toks[j].v===')'&&--d===0)break;}const asm=t.v.startsWith('__asm')||t.v==='asm';toks.splice(i,j-i+1,...(asm?[{t:'num',v:'0',f:t.f,l:t.l}]:[]));i--;continue;}
+    if(t.t==='id'&&['__inline','__inline__','__forceinline','__restrict','__restrict__','restrict','__extension__','__volatile__','__const','__far','__near','__huge','_Noreturn','__noreturn','__interrupt','__packed__','__packed'].includes(t.v)){toks.splice(i,1);i--;}}
   const is=v=>peek().v===v&&peek().t!=='str';
   const expect=v=>{const t=next();if(t.v!==v)throw new CErr(`“${v}” bekleniyordu, “${t.v}” bulundu`,t);return t;};
   const typedefs=ctx.typedefs;
@@ -220,10 +226,15 @@ function parse(toks,ctx){
     expect(';');return {k:'decl',ds,storage};}
   /* üst düzey */
   const items=[];
+  const isHdr=f=>/\.h$/i.test(f||'');
+  function skipItem(){let d=0;for(;;){const t=next();if(t.t==='eof')return;if(t.v==='{'){d++;continue;}if(t.v==='}'){if(--d<=0){if(is(';'))next();return;}continue;}if(t.v===';'&&d<=0)return;}}
   while(peek().t!=='eof'){
     if(is(';')){next();continue;}
+    const st0=p,tf=peek().f;
+    try{parseTop();}catch(e){if(!isHdr(tf))throw e;p=st0;skipItem();(ctx.hdrSkips=ctx.hdrSkips||[]).push({file:tf,line:toks[st0]&&toks[st0].l,msg:e.message});}}
+  function parseTop(){
     const st=p;const {ty,storage}=parseBaseType();
-    if(is(';')){next();continue;}
+    if(is(';')){next();return;}
     for(;;){const d=parseDeclarator(ty);
       if(storage==='typedef'){typedefs.set(d.name,d.ty.k==='struct'&&!d.ty.name?Object.assign(d.ty,{name:d.name}):resolveTD(d.ty));}
       else if(d.params&&is('{')){const body=parseBlock();items.push({k:'func',name:d.name,ret:d.ty,params:d.params,body,tok:d.tok});break;}
@@ -363,7 +374,11 @@ function compile(fileMap,opts){
     return '{__pos:['+init.items.map(it=>initJS(null,it.v)).join(',')+']}';}
   /* fonksiyonlar */
   const fnJS=[];
-  for(const [name,f] of F){fnCtx={scopes:[new Map(f.params.map(p=>[p.name,p.ty]))],ret:f.ret};
+  /* yalnızca .c dosyalarındaki fonksiyonlar ve onların çağırdıkları üretilir (başlıktaki kullanılmayan inline/asm fonksiyonlar atlanır) */
+  const callsOf=f=>{const out=new Set();const walk=n=>{if(!n||typeof n!=='object')return;if(Array.isArray(n)){n.forEach(walk);return;}if(n.k==='call'&&n.f&&n.f.k==='id')out.add(n.f.name);for(const k in n){if(k!=='tok'&&k!=='ty')walk(n[k]);}};walk(f.body);return out;};
+  const reach=new Set(),q=[...F.values()].filter(f=>!/\.h$/i.test(f.tok&&f.tok.f||'')).map(f=>f.name);
+  while(q.length){const n=q.pop();if(reach.has(n)||!F.has(n))continue;reach.add(n);callsOf(F.get(n)).forEach(c=>{if(F.has(c)&&!reach.has(c))q.push(c);});}
+  for(const [name,f] of F){if(!reach.has(name))continue;fnCtx={scopes:[new Map(f.params.map(p=>[p.name,p.ty]))],ret:f.ret};
     const body=genStmt(f.body,1);fnJS.push(`F.${id(name)}=function(${f.params.map(p=>id(p.name)).join(',')}){let $t;\n${body}\n};`);fnCtx=null;}
   /* global başlangıç */
   const gInit=[];
@@ -383,7 +398,7 @@ function compile(fileMap,opts){
   const globals={};for(const [n,g] of G)globals[n]={ty:g.ty,file:g.tok&&g.tok.f,line:g.tok&&g.tok.l,calib:!!(g.tok&&/_Local\.c$/i.test(g.tok.f)&&/_P$/.test(n))};
   let mod=null;if(!opts.noMod)try{mod=Function(js)();}catch(e){throw new CErr('İç hata (üretilen JS): '+e.message,null);}
   const types={};[...io.inputs,...io.outputs,...io.params].forEach(n=>{const t=typeOfGlobal(n);if(t)types[n]=tyName(t);});
-  const res={mod,js,steps,types,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.warnings),globals,typeOf:n=>typeOfGlobal(n)};if(opts.noMod){delete res.mod;delete res.typeOf;}return res;}
+  const res={mod,js,steps,types,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.warnings.concat((ctx.hdrSkips||[]).slice(0,30).map(x=>({msg:'Başlıktaki tanım atlandı (simülasyon için gerekmiyor): '+x.msg,file:x.file,line:x.line})))),hdrSkips:(ctx.hdrSkips||[]).length,globals,typeOf:n=>typeOfGlobal(n)};if(opts.noMod){delete res.mod;delete res.typeOf;}return res;}
 function dedupe(w){const s=new Set();return w.filter(x=>{const k=x.msg;if(s.has(k))return false;s.add(k);return true;});}
 const tyName=t=>!t?'?':t.k==='bool'?'boolean':t.k==='int'?(t.signed?'int':'uint')+t.bits:t.k==='float'?'real'+(t.bits===32?'32':''):t.k;
 return {compile,CErr,tyName};

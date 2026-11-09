@@ -350,7 +350,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev U</div>
+    <div class="eyebrow">Konsept · Rev V</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
   </div>
@@ -1457,7 +1457,9 @@ const doorBlockedOpen=id=>V.doorLock?'Kapı kilidi aktif':V.speed>1?'araç harek
 const doorBlockedClose=id=>(id===2&&(V.ramp||V.rampPos>0.01))?'Rampa açık':null;
 const zoneHold=id=>ZR[id].stroller||ZR[id].prm||ZR[id].elderly; // 2025.03465
 const snap=()=>DOORS.map(d=>doorS[d.id].state);
+let cDoorNoteT=0;function cDoorNote(id,src,what){const t=performance.now();if(t-cDoorNoteT>1500){cDoorNoteT=t;log(`${src} → kapı ${id} ${what}: karar C kodunda (Doors_BBCAN komutu bekleniyor)`);}}
 function openDoor(id,src,auto){
+  if(src!=='C kodu'&&cDrivesDoors()){cDoorNote(id,src,'açma');return false;}
   const s=doorS[id],d=DOORS[id-1],b=doorBlockedOpen(id);
   if(b){log(`${src} → Kapı ${id} açılamadı: ${b}`,'warn');SFX.buzz(doorPos(d));
     if(V.speed>1){RQ('block03864','pass',`${V.speed.toFixed(0)} km/h hızda kapı ${id} açılmadı`);if(!auto){const r=reqFor('drvbtn19027');if(r){r.seen.blk=true;setReq(r,r.seen.ok?'pass':'progress','Hareket halinde sürücü butonu kapıyı açmadı'+(r.seen.ok?'':' (araç dururken de dene)'));}}}return false;}
@@ -1468,6 +1470,7 @@ function openDoor(id,src,auto){
   onDoorOpened(id);return true;
 }
 function closeDoor(id,src,reason){
+  if(src!=='C kodu'&&cDrivesDoors()){cDoorNote(id,src,'kapama');return false;}
   const s=doorS[id],d=DOORS[id-1],b=doorBlockedClose(id);
   if(b){log(`${src} → Kapı ${id} kapanamadı: ${b}`,'warn');SFX.buzz(doorPos(d));if(b.indexOf('Rampa')===0)RQ('ramp29327','pass',`Rampa açıkken kapı ${id} kapanma engeli aktif`);return false;}
   const prev=s.state;if(prev==='CLOSED'||prev==='CLOSING')return true;
@@ -1762,7 +1765,7 @@ async function runDemo(r,batch){
   const t0=REC.now();let ok=true;
   try{for(let i=0;i<sc.length;i++){const [cap,fn,ms]=sc[i],li=$('#ds'+i);li.className='cur';li.querySelector('time').textContent=(REC.now()-t0).toFixed(1)+' s';li.scrollIntoView({block:'nearest'});
       if(fn)fn();await sleep(typeof ms==='function'?ms():ms);li.className='done';}
-    $('#demoRes').innerHTML=`Sonuç: <span class="rs ${r.status}">${RS[r.status]}</span> · süre ${(REC.now()-t0).toFixed(1)} s`;await sleep(1500);}catch(e){ok=false;}
+    $('#demoRes').innerHTML=`Sonuç: <span class="rs ${r.status}">${RS[r.status]}</span> · süre ${(REC.now()-t0).toFixed(1)} s`+(cDrivesDoors()||cDrivesRelease()?'<div class="note">Araç modu: kapıları/Türfreigabe’yi C kodu sürüyor. Bu karar simülatörün beklenen akışına göre verildi; kapının gerçekten açılıp kapandığını sinyal grafiğinden (BD12_StDoor2_IC, BBC_StDoor2) kontrol edin.</div>':'');await sleep(1500);}catch(e){ok=false;}
   r.rec={t0,t1:REC.now()};REQS.forEach(x=>{if(x!==r&&x.kind===r.kind)x.rec=r.rec;});
   DRV.force=null;V.speed=0;rig.position.set(0,0,0);rig.rotation.y=0;
   log(`Otomatik test ${ok?'bitti':'durduruldu'}: ${r.id} → ${RS[r.status]}`,'req');
@@ -1854,7 +1857,7 @@ function updateDoors(dt){
     s.pivots.forEach(q=>q.pv.rotation.y=q.dir*e*Math.PI/2*0.94);
     s.btnMat.emissive.set(s.state==='CLOSED'?'#300000':s.state==='OPEN'?'#ff2a14':(bl?'#ff2a14':'#400000'));
   });
-  const sb=V.stopBrakeMan||V.release||DOORS.some(d=>doorS[d.id].state!=='CLOSED');
+  const sb=cDrivesBrake()?(V.stopBrakeMan||!!CSIM.G.DBSBR_StBstbrkReq):(V.stopBrakeMan||V.release||DOORS.some(d=>doorS[d.id].state!=='CLOSED'));
   if(sb!==V.stopBrake){V.stopBrake=sb;log(`GW_AcvBstbrkOn=${sb?1:0}`+(sb?' (hareket engeli aktif)':''));
     {const r=reqFor('bsb13674');if(r){if(sb&&V.release){r.seen.on=true;setReq(r,r.status==='pass'?'pass':'progress','Türfreigabe aktif → GW_AcvBstbrkOn=1');}else if(!sb&&r.seen.on)setReq(r,'pass','Türfreigabe kapatıldı → GW_AcvBstbrkOn=0');}}
     if(sb&&!V.release&&DOORS.some(d=>doorS[d.id].state!=='CLOSED'))RQ('bsb18762','pass','Kapı kapalı değil → GW_AcvBstbrkOn=1');}
@@ -1950,6 +1953,17 @@ const SIG_DB=[];
   b('DBF_StAllDoorsClsd','Kapı durumu (temel fonksiyon / CAN)',()=>DOORS.every(d=>doorS[d.id].state==='CLOSED'),'Tüm kapılar kapalı'),
   ...[1,2,3].map(z=>b(`DBF_StsDoor${z}Clsd`,'Kapı durumu (temel fonksiyon / CAN)',()=>doorS[z].state==='CLOSED',`Kapı ${z} kapalı`)),
   b('DBF_StLastDoorClsng','Kapı durumu (temel fonksiyon / CAN)',()=>{const c=DOORS.filter(d=>doorS[d.id].state==='CLOSING').length;return c===1&&DOORS.every(d=>['CLOSED','CLOSING'].includes(doorS[d.id].state));},'Son açık kapı kapanıyor'),
+  ...(()=>{const GH='Araç (Gateway) ham giriş';return [b('GW_StClmp15',GH,()=>true,'KL15 ham (simülatörde hep açık)'),b('GW_StClmpRdo',GH,()=>true,'Radyo kontağı ham'),
+    b('GW_SpdLess1',GH,()=>V.speed<1,'Hız < 1 km/h ham'),b('GW_SpdLess3',GH,()=>V.speed<3,'Hız < 3 km/h ham'),b('GW_StPrkgBrkEngd',GH,()=>V.park,'Park freni ham'),
+    b('GW_AcvBstbrk',GH,()=>V.stopBrake,'Durak freni aktif ham'),b('GW_StEngRung',GH,()=>V.engine,'Motor çalışıyor ham'),b('GW_StEngAcv',GH,()=>V.engine&&V.speed<1,'Motor rölantide ham'),b('GW_ModeExbn',GH,()=>false,'Sergi modu (kapalı)')];})(),
+  ...(()=>{const GK='Kapı kontrolcüsü (CAN girişi)',ST={CLOSED:1,OPEN:2,CLOSING:3,OPENING:4},st=z=>ST[doorS[z].state]||0,ps=z=>Math.round(doorS[z].pos*100);
+    return [num('BD12_StDoor1Wngfr_IC',GK,()=>st(1),'','Kapı 1 ön kanat durumu: 1 kapalı, 2 açık, 3 kapanıyor, 4 açılıyor'),num('BD12_StDoor1Wngre_IC',GK,()=>st(1),'','Kapı 1 arka kanat durumu'),
+      num('BD12_StDoor2_IC',GK,()=>st(2),'','Kapı 2 durumu: 1 kapalı, 2 açık, 3 kapanıyor, 4 açılıyor'),num('BD34_StDoor3_IC',GK,()=>st(3),'','Kapı 3 durumu'),
+      ...['BD12_StDoor1WngfrCal_IC','BD12_StDoor1WngreCal_IC','BD12_StDoor2Cal_IC','BD34_StDoor3Cal_IC'].map(n=>num(n,GK,()=>2,'','Kapı kalibrasyonu: 2 = tamamlandı')),
+      b('BD12_StLibarDoor1_IC',GK,()=>!!doorS[1].lb,'Kapı 1 ışık bariyeri'),b('BD12_StLibarDoor2_IC',GK,()=>!!doorS[2].lb,'Kapı 2 ışık bariyeri'),b('BD34_StLibarDoor3_IC',GK,()=>!!doorS[3].lb,'Kapı 3 ışık bariyeri'),
+      num('BD12_PosnDoor1Wngfr_IC',GK,()=>ps(1),'%','Kapı 1 ön kanat konumu'),num('BD12_PosnDoor1Wngre_IC',GK,()=>ps(1),'%','Kapı 1 arka kanat konumu'),
+      num('BD12_PosnDoor2Wngfr_IC',GK,()=>ps(2),'%','Kapı 2 ön kanat konumu'),num('BD12_PosnDoor2Wngre_IC',GK,()=>ps(2),'%','Kapı 2 arka kanat konumu'),
+      num('BD34_PosnDoor3Wngfr_IC',GK,()=>ps(3),'%','Kapı 3 ön kanat konumu'),num('BD34_PosnDoor3Wngre_IC',GK,()=>ps(3),'%','Kapı 3 arka kanat konumu')];})(),
   b('DR_StDoorRelsBtnPosn1_I',GR,pulse('Dash_B01'),'Türfreigabe tuşu (B01) basışı, 300 ms darbe'),
   b('DR_StDoorRelsActv',GR,()=>V.release,'Türfreigabe aktif'),
   ...[1,2,3].map(z=>b('DR_StDoorRelsActvForDoor'+z,GR,()=>V.release,`Türfreigabe, kapı ${z} bölgesi`)),
@@ -2186,9 +2200,14 @@ const KW=new Set(['if','else','switch','case','default','break','continue','retu
 const PUN=['>>=','<<=','...','->','++','--','&&','||','==','!=','<=','>=','<<','>>','+=','-=','*=','/=','%=','&=','|=','^=','##','{','}','(',')','[',']',';',',','.','?',':','=','<','>','+','-','*','/','%','&','|','^','!','~','#'];
 const T=(k,bits,signed)=>({k,bits,signed});
 const TY={bool:T('bool',8,false),u8:T('int',8,false),i8:T('int',8,true),u16:T('int',16,false),i16:T('int',16,true),u32:T('int',32,false),i32:T('int',32,true),f64:T('float',64),f32:T('float',32),void:T('void'),unk:T('unk')};
-const BUILTIN_TYPEDEF={boolean_T:TY.bool,uint8_T:TY.u8,int8_T:TY.i8,uint16_T:TY.u16,int16_T:TY.i16,uint32_T:TY.u32,int32_T:TY.i32,real_T:TY.f64,real64_T:TY.f64,time_T:TY.f64,real32_T:TY.f32,int_T:TY.i32,uint_T:TY.u32,char_T:TY.i8,uchar_T:TY.u8,byte_T:TY.u8,ZCSigState:TY.u8,ZCEventType:TY.i32,ulong_T:TY.u32,long_T:TY.i32,bool:TY.bool};
+const BUILTIN_TYPEDEF={boolean_T:TY.bool,uint8_T:TY.u8,int8_T:TY.i8,uint16_T:TY.u16,int16_T:TY.i16,uint32_T:TY.u32,int32_T:TY.i32,real_T:TY.f64,real64_T:TY.f64,time_T:TY.f64,real32_T:TY.f32,int_T:TY.i32,uint_T:TY.u32,char_T:TY.i8,uchar_T:TY.u8,byte_T:TY.u8,ZCSigState:TY.u8,ZCEventType:TY.i32,ulong_T:TY.u32,long_T:TY.i32,bool:TY.bool,
+  uint8:TY.u8,uint16:TY.u16,uint32:TY.u32,sint8:TY.i8,sint16:TY.i16,sint32:TY.i32,boolean:TY.bool,float32:TY.f32,float64:TY.f64,uint8_least:TY.u8,uint16_least:TY.u16,uint32_least:TY.u32,sint8_least:TY.i8,sint16_least:TY.i16,sint32_least:TY.i32,
+  uint8_t:TY.u8,uint16_t:TY.u16,uint32_t:TY.u32,int8_t:TY.i8,int16_t:TY.i16,int32_t:TY.i32,Std_ReturnType:TY.u8,Ifx_UReg_8Bit:TY.u8,Ifx_UReg_16Bit:TY.u16,Ifx_UReg_32Bit:TY.u32,Ifx_SReg_32Bit:TY.i32};
 const BUILTIN_DEF={true:'1',false:'0',TRUE:'1',FALSE:'0',NULL:'0',MAX_uint32_T:'4294967295U',MAX_uint16_T:'65535U',MAX_uint8_T:'255U',MAX_int32_T:'2147483647',MIN_int32_T:'(-2147483647-1)',MAX_int16_T:'32767',MIN_int16_T:'(-32768)',MAX_int8_T:'127',MIN_int8_T:'(-128)',
-  POS_ZCSIG:'1U',ZERO_ZCSIG:'0U',NEG_ZCSIG:'2U',UNINITIALIZED_ZCSIG:'3U',FALLING_ZCEVENT:'(-1)',NO_ZCEVENT:'0',RISING_ZCEVENT:'1'};
+  POS_ZCSIG:'1U',ZERO_ZCSIG:'0U',NEG_ZCSIG:'2U',UNINITIALIZED_ZCSIG:'3U',FALLING_ZCEVENT:'(-1)',NO_ZCEVENT:'0',RISING_ZCEVENT:'1',
+  NULL_PTR:'0',E_OK:'0U',E_NOT_OK:'1U',STD_ON:'1U',STD_OFF:'0U',STD_HIGH:'1U',STD_LOW:'0U',STD_ACTIVE:'1U',STD_IDLE:'0U',INLINE:'inline',LOCAL_INLINE:'static inline',IFX_INLINE:'static inline',STATIC:'static',TYPEDEF:'typedef'};
+/* AUTOSAR Compiler.h makroları (başlıkta tanım yoksa) */
+const BUILTIN_FN={FUNC:[['rt','mc'],'rt'],FUNC_P2VAR:[['rt','pc','mc'],'rt *'],FUNC_P2CONST:[['rt','pc','mc'],'const rt *'],P2VAR:[['t','mc','pc'],'t *'],P2CONST:[['t','mc','pc'],'const t *'],CONSTP2VAR:[['t','mc','pc'],'t * const'],CONSTP2CONST:[['t','mc','pc'],'const t * const'],P2FUNC:[['rt','pc','fn'],'rt (*fn)'],VAR:[['t','mc'],'t'],CONST:[['t','mc'],'const t']};
 const MATH={fabs:'Math.abs',floor:'Math.floor',ceil:'Math.ceil',sqrt:'Math.sqrt',pow:'Math.pow',sin:'Math.sin',cos:'Math.cos',tan:'Math.tan',exp:'Math.exp',log:'Math.log',log10:'Math.log10',atan2:'Math.atan2',atan:'Math.atan',fmod:'((a,b)=>a%b)',rt_roundd:'Math.round',fmax:'Math.max',fmin:'Math.min',abs:'Math.abs'};
 class CErr extends Error{constructor(msg,tok){super(msg);this.file=tok&&tok.f;this.line=tok&&tok.l;}}
 
@@ -2208,7 +2227,7 @@ function lex(src,file){
       else{while(j<n&&/[0-9.]/.test(src[j]))j++;if(/[eE]/.test(src[j])){j++;if(/[+-]/.test(src[j]))j++;while(j<n&&/[0-9]/.test(src[j]))j++;}}
       let k=j;while(k<n&&/[uUlLfF]/.test(src[k]))k++;out.push({t:'num',v:src.slice(i,k),f:file,l});i=k;continue;}
     if(c==='"'||c==="'"){let j=i+1;while(j<n&&src[j]!==c){if(src[j]==='\\')j++;j++;}out.push({t:c==='"'?'str':'chr',v:src.slice(i,j+1),f:file,l});i=j+1;continue;}
-    let p=PUN.find(p=>src.startsWith(p,i));if(!p)throw new CErr(`Tanınmayan karakter “${c}”`,{f:file,l});
+    let p=PUN.find(p=>src.startsWith(p,i));if(!p){out.push({t:'p',v:c,f:file,l,junk:true});i++;continue;}
     out.push({t:'p',v:p,f:file,l});i+=p.length;}
   out.push({t:'nl',f:file,l});return out;}
 
@@ -2217,6 +2236,7 @@ function preprocess(files,mainName,ctx){
   const macros=new Map();
   Object.entries(BUILTIN_DEF).forEach(([k,v])=>macros.set(k,{body:lex(v,'<builtin>').filter(t=>t.t!=='nl')}));
   macros.set('CALIB',{params:['t','s'],body:lex('t','<builtin>').filter(t=>t.t!=='nl')});
+  Object.entries(BUILTIN_FN).forEach(([k,[ps,b]])=>macros.set(k,{params:ps,body:lex(b,'<builtin>').filter(t=>t.t!=='nl')}));
   const out=[];const stackInc=[];
   function expand(toks,hide){const res=[];
     for(let i=0;i<toks.length;i++){const t=toks[i];
@@ -2276,8 +2296,8 @@ function preprocess(files,mainName,ctx){
 /* ---------- ayrıştırıcı ---------- */
 function parse(toks,ctx){
   let p=0;const peek=(o=0)=>toks[p+o]||{t:'eof',v:'<eof>'},next=()=>toks[p++]||{t:'eof',v:'<eof>'};
-  for(let i=0;i<toks.length;i++){const t=toks[i];if(t.t==='id'&&(t.v==='__attribute__'||t.v==='__declspec'||t.v==='__asm__'||t.v==='asm')&&toks[i+1]&&toks[i+1].v==='('){let d=0,j=i+1;for(;j<toks.length;j++){if(toks[j].v==='(')d++;else if(toks[j].v===')'&&--d===0)break;}toks.splice(i,j-i+1);i--;continue;}
-    if(t.t==='id'&&['__inline','__inline__','__restrict','__restrict__','restrict','__extension__','__volatile__','__const'].includes(t.v)){toks.splice(i,1);i--;}}
+  for(let i=0;i<toks.length;i++){const t=toks[i];if(t.t==='id'&&['__attribute__','__declspec','__asm__','__asm','asm','_Pragma','__pragma'].includes(t.v)){let j=i+1;while(toks[j]&&toks[j].t==='id'&&['volatile','__volatile__','__volatile','goto','inline'].includes(toks[j].v))j++;if(!(toks[j]&&toks[j].v==='(')){if(t.v.startsWith('__asm')||t.v==='asm'){toks.splice(i,j-i);i--;}continue;}let d=0;for(;j<toks.length;j++){if(toks[j].v==='(')d++;else if(toks[j].v===')'&&--d===0)break;}const asm=t.v.startsWith('__asm')||t.v==='asm';toks.splice(i,j-i+1,...(asm?[{t:'num',v:'0',f:t.f,l:t.l}]:[]));i--;continue;}
+    if(t.t==='id'&&['__inline','__inline__','__forceinline','__restrict','__restrict__','restrict','__extension__','__volatile__','__const','__far','__near','__huge','_Noreturn','__noreturn','__interrupt','__packed__','__packed'].includes(t.v)){toks.splice(i,1);i--;}}
   const is=v=>peek().v===v&&peek().t!=='str';
   const expect=v=>{const t=next();if(t.v!==v)throw new CErr(`“${v}” bekleniyordu, “${t.v}” bulundu`,t);return t;};
   const typedefs=ctx.typedefs;
@@ -2402,10 +2422,15 @@ function parse(toks,ctx){
     expect(';');return {k:'decl',ds,storage};}
   /* üst düzey */
   const items=[];
+  const isHdr=f=>/\.h$/i.test(f||'');
+  function skipItem(){let d=0;for(;;){const t=next();if(t.t==='eof')return;if(t.v==='{'){d++;continue;}if(t.v==='}'){if(--d<=0){if(is(';'))next();return;}continue;}if(t.v===';'&&d<=0)return;}}
   while(peek().t!=='eof'){
     if(is(';')){next();continue;}
+    const st0=p,tf=peek().f;
+    try{parseTop();}catch(e){if(!isHdr(tf))throw e;p=st0;skipItem();(ctx.hdrSkips=ctx.hdrSkips||[]).push({file:tf,line:toks[st0]&&toks[st0].l,msg:e.message});}}
+  function parseTop(){
     const st=p;const {ty,storage}=parseBaseType();
-    if(is(';')){next();continue;}
+    if(is(';')){next();return;}
     for(;;){const d=parseDeclarator(ty);
       if(storage==='typedef'){typedefs.set(d.name,d.ty.k==='struct'&&!d.ty.name?Object.assign(d.ty,{name:d.name}):resolveTD(d.ty));}
       else if(d.params&&is('{')){const body=parseBlock();items.push({k:'func',name:d.name,ret:d.ty,params:d.params,body,tok:d.tok});break;}
@@ -2545,7 +2570,11 @@ function compile(fileMap,opts){
     return '{__pos:['+init.items.map(it=>initJS(null,it.v)).join(',')+']}';}
   /* fonksiyonlar */
   const fnJS=[];
-  for(const [name,f] of F){fnCtx={scopes:[new Map(f.params.map(p=>[p.name,p.ty]))],ret:f.ret};
+  /* yalnızca .c dosyalarındaki fonksiyonlar ve onların çağırdıkları üretilir (başlıktaki kullanılmayan inline/asm fonksiyonlar atlanır) */
+  const callsOf=f=>{const out=new Set();const walk=n=>{if(!n||typeof n!=='object')return;if(Array.isArray(n)){n.forEach(walk);return;}if(n.k==='call'&&n.f&&n.f.k==='id')out.add(n.f.name);for(const k in n){if(k!=='tok'&&k!=='ty')walk(n[k]);}};walk(f.body);return out;};
+  const reach=new Set(),q=[...F.values()].filter(f=>!/\.h$/i.test(f.tok&&f.tok.f||'')).map(f=>f.name);
+  while(q.length){const n=q.pop();if(reach.has(n)||!F.has(n))continue;reach.add(n);callsOf(F.get(n)).forEach(c=>{if(F.has(c)&&!reach.has(c))q.push(c);});}
+  for(const [name,f] of F){if(!reach.has(name))continue;fnCtx={scopes:[new Map(f.params.map(p=>[p.name,p.ty]))],ret:f.ret};
     const body=genStmt(f.body,1);fnJS.push(`F.${id(name)}=function(${f.params.map(p=>id(p.name)).join(',')}){let $t;\n${body}\n};`);fnCtx=null;}
   /* global başlangıç */
   const gInit=[];
@@ -2565,7 +2594,7 @@ function compile(fileMap,opts){
   const globals={};for(const [n,g] of G)globals[n]={ty:g.ty,file:g.tok&&g.tok.f,line:g.tok&&g.tok.l,calib:!!(g.tok&&/_Local\.c$/i.test(g.tok.f)&&/_P$/.test(n))};
   let mod=null;if(!opts.noMod)try{mod=Function(js)();}catch(e){throw new CErr('İç hata (üretilen JS): '+e.message,null);}
   const types={};[...io.inputs,...io.outputs,...io.params].forEach(n=>{const t=typeOfGlobal(n);if(t)types[n]=tyName(t);});
-  const res={mod,js,steps,types,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.warnings),globals,typeOf:n=>typeOfGlobal(n)};if(opts.noMod){delete res.mod;delete res.typeOf;}return res;}
+  const res={mod,js,steps,types,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.warnings.concat((ctx.hdrSkips||[]).slice(0,30).map(x=>({msg:'Başlıktaki tanım atlandı (simülasyon için gerekmiyor): '+x.msg,file:x.file,line:x.line})))),hdrSkips:(ctx.hdrSkips||[]).length,globals,typeOf:n=>typeOfGlobal(n)};if(opts.noMod){delete res.mod;delete res.typeOf;}return res;}
 function dedupe(w){const s=new Set();return w.filter(x=>{const k=x.msg;if(s.has(k))return false;s.add(k);return true;});}
 const tyName=t=>!t?'?':t.k==='bool'?'boolean':t.k==='int'?(t.signed?'int':'uint')+t.bits:t.k==='float'?'real'+(t.bits===32?'32':''):t.k;
 return {compile,CErr,tyName};
@@ -2766,10 +2795,21 @@ function cStep(noIn){const G=CSIM.G;if(!CSIM.build)return;
     catch(e){CSIM.errs[t.asw]={msg:'Çalışma hatası ('+t.fn+'): '+e.message};delete CSIM.mods[t.asw];log(`C kodu: ${t.asw} durduruldu: ${e.message}`,'warn');cRewire();return;}}
   for(const n in CSIM.forces)if(CSIM.prod[n])G[n]=CSIM.forces[n];
   CSIM.steps++;
-  if(CSIM.prod.DR_StDoorRelsActv){const r=!!G.DR_StDoorRelsActv;if(r!==V.release)setRelease(r,'C kodu');}}
+  cActuate();}
 function cRelease(on,src){const t=performance.now();if(on){PRS['Dash_B01']=t;PRS['Dash_B01_off']=-1e9;}else{PRS['Dash_B01_off']=t;PRS['Dash_B01']=-1e9;}
   log(`${src} → C kodu girişi ${on?'DR_StDoorRelsBtnPosn1_I':'DR_StDoorRelsDisadBtnPosn1_I'} = 1 (300 ms); karar C kodunda`);}
 const cDrivesRelease=()=>CSIM.on&&!!CSIM.build&&!!CSIM.prod.DR_StDoorRelsActv;
+/* G/Ç katmanı: pin ve anahtar paneli yöneticileri fiziksel pin/CAN yapılandırmasına bağlı; çıkışlarını (butonlar) simülatör sağlar */
+const C_IO_ASW=/^(PinManager|FAP_Manager|NetworkManager|BDC_Dummy)/i;
+/* kapı kontrolcüsüne giden CAN komutları (Doors_BBCAN çıkışları) */
+const C_DOOR_CMD={1:{open:['BD12_ReqDoor1WngfrOpg_OC','BD12_ReqDoor1WngreOpg_OC'],close:['BD12_ReqDoor1WngfrClsng_OC','BD12_ReqDoor1WngreClsng_OC','BD12_ReqDoor1WngfrFrcdClsng_OC','BD12_ReqDoor1WngreFrcdClsng_OC']},
+  2:{open:['BD12_ReqDoor2Opg_OC'],close:['BD12_ReqDoor2Clsng_OC','BD12_ReqDoor2FrcdClsng_OC']},3:{open:['BD34_ReqDoor3Opg_OC'],close:['BD34_ReqDoor3Clsng_OC','BD34_ReqDoor3FrcdClsng_OC']}};
+const cDrivesDoors=()=>CSIM.on&&!!CSIM.build&&!!(CSIM.prod.BD12_ReqDoor2Opg_OC||CSIM.prod.BD34_ReqDoor3Opg_OC);
+const cDrivesBrake=()=>CSIM.on&&!!CSIM.build&&!!CSIM.prod.DBSBR_StBstbrkReq;
+function cActuate(){const G=CSIM.G;
+  if(CSIM.prod.DR_StDoorRelsActv){const r=!!G.DR_StDoorRelsActv;if(r!==V.release)setRelease(r,'C kodu');}
+  if(cDrivesDoors())[1,2,3].forEach(z=>{const c=C_DOOR_CMD[z],st=doorS[z].state,on=l=>l.some(n=>CSIM.prod[n]&&G[n]==1);
+    if(on(c.close)){if(st==='OPEN'||st==='OPENING')closeDoor(z,'C kodu');}else if(on(c.open)){if(st==='CLOSED'||st==='CLOSING')openDoor(z,'C kodu',true);}});}
 /* sinyal kataloğuna bağla */
 function cHook(){CSIM.added=[];const mods=Object.values(CSIM.mods);const tyOf=n=>{for(const b of mods){const t=b.typeOf(n);if(t)return t;}const h=cTypeHint(n);return h?{k:/boolean/.test(h)?'bool':'int'}:{k:'int'};};
   const mk=(n,g,isOut)=>{const get=()=>CSIM.G[n]??0;const lab=isOut?`${CSIM.prod[n]} çıkışı (C kodu)`:'C kodunun okuduğu giriş';
@@ -2908,8 +2948,10 @@ function cCodeClick(e){const t=e.target.closest('button,a');if(!t)return false;
     else if(a==='fcten'){const b=CSIM.mods[CSIM.sel];b.params.filter(n=>/StsFctEna_P$/.test(n)).forEach(n=>{CSIM.params[n]=1;CSIM.G[n]=1;});cSaveCfg();cRefreshTop();}
     else if(a==='selchg'){cAswNames().forEach(n=>{if(cChanged(CSIM.asws[n]))CSIM.asws[n].active=true;});cSaveCfg();cBuildActive().then(()=>{if(CSIM.build&&!CSIM.on)cSetOn(true);renderCode();});}
     else if(a==='checkall'){cCheckAll().then(renderCode);}
-    else if(a==='runall'){const bad=cAswNames().filter(n=>CSIM.chk[n]&&!CSIM.chk[n].ok);cAsk(`Derlenen tüm ASW’ler (${cAswNames().length-bad.length}) birlikte çalıştırılsın mı?${bad.length?` ${bad.length} ASW derlenemediği için dışarıda kalır.`:''}`,'Tümünü çalıştır').then(ok=>{if(!ok)return;
-      cAswNames().forEach(n=>{CSIM.asws[n].active=!(CSIM.chk[n]&&!CSIM.chk[n].ok);});cSaveCfg();cBuildActive().then(()=>{if(CSIM.build&&!CSIM.on)cSetOn(true);renderCode();});});}
+    else if(a==='runall'){const bad=cAswNames().filter(n=>CSIM.chk[n]&&!CSIM.chk[n].ok),io=cAswNames().filter(n=>C_IO_ASW.test(n)&&!bad.includes(n));
+      const nRun=cAswNames().length-bad.length-io.length;
+      cAsk(`Derlenen ${nRun} ASW birlikte çalıştırılsın mı? Araç gibi çalışır: kapıları, Türfreigabe’yi ve durak frenini C kodu sürer; Nv/_P değerleri koddaki gibi kalır.${io.length?` G/Ç katmanı (${io.join(', ')}) simülatörden beslenir.`:''}${bad.length?` ${bad.length} ASW derlenemediği için dışarıda kalır.`:''}`,'Tümünü çalıştır').then(ok=>{if(!ok)return;
+      cAswNames().forEach(n=>{CSIM.asws[n].active=!(CSIM.chk[n]&&!CSIM.chk[n].ok)&&!C_IO_ASW.test(n);});cSaveCfg();cBuildActive().then(()=>{if(CSIM.build&&!CSIM.on)cSetOn(true);renderCode();});});}
     else if(a==='selnone'){cAswNames().forEach(n=>CSIM.asws[n].active=false);if(CSIM.on)cSetOn(false);CSIM.mods={};CSIM.errs={};cRewire();cSaveCfg();renderCode();}
     else if(a==='orig'&&f){cAsk(`${CSIM.cur} orijinal haline dönsün mü? Bu dosyadaki değişiklikleriniz silinir.`,'Orijinale dön').then(ok=>{if(ok){f.cur=f.orig;A.dirty=true;A.rev=(A.rev||0)+1;cSaveSrc(CSIM.sel);renderCode();}});}
     else if(a==='diff'&&f){const d=$('#cDiff');if(!d.hidden){d.hidden=true;return true;}const ds=cDiff(f.orig,f.cur);d.hidden=false;

@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev U)
+# Otobüs Tasarım Stüdyosu (konsept, Rev V)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -149,3 +149,9 @@ Sinyaller: DoorRelease, DoorState_K2
 - Depolama ASW başına ayrı kayıt: kod düzenlenince yalnızca o ASW yazılır (eskiden tüm B24). Eski kayıtlar otomatik taşınır.
 - Grafik kaydı yalnızca grafikteki, testlerdeki ve yan paneldeki sinyalleri tutar (Tümünü çalıştır ile binlerce sinyal kaydedilip bellek doluyordu). Büyük sinyal tablosu 0,5 s aralıkla güncellenir.
 - Ölçüm: 59 ASW birlikte çalışırken JS yükü %1,4-2, bellek 15-26 MB.
+
+## Rev V
+- **BSW/MCAL başlıkları**: derleyiciye özel yapılar (IFX_INLINE, FUNC/P2VAR gibi AUTOSAR makroları, `__asm`, `#pragma`, işlemci komutları) tanınıyor veya atlanıyor. Başlıklardaki çözülemeyen tanımlar uyarı olarak geçiliyor (ASW .c dosyalarındaki hatalar hâlâ hata). Yalnızca .c'deki fonksiyonlar ve onların çağırdıkları derleniyor; başlıklardaki kullanılmayan inline/asm fonksiyonlar atlanıyor. AUTOSAR Platform_Types tipleri (uint8, boolean…) yerleşik.
+- **Araç modu**: Tümünü çalıştır'da G/Ç katmanı (PinManager, FAP_Manager, NetworkManager, BDC_Dummy) hariç tüm ASW'ler çalışır. Simülatör ham gateway girişlerini (GW_StClmp15, GW_SpdLess1, GW_StPrkgBrkEngd…) ve kapı kontrolcüsü CAN geri bildirimini (BD12_StDoor2_IC, kalibrasyon, ışık bariyeri, konum) verir. Doors_BBCAN'ın CAN komutları (BD12_ReqDoor2Opg_OC, …Clsng_OC) kapıları sürer; simülatörün kendi kapı kararları devre dışı kalır. DBSBR_StBstbrkReq durak frenini sürer.
+- Nv/_P girilmezse fonksiyonlar koddaki gibi kapalı kalır (ör. DR_StsFctEna_P = 0 → Türfreigabe açılmaz).
+- Araç modunda otomatik test sonucuna uyarı: karar simülatör akışına göre, kapı sinyallerini grafikte kontrol edin.
