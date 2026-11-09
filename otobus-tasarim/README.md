@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev Q)
+# Otobüs Tasarım Stüdyosu (konsept, Rev R)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -128,3 +128,8 @@ Sinyaller: DoorRelease, DoorState_K2
 - **B24 entegrasyon zip'i:** C Kod sayfasına zip bırakılır; `…/ASW/<ASW>/src/*.c|h` yapısından ASW'ler ayrılır, `mdl_test` kopyaları atlanır, Cmn*/BSW başlıkları ortak başlık olarak paylaşılır. Dosyalar tarayıcının IndexedDB'sinde saklanır.
 - **Çoklu ASW:** Seçilen ASW'ler tek sinyal alanında birlikte çalışır; bir ASW'nin çıkışı diğerinin girişine doğrudan gider (kaynak “C: <ASW>”), kalan girişler simülatörden okunur. Üretici → tüketici sırasına göre, her görev kendi periyodunda (10/20/100 ms) çağrılır.
 - Yeni zip yüklenince değişiklikler isteğe göre korunur; **Değişenleri indir** yalnızca değişen dosyaları orijinal yollarıyla zip'ler.
+
+## Rev R
+- Zip yüklenince tüm ASW'ler otomatik derlenip kontrol edilir ("59/60 ASW derlendi · 1 hata: …"); hatalı ASW'ler dosya ve satırla listelenir. Derleme sonuçları önbelleğe alınır, düzenlenmeyen ASW tekrar derlenmez.
+- **Tümünü çalıştır**: derlenen tüm ASW'leri birlikte simülasyona alır. **Tümünü kontrol et**: elle yeniden kontrol.
+- Sol listede durum: dolu yeşil çalışıyor, boş yeşil derlendi, turuncu derlenemedi.

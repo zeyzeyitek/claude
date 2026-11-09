@@ -333,7 +333,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
 #cDiff{padding:10px 12px;border-bottom:1px solid var(--line);max-height:40vh;overflow:auto}
 .cdiff{margin:6px 0 0;font:12px/1.55 var(--f-mono);white-space:pre} .cdiff button{all:unset;cursor:pointer} .cdiff button:hover{text-decoration:underline} .dl-add{color:var(--ok)} .dl-del{color:var(--warn)}
 #hC{background:var(--prm);color:#fff}
-.cdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--line);margin-right:8px;vertical-align:1px} .cdot.ok{background:var(--ok)} .cdot.bad{background:var(--warn)}
+.cdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--line);margin-right:8px;vertical-align:1px} .cdot.ok{background:var(--ok)} .cdot.idle{background:transparent;box-shadow:inset 0 0 0 2px var(--ok)} .cbad{color:var(--warn)} .cdot.bad{background:var(--warn)}
 .csrc .chd2{align-items:flex-start} .crun{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)} .crun .sp{flex:1}
 .cdrop.small{padding:14px;margin:10px 12px;border-width:1.5px} #cImp:empty{display:none} #cImp{padding:0 12px 10px;font-weight:600;color:var(--accent)}
 .cact{display:inline-flex;gap:8px;align-items:center;font-weight:600;margin-top:4px;cursor:pointer} .cact input{width:18px;height:18px;accent-color:var(--ok)}
@@ -345,7 +345,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev Q</div>
+    <div class="eyebrow">Konsept · Rev R</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
   </div>
@@ -479,7 +479,7 @@ const AXLES=[3.3,-2.6], ARCH=0.65;
 const KIND={stroller:{name:'Bebek arabası',sig:z=>`D${z}PB_StStrqDoor${z}FromPrmBtn`,code:'BTN-STR'},prm:{name:'Engelli',sig:z=>`D${z}W_StStrqDoor${z}FromWhlchrBtn`,code:'BTN-PRM'},elderly:{name:'Yaşlı yolcu',sig:z=>`DOM_StStrqDoor${z}FromOldMBtn`,code:'BTN-ELD'}};
 
 /* ================= Araç durumu ================= */
-const PRS={};const CSIM={asws:{},common:{},src:null,sel:null,cur:null,mods:{},errs:{},prod:{},extIn:[],order:[],tasks:[],t:0,build:null,G:{},on:false,paused:false,acc:0,steps:0,period:100,step:null,forces:{},params:{},tab:'out',added:[]};const pulse=k=>()=>performance.now()-(PRS[k]||-1e9)<300;
+const PRS={};const CSIM={asws:{},common:{},src:null,sel:null,cur:null,mods:{},errs:{},cache:{},chk:{},prod:{},extIn:[],order:[],tasks:[],t:0,build:null,G:{},on:false,paused:false,acc:0,steps:0,period:100,step:null,forces:{},params:{},tab:'out',added:[]};const pulse=k=>()=>performance.now()-(PRS[k]||-1e9)<300;
 const V={speed:0,rpm:620,gear:'N',stopReq:false,req:{stroller:false,prm:false,elderly:false},temp:17,odo:47389,stopBrake:false,intLight:true,night:false,
   release:false,kneel:false,kneelPos:0,fog:false,wiper:false,ramp:false,rampPos:0,dim:false,engine:true,hazard:false,head:false,park:true,stopBrakeMan:false,doorLock:false};
 const DOOR_T=2.4;
@@ -2534,7 +2534,7 @@ const IDB={db:null,open(){if(this.db)return Promise.resolve(this.db);return new 
   async set(k,v){const db=await this.open();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);});}};
 let cSrcT=0,cCfgT=0;
 function cSaveSrc(){clearTimeout(cSrcT);cSrcT=setTimeout(()=>{IDB.set('src',{asws:Object.fromEntries(Object.entries(CSIM.asws).map(([n,a])=>[n,{files:a.files}])),common:CSIM.common,src:CSIM.src}).catch(()=>{CSIM.saveErr=true;});},600);}
-function cSaveCfg(){clearTimeout(cCfgT);cCfgT=setTimeout(()=>{IDB.set('cfg',{active:Object.keys(CSIM.asws).filter(n=>CSIM.asws[n].active),sel:CSIM.sel,cur:CSIM.cur,forces:CSIM.forces,params:CSIM.params,on:CSIM.on}).catch(()=>{});},300);}
+function cSaveCfg(){clearTimeout(cCfgT);cCfgT=setTimeout(()=>{IDB.set('cfg',{active:Object.keys(CSIM.asws).filter(n=>CSIM.asws[n].active),sel:CSIM.sel,cur:CSIM.cur,forces:CSIM.forces,params:CSIM.params,on:CSIM.on,chk:CSIM.chk}).catch(()=>{});},300);}
 const cSave=()=>{cSaveSrc();cSaveCfg();};
 async function cLoad(){
   try{const old=JSON.parse(localStorage.getItem(C_KEY)||'null');if(old&&old.files&&Object.keys(old.files).length){const nm=cAswNameFromFiles(Object.keys(old.files));
@@ -2542,7 +2542,7 @@ async function cLoad(){
       await IDB.set('src',{asws:{[nm]:{files:CSIM.asws[nm].files}},common:{},src:null});await IDB.set('cfg',{active:[nm],sel:nm,cur:old.cur,forces:CSIM.forces,params:CSIM.params,on:old.on});localStorage.removeItem(C_KEY);}}catch(e){}
   try{const s=await IDB.get('src'),c=await IDB.get('cfg');if(!s||!s.asws)return;
     CSIM.common=s.common||{};CSIM.src=s.src||null;Object.entries(s.asws).forEach(([n,a])=>CSIM.asws[n]={files:a.files,active:false});
-    if(c){(c.active||[]).forEach(n=>{if(CSIM.asws[n])CSIM.asws[n].active=true;});Object.assign(CSIM,{sel:c.sel,cur:c.cur,forces:c.forces||{},params:c.params||{}});}
+    if(c){(c.active||[]).forEach(n=>{if(CSIM.asws[n])CSIM.asws[n].active=true;});Object.assign(CSIM,{sel:c.sel,cur:c.cur,forces:c.forces||{},params:c.params||{},chk:c.chk||{}});}
     await cBuildActive();if(c&&c.on&&cAnyRunning())cSetOn(true);if(VIEW==='code')renderCode();}catch(e){}}
 /* ---- yardımcılar ---- */
 const cNum=v=>v===true?1:v===false||v==null?0:typeof v==='number'?v:typeof v==='string'?(/=(-?\d+)$/.exec(v)?+/=(-?\d+)$/.exec(v)[1]:0):+v||0;
@@ -2594,10 +2594,10 @@ async function cImportZip(file){const st=$('#cImp');const say=t=>{if(st)st.textC
         const prev=old[n]&&old[n].files[b];fs[b]={orig:t,cur:keepEdits&&prev&&prev.cur!==prev.orig?prev.cur:t,path:p};if(++done%40===0){say(`Dosyalar açılıyor… ${done}/${total}`);await new Promise(r=>setTimeout(r));}}
       nas[n]={files:fs,active:!!(old[n]&&old[n].active)};}
     for(const [b,p] of Object.entries(g.common)){common[b]=(await z.read(byName.get(p))).replace(/\r\n/g,'\n');}
-    if(CSIM.on)cSetOn(false);CSIM.asws=nas;CSIM.common=common;CSIM.mods={};CSIM.errs={};
+    if(CSIM.on)cSetOn(false);CSIM.asws=nas;CSIM.common=common;CSIM.mods={};CSIM.errs={};CSIM.cache={};CSIM.chk={};
     CSIM.src={name:file.name,date:new Date().toISOString(),asw:names.length,files:done,common:Object.keys(common).length,skipped:g.skipped.length};
     if(!CSIM.sel||!nas[CSIM.sel])CSIM.sel=names.includes('Doors_DoorsRels')?'Doors_DoorsRels':cAswNames()[0];CSIM.cur=null;
-    cSave();say('Seçili ASW’ler derleniyor…');await cBuildActive();say('');renderCode();
+    cSave();renderCode();await cCheckAll();await cBuildActive();say('');renderCode();
   }catch(e){say('');alert('Zip içe aktarılamadı: '+e.message);}}
 function cAddFiles(list){const fs=[...list];const zip=fs.find(f=>/\.zip$/i.test(f.name));if(zip){cImportZip(zip);return;}
   const src=fs.filter(f=>/\.(c|h)$/i.test(f.name));if(!src.length){alert('B24 entegrasyonu için .zip, tek ASW için .c ve .h dosyaları eklenebilir.');return;}
@@ -2622,12 +2622,17 @@ function cAssumeFile(asw,b){
 function cCompileAsw(name){const a=CSIM.asws[name];
   const map={};Object.entries(CSIM.common).forEach(([b,t])=>map[b]=t);Object.entries(a.files).forEach(([b,f])=>map[b]=f.cur);
   return CC.compile(map,{known:n=>SIGN.has(n)||!!(INV&&INV.byName.has(n)),typeHint:cTypeHint});}
-async function cBuildOne(name){const a=CSIM.asws[name];if(!a)return false;const t0=performance.now();delete CSIM.errs[name];delete CSIM.mods[name];
+async function cBuildOne(name,check){const a=CSIM.asws[name];if(!a)return false;const t0=performance.now();const rev=a.rev||0;
+  if(!check){delete CSIM.errs[name];delete CSIM.mods[name];const c=CSIM.cache[name];if(c&&c.rev===rev){CSIM.mods[name]=c;a.dirty=false;return true;}}
   let b;try{b=cCompileAsw(name);
     if(!Object.keys(a.files).some(n=>/^SIM_/i.test(n))){const s=cAssumeFile(name,b);if(s){a.files['SIM_varsayimlar.c']={orig:s,cur:s,path:'SIM_varsayimlar.c',added:true};b=cCompileAsw(name);cSaveSrc();}}
     if(!b.steps.length)throw Object.assign(new Error('Adım (step) fonksiyonu bulunamadı. Parametresiz ve “…_10ms / …_100ms / …step” adlı bir fonksiyon bekleniyor.'),{file:null});}
-  catch(e){CSIM.errs[name]={msg:e.message,file:e.file,line:e.line};a.dirty=false;return false;}
-  b.ms=Math.round(performance.now()-t0);b.asw=name;CSIM.mods[name]=b;a.dirty=false;return true;}
+  catch(e){const er={msg:e.message,file:e.file,line:e.line};CSIM.chk[name]={ok:false,...er};delete CSIM.cache[name];if(!check)CSIM.errs[name]=er;a.dirty=false;return false;}
+  b.ms=Math.round(performance.now()-t0);b.asw=name;b.rev=a.rev||0;CSIM.cache[name]=b;CSIM.chk[name]={ok:true,ms:b.ms,step:b.steps.map(x=>x.name).join(', ')};if(!check){CSIM.mods[name]=b;a.dirty=false;}return true;}
+async function cCheckAll(){const ns=cAswNames(),st=$('#cImp');let bad=0;
+  for(let i=0;i<ns.length;i++){const n=ns[i];if(!CSIM.cache[n]||CSIM.cache[n].rev!==(CSIM.asws[n].rev||0)){if(!(await cBuildOne(n,true)))bad++;}else if(!CSIM.chk[n].ok)bad++;
+    if(st)st.textContent=`ASW’ler kontrol ediliyor… ${i+1}/${ns.length} · ${n}`;if(i%2===1)await new Promise(r=>setTimeout(r));}
+  if(st)st.textContent='';cSaveCfg();return bad;}
 async function cBuildActive(){const act=cAswNames().filter(n=>CSIM.asws[n].active);CSIM.mods={};CSIM.errs={};
   for(let i=0;i<act.length;i++){await cBuildOne(act[i]);const st=$('#cImp');if(st&&act.length>3)st.textContent=`Derleniyor… ${i+1}/${act.length} · ${act[i]}`;if(act.length>3)await new Promise(r=>setTimeout(r));}
   const st=$('#cImp');if(st)st.textContent='';cRewire();}
@@ -2737,9 +2742,9 @@ function cIOHTML(){const b=CSIM.mods[CSIM.sel];if(!b)return `<p class="note" sty
     body=`<p class="note">${esc(CSIM.sel)} için Simulink blok sinyalleri (B), durumlar (DW) ve sıfır geçiş durumları (PrevZCX).</p><table class="stable"><thead><tr><th>Değişken</th><th>Değer</th></tr></thead><tbody>${rows.filter(r=>f(r[0])).map(r=>`<tr><td><code>${esc(r[0])}</code></td><td><span class="sv" data-cst="${esc(r[0])}">${esc(String(r[1]))}</span></td></tr>`).join('')||'<tr><td colspan="2" class="note">Simülatörde çalışınca dolar.</td></tr>'}</tbody></table>`;}
   return `<div class="ctabs" role="tablist">${tabs.map(([k,l,c])=>`<button class="sfb" data-ctab="${k}" aria-pressed="${CSIM.tab===k}">${l}${c!==''?' ('+c+')':''}</button>`).join('')}</div><div class="stable-wrap cio">${body}</div>`;}
 function cTocHTML(){const q=($('#docSearch').value||'').trim().toLowerCase();const names=cAswNames().filter(n=>!q||n.toLowerCase().includes(q)||(CSIM.mods[n]&&q.length>2&&[...CSIM.mods[n].inputs,...CSIM.mods[n].outputs].some(x=>x.toLowerCase().includes(q))));
-  const st=n=>CSIM.errs[n]?'<i class="cdot bad" title="Hata"></i>':CSIM.mods[n]?'<i class="cdot ok" title="Çalışıyor"></i>':'<i class="cdot"></i>';
+  const st=n=>CSIM.errs[n]||(CSIM.chk[n]&&!CSIM.chk[n].ok)?'<i class="cdot bad" title="Derlenemedi"></i>':CSIM.mods[n]?'<i class="cdot ok" title="Çalışıyor"></i>':CSIM.chk[n]?'<i class="cdot idle" title="Derlendi, çalışmıyor"></i>':'<i class="cdot"></i>';
   return `<div class="tochead">ASW’ler${CSIM.src?' · '+cAswNames().length:''}</div>${names.map(n=>`<a class="tocg${CSIM.sel===n?' cur':''}" href="#" data-casw="${esc(n)}"><span>${st(n)}${esc(n)}</span><em>${cChanged(CSIM.asws[n])?'değişti':''}</em></a>`).join('')||'<p class="note tocnote">Eşleşen ASW yok.</p>'}
-    <p class="note tocnote">Yeşil nokta: C koduyla çalışıyor. Dosyalar yalnızca bu tarayıcıda saklanır; yayınlanan sayfaya eklenmez.</p>`;}
+    <p class="note tocnote">Dolu yeşil: çalışıyor · boş yeşil: derlendi, çalışmıyor · turuncu: derlenemedi. Dosyalar yalnızca bu tarayıcıda saklanır; yayınlanan sayfaya eklenmez.</p>`;}
 function renderCode(){
   const names=cAswNames();$('#dtoc').innerHTML=names.length?cTocHTML():'<div class="tochead">ASW’ler</div><p class="note tocnote">Henüz kod yok.</p>';
   const m=$('#dmain');
@@ -2752,7 +2757,9 @@ function renderCode(){
   const f=a.files[CSIM.cur],chg=f.cur!==f.orig,nChg=cAswNames().reduce((s,n)=>s+Object.entries(CSIM.asws[n].files).filter(([b,x])=>!/^SIM_/.test(b)&&x.cur!==x.orig).length,0);
   m.innerHTML=`<div class="dwrap wide cwrap">
     <section class="ccard csrc"><div class="chd2"><div><div class="dlbl">Kaynak</div><div>${CSIM.src?`<b>${esc(CSIM.src.name)}</b> · ${CSIM.src.asw} ASW · ${CSIM.src.files} dosya · ${CSIM.src.common} ortak başlık · ${new Date(CSIM.src.date).toLocaleString('tr-TR')}`:`<b>Elle eklenen dosyalar</b> · ${names.length} ASW`}</div></div><span class="sp"></span>
-      <button class="sfb" data-cact="dlchg" data-lbl="Değişenleri indir (.zip)">Değişenleri indir (.zip)</button></div>
+      <button class="sfb" data-cact="checkall">Tümünü kontrol et</button><button class="sfb" data-cact="runall">Tümünü çalıştır</button><button class="sfb" data-cact="dlchg" data-lbl="Değişenleri indir (.zip)">Değişenleri indir (.zip)</button></div>
+      ${(()=>{const k=Object.keys(CSIM.chk).filter(n=>CSIM.asws[n]);if(!k.length)return '';const bad=k.filter(n=>!CSIM.chk[n].ok);
+        return `<div class="crun"><span class="dlbl">Kontrol</span> <span>${k.length-bad.length}/${names.length} ASW derlendi${bad.length?` · <b class="cbad">${bad.length} hata</b>:`:''}</span> ${bad.slice(0,30).map(n=>`<button class="sigchip" data-casw="${esc(n)}" title="${esc(CSIM.chk[n].msg||'')}">${esc(n)}</button>`).join(' ')}</div>`;})()}
       <div class="crun"><span class="dlbl">Çalışan ASW’ler (${CSIM.order.length})</span> ${CSIM.order.map(n=>`<button class="sigchip" data-casw="${esc(n)}">${esc(n)}</button>`).join(' ')||'<span class="note">Yok. Soldan bir ASW seçip “Bu ASW’yi C koduyla çalıştır”ı işaretleyin.</span>'}
         <span class="sp"></span><button class="linkbtn" data-cact="selchg">Değişenleri çalıştır</button>${CSIM.order.length?' · <button class="linkbtn" data-cact="selnone">Hepsini durdur</button>':''}${nChg?` · <span class="note">${nChg} dosya değişti</span>`:''}</div>
       ${drop(false)}</section>
@@ -2797,8 +2804,11 @@ function cCodeClick(e){const t=e.target.closest('button,a');if(!t)return false;
     else if(a==='gosim')setView('sim');
     else if(a==='fcten'){const b=CSIM.mods[CSIM.sel];b.params.filter(n=>/StsFctEna_P$/.test(n)).forEach(n=>{CSIM.params[n]=1;CSIM.G[n]=1;});cSaveCfg();cRefreshTop();}
     else if(a==='selchg'){cAswNames().forEach(n=>{if(cChanged(CSIM.asws[n]))CSIM.asws[n].active=true;});cSaveCfg();cBuildActive().then(()=>{if(CSIM.build&&!CSIM.on)cSetOn(true);renderCode();});}
+    else if(a==='checkall'){cCheckAll().then(renderCode);}
+    else if(a==='runall'){const bad=cAswNames().filter(n=>CSIM.chk[n]&&!CSIM.chk[n].ok);if(!confirm(`Derlenen tüm ASW’ler (${cAswNames().length-bad.length}) birlikte çalıştırılsın mı?${bad.length?`\n${bad.length} ASW derlenemediği için dışarıda kalır.`:''}`))return true;
+      cAswNames().forEach(n=>{CSIM.asws[n].active=!(CSIM.chk[n]&&!CSIM.chk[n].ok);});cSaveCfg();cBuildActive().then(()=>{if(CSIM.build&&!CSIM.on)cSetOn(true);renderCode();});}
     else if(a==='selnone'){cAswNames().forEach(n=>CSIM.asws[n].active=false);if(CSIM.on)cSetOn(false);CSIM.mods={};CSIM.errs={};cRewire();cSaveCfg();renderCode();}
-    else if(a==='orig'&&f){if(confirm(`${CSIM.cur} orijinal haline dönsün mü? Değişiklikleriniz silinir.`)){f.cur=f.orig;A.dirty=true;cSaveSrc();renderCode();}}
+    else if(a==='orig'&&f){if(confirm(`${CSIM.cur} orijinal haline dönsün mü? Değişiklikleriniz silinir.`)){f.cur=f.orig;A.dirty=true;A.rev=(A.rev||0)+1;cSaveSrc();renderCode();}}
     else if(a==='diff'&&f){const d=$('#cDiff');if(!d.hidden){d.hidden=true;return true;}const ds=cDiff(f.orig,f.cur);d.hidden=false;
       d.innerHTML=`<div class="dlbl">${ds.filter(x=>x.t==='+').length} satır eklendi/değişti · ${ds.filter(x=>x.t==='-').length} satır silindi/değişti</div><pre class="cdiff">${ds.slice(0,400).map(x=>x.t==='+'?`<button class="dl-add" data-cjump="${esc(CSIM.cur)}:${x.b}">+ ${String(x.b).padStart(4)} │ ${esc(x.txt)}</button>`:x.t==='-'?`<span class="dl-del">− ${String(x.a).padStart(4)} │ ${esc(x.txt)}</span>`:`<span>${esc(x.txt)}</span>`).join('\n')}</pre>`;}
     else if(a==='dlchg')cDownload(t,'chg');else if(a==='dlall')cDownload(t,'all');
@@ -2821,7 +2831,7 @@ function cCodeChange(e){const t=e.target;
   if(t.dataset.cfv){const n=t.dataset.cfv;if(CSIM.forces[n]!=null){CSIM.forces[n]=+t.value||0;cSaveCfg();}return true;}
   if(t.dataset.cpar){const n=t.dataset.cpar,v=+t.value||0;CSIM.params[n]=v;if(CSIM.G)CSIM.G[n]=v;cSaveCfg();const m=$('#cMsgs');if(m)m.innerHTML=cMsgsHTML();return true;}
   return false;}
-function cCodeInput(e){const t=e.target;if(t.id!=='cTa')return false;const A=CSIM.asws[CSIM.sel],f=A&&A.files[CSIM.cur];if(!f)return true;f.cur=t.value;A.dirty=true;cGutter();cSaveSrc();
+function cCodeInput(e){const t=e.target;if(t.id!=='cTa')return false;const A=CSIM.asws[CSIM.sel],f=A&&A.files[CSIM.cur];if(!f)return true;f.cur=t.value;A.dirty=true;A.rev=(A.rev||0)+1;cGutter();cSaveSrc();
   const c=$('#cChg');if(c)c.textContent=f.cur!==f.orig?'Orijinalden farklı':'Orijinal';const s=$('#cStat');if(s)s.innerHTML=cStatusHTML();return true;}
 /* eski adlarla uyumluluk */
 const cBuild=()=>{cRebuildDirty();return true;};
