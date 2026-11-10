@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev AC)
+# Otobüs Tasarım Stüdyosu (sürüm 1.1.0)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -182,3 +182,13 @@ Sinyaller: DoorRelease, DoorState_K2
 ## Rev AC
 - **Kapı tipleri**: her kapı IST (içe salınımlı), AST (dışa salınımlı) veya SST (sürgülü-salınımlı) olabilir; varsayılan K1 IST, K2 SST, K3 AST. Yan panel → Sinyal → Kapı tipleri’nden değiştirilir, tarayıcıda saklanır. SST kanatları önce dışarı çıkar sonra gövde boyunca kayar; yalnızca IST kanatları içeride geçişi engeller.
 - Yalnızca bildirimi olan, gövdesi yüklenen dosyalarda bulunmayan fonksiyonlar (ör. KSWpinningWriteDigitalOutput) hata yerine uyarı verir ve 0 döndürür.
+
+---
+# Sürümler ve yama notları
+Bundan sonra her güncelleme bir sürüm numarası alır: 1.1.0, 1.1.1 … 1.1.9, sonra 1.2.0. Yama notları uygulamada sol üstteki “Sürüm” bağlantısından da okunur.
+
+## 1.1.0 · 10.11.2026
+- Sürüm numarası ve yama notları.
+- AST kapı: kanatlar dışarı doğru yay çizerek açılır, kapı boşluğunun yanında gövdeye paralel durur.
+- Elektrikli rampa: kapı 2 zemininin altından dışarı kayar, kaldırıma eğilir; kapı kapalıysa önce kapı açılır.
+- Kapı havası: motor çalışmazken her kapı hareketi 0,45 bar harcar (başlangıç 8,5 bar). 5,5 bar altında kapılar POWERLESS + hata (CAN durum 5, BDxx_ErrDoorx_IC = 1), buzzer ve göstergede sürekli uyarı. Motor çalışınca kompresör 0,35 bar/s doldurur; HUD’daki “Hava” butonu devreye hava verir. 6,5 bar üstünde kapılar kendiliğinden toparlanır. Sinyaller: GW_PAirCirc4(On), GW_PAirSplyLo(On).
