@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (sürüm 1.1.1)
+# Otobüs Tasarım Stüdyosu (sürüm 1.1.2)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -186,6 +186,13 @@ Sinyaller: DoorRelease, DoorState_K2
 ---
 # Sürümler ve yama notları
 Bundan sonra her güncelleme bir sürüm numarası alır: 1.1.0, 1.1.1 … 1.1.9, sonra 1.2.0. Yama notları uygulamada sol üstteki “Sürüm” bağlantısından da okunur.
+
+## 1.1.2 · 10.11.2026
+- Düzeltme: 1.1.1’de simülatör donuyordu (yürüme, sürüş, kapılar). RAMPA butonuna eklenen LED fonksiyonu (`b.led`) butonun 3D LED nesnesiyle aynı adı taşıyordu ve her karede hata veriyordu; adı `ledFn` oldu. Gerçek Three.js r128 ile yürüme ve sürüş denendi.
+- Parametre listesi şimdilik yalnızca EIOB24. İçe aktarmada SG’si EIOB24 olmayan bölümler alınmaz, sayılıp bildirilir.
+- Açılışta aktif parametreler (değeri ≠ 0) listelenir. “NV ara ve aktif et”: NV ya da PARA_NAME yazılır; “Aktif et” 1, “Pasif” 0 yapar, değer C kodunda hemen kullanılır.
+- Parametre listesi metin olarak yapıştırılabilir: “Parametre listesini metin olarak yapıştır” → “Yapıştırılanı içe aktar”.
+- Sol üstteki sürüm numarası yama notlarından okunuyor.
 
 ## 1.1.1 · 10.11.2026
 - **Kapı başına hava sistemi**: her kapının kendi tankı var. Hareket başına 0,45 bar yalnızca o kapının tankından düşer; 5,5 bar altında yalnızca o kapı POWERLESS olur. Kompresör (motor çalışırken) her tankı 0,35 bar/s doldurur. Yan panel → Sinyal → Kapı hava sistemleri: kapı başına “Hava ver” ve “Kaçak” (0,5 bar/s). Sinyaller: `DC1_PAirDoor1`, `DC2_PAirDoor2`, `DC3_PAirDoor3` (mbar); `GW_PAirCirc4` en düşük tankı gösterir.

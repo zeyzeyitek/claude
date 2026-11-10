@@ -342,6 +342,8 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
 .caskbox{background:var(--panel);color:var(--ink);border-radius:10px;padding:18px;max-width:460px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.25)} .caskbox p{margin:0 0 14px;line-height:1.5}
 .caskbtn{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .dair{display:grid;grid-template-columns:auto 1fr auto auto;gap:6px 8px;align-items:center;margin-top:6px} .dair b{font:600 13px var(--f-mono,monospace)} .dair b.warn{color:#c77700} .dair b.bad{color:#d0302a}
+.plstat{display:grid;gap:4px;margin:10px 8px;font-size:13px;color:var(--muted)} .plstat b{color:var(--ink);font:600 15px var(--f-mono)}
+.plfind{width:100%} .plfind input[type=search]{width:100%;font:500 14px var(--f-mono);padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)} .plfind #plHits{width:100%;overflow-x:auto} .plhit{min-width:0} .plbtns{white-space:nowrap} .plbtns button{margin-left:6px} .plpaste{width:100%} .plpaste summary{cursor:pointer;font-weight:600} .plpaste .plout{min-height:140px;margin:8px 0}
 .pltools{display:flex;flex-wrap:wrap;gap:8px;align-items:center} .plset summary{cursor:pointer;font-weight:600} .plgrid{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;width:100%;max-width:560px}
 .plgrid input,.plgrid select{font:500 13px var(--f-mono);padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);min-width:0}
 .pwrap{grid-template-columns:minmax(0,1fr)} .pwrap .ctabs{display:flex;flex-wrap:wrap;gap:6px} .pwrap .cmsg div{overflow-wrap:anywhere}
@@ -361,7 +363,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow"><button class="verbtn" id="verBtn" title="Yama notlarını aç">Sürüm <b id="verNo">1.1.0</b> · yama notları</button></div>
+    <div class="eyebrow"><button class="verbtn" id="verBtn" title="Yama notlarını aç">Sürüm <b id="verNo">1.1.2</b> · yama notları</button></div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button><button class="vbtn" data-view="par" aria-current="false">Parametre listesi</button></nav>
   </div>
@@ -524,6 +526,12 @@ const DOOR_T=2.4;
 const airMin=()=>Math.min(...DOORS.map(d=>doorS[d.id].air));Object.defineProperty(V,'air',{get:airMin,enumerable:false});
 /* ---- sürüm / yama notları: 1.1.0, 1.1.1 … 1.1.9 → 1.2.0 ---- */
 const CHANGELOG=[
+ {v:'1.1.2',d:'10.11.2026',items:[
+  'Düzeltme: 1.1.1’de simülatör donuyordu (yürüme, sürüş ve kapılar çalışmıyordu). RAMPA butonunun LED fonksiyonu butonun 3D LED nesnesiyle aynı adı taşıyordu; her karede hata veriyordu.',
+  'Parametre listesi şimdilik yalnızca EIOB24: içe aktarmada başka SG’ler (EIOB22, EIOB30 …) alınmaz, sayılıp bildirilir.',
+  'Açılışta aktif parametreler (değeri ≠ 0) listelenir. “NV ara ve aktif et”: NV ya da PARA_NAME yazın, “Aktif et” değeri 1 yapar, “Pasif” 0; değer C kodunda hemen kullanılır.',
+  'Parametre listesi metin olarak yapıştırılabilir (Ctrl+C / Ctrl+V): “Parametre listesini metin olarak yapıştır” → “Yapıştırılanı içe aktar”. Dosyadan içe aktarma da duruyor.',
+  'Sol üstteki sürüm numarası artık yama notlarından okunuyor.']},
  {v:'1.1.1',d:'10.11.2026',items:[
   'Her kapının kendi hava sistemi var: kapı her harekette kendi tankından hava harcar, 5,5 bar altında yalnızca o kapı POWERLESS olur. Göstergede K1 · K2 · K3 basınçları ayrı görünür. Yan panel → Sinyal → Kapı hava sistemleri’nden kapı başına “Hava ver” ve “Kaçak” (tek kapı arızası). Yeni sinyaller DC1..3_PAirDoorx; GW_PAirCirc4 en düşük tankı gösterir.',
   'Elektrikli rampa gereksinimlere göre yeniden yazıldı: yalnızca kapı 2 kapalıyken hareket eder (2021.29298). RAMPA basılı tutulunca çıkar, tam açılmadan bırakılırsa geri toplanır (2021.29299); tam açıkken bir kez basınca toplanır. Rampa anahtarı 0 / 1 / 2 (kapalı / açık / acil mod, 2021.29301-03). Hareket ederken buzzer ve yanıp sönen LED, tam açıkken sürekli LED (2021.29315, 2025.03167/03168). Rampa hareket ederken kapı 2 açılmaz. Klavye: R basılı tut.',
@@ -536,7 +544,7 @@ const CHANGELOG=[
   'Rampa elektrikli: kapı 2’nin zemininin altından dışarı kayıyor, sonra kaldırıma doğru eğiliyor. Kapı 2 kapalıyken RAMPA’ya basılırsa önce kapı açılıyor, kapı tam açılınca rampa çıkıyor.',
   'Kapı havası: kapılar pnömatik. Motor çalışmazken her kapı hareketi hava harcıyor; basınç düşünce kapılar POWERLESS (hata) durumuna geçiyor, kapı 5 (POWERLESS) ve hata sinyali CAN’dan bildiriliyor, buzzer ve gösterge sürekli uyarıyor. Motoru çalıştırınca kompresör havayı doldurur ya da HUD’daki “Hava” butonuyla kapı devresine hava verilir.',
   'Önceki geliştirmeler (Rev A–AC, özet): 3D şehir otobüsü ve sürüş, 30 tuşlu gösterge, gereksinim kılavuzu ve otomatik testler, B24 ASW sinyal envanteri, fonksiyon zincirleri, sinyal grafiği, tarayıcıda C derleyicisi (gcc ile doğrulanmış), B24 zip/klasör/çoklu dosya içe aktarma, araç modu (kapıları C kodu sürer), IST/AST/SST kapı tipleri.']}];
-const APP_VER=CHANGELOG[0].v;
+const APP_VER=CHANGELOG[0].v;{const e=document.getElementById('verNo');if(e)e.textContent=APP_VER;}
 /* kapı devresi havası (bar) */
 const AIR={max:10,start:8.5,min:5.5,ok:6.5,per:0.45,comp:0.35,leak:0.5};
 const RAMP_T=3; // elektrikli rampa tam açılma süresi (s)
@@ -871,7 +879,7 @@ const doorIconTex=tex(128,128,g=>{g.strokeStyle='#fff';g.fillStyle='#fff';g.line
 const BTN=[
  {label:'SERBEST',name:'Türfreigabe (kapı serbest)',type:'toggle',impl:true,get:()=>V.release,fn:(on,src)=>setRelease(on,src),desc:'Kapıları otomatik moda alır (DR_StDoorRelsActv=1). Bekleyen (önceden saklanmış) isteği olan bölgenin kapısı açılır (bölgeleme: K1, K2, K3 ayrı). Türfreigabe aktifken STOP butonları kapı açmaz (Vorspeicherung); kapı üstü AÇ butonları her zaman açar. Türfreigabe aktifken durak freni devrededir. Normal istekte kapı, açık kalma süresi (parametre, varsayılan 3 s) dolunca kendiliğinden kapanır; ışık bariyeri süreyi yeniden başlatır. Bebek arabası, engelli veya yaşlı yolcu isteğinde kapı açık kalır, sürücü K butonuyla kapatır. Kapatınca otomatik açılmış kapılar kapanır.'},
  {label:'DİZ',name:'Diz çöktürme (kneeling)',type:'toggle',impl:true,get:()=>V.kneel,fn:(on,src)=>{V.kneel=on;SFX.hiss([2,0,HW]);SFX.motor();log(`${src} → Kneel=${on?1:0} (${on?'sağ taraf alçalıyor':'normal seviyeye dönüyor'})`);},desc:'Aracın kapı tarafını (sağ) yaklaşık 70 mm alçaltır; gövde sağa yatar. Tekrar basınca normal seviyeye döner. Cluster’da DİZ lambası yanar.'},
- {label:'RAMPA',name:'Elektrikli rampa · kapı 2',type:'hold',impl:true,get:()=>V.rampBtn,led:()=>rampLed(),fn:(on,src)=>rampButton(on,src),desc:'Basılı tut: kapı 2 kapalıyken rampa çıkar; tam açılmadan bırakırsan geri toplanır (2021.29299). Tam açıkken bir kez bas: toplanır (2021.29298). Koşullar: rampa anahtarı 1, hız < 1 km/h, kapı 2 kapalı ve arızasız. Hareket ederken buzzer çalar ve LED yanıp söner; tam açıkken LED sürekli yanar. Rampa hareket ederken kapı 2 açılmaz. Klavye: R basılı tut.'},
+ {label:'RAMPA',name:'Elektrikli rampa · kapı 2',type:'hold',impl:true,get:()=>V.rampBtn,ledFn:()=>rampLed(),fn:(on,src)=>rampButton(on,src),desc:'Basılı tut: kapı 2 kapalıyken rampa çıkar; tam açılmadan bırakırsan geri toplanır (2021.29299). Tam açıkken bir kez bas: toplanır (2021.29298). Koşullar: rampa anahtarı 1, hız < 1 km/h, kapı 2 kapalı ve arızasız. Hareket ederken buzzer çalar ve LED yanıp söner; tam açıkken LED sürekli yanar. Rampa hareket ederken kapı 2 açılmaz. Klavye: R basılı tut.'},
  {label:'İSTEK ↺',name:'Durak isteği sıfırla',type:'momentary',impl:true,fn:src=>resetStop(src),desc:'DSRD_StDoorsStopReqDisp ve tüm özel istekleri sıfırlar.'},
  {label:'IŞIK',name:'İç aydınlatma',type:'toggle',impl:true,get:()=>V.intLight,fn:(on,src)=>setIntLight(on,src),desc:'Yolcu salonu aydınlatmasını açar/kapatır. Cluster’da yeşil lamba.'},
  {label:'IŞIK ½',name:'İç aydınlatma %50',type:'toggle',impl:true,get:()=>V.dim,fn:(on,src)=>{V.dim=on;applyLighting();log(`${src} → IntLightDim=${on?1:0}`);},desc:'Aydınlatmayı yarı güce düşürür (gece sürüşü).'},
@@ -1940,7 +1948,7 @@ function renderBtnCard(){const b=curBtn;[...bgrid.children].forEach((c,i)=>c.set
   $('#bShow').onclick=()=>{teleport(4.9,-0.72,1.3,-1.92,-0.55);select(b.mesh,true);};updBtnCard();}
 function updBtnCard(){const b=curBtn,s=$('#bState'),p=$('#bPress');if(s)s.textContent=b.type==='toggle'?(b.get()?'AÇIK (1)':'KAPALI (0)'):b.type==='hold'?(b.get()?'BASILI (1)':'BIRAKILDI (0)')+' · rampa '+rampState():'—';if(p)p.textContent=String(b.presses||0);}
 function refreshBtns(){
-  BTN.forEach((b,i)=>{const on=(b.type==='toggle'&&b.get())||b.flashT>0||(b.led&&b.led());b.ledM.color.set(on?(b.flashT>0&&b.type==='momentary'?'#eafff3':'#3ddc84'):'#1a2024');bgrid.children[i].classList.toggle('on',on);});
+  BTN.forEach((b,i)=>{const on=(b.type==='toggle'&&b.get())||b.flashT>0||(b.ledFn&&b.ledFn());b.ledM.color.set(on?(b.flashT>0&&b.type==='momentary'?'#eafff3':'#3ddc84'):'#1a2024');bgrid.children[i].classList.toggle('on',on);});
   updBtnCard();$('#hLight').setAttribute('aria-pressed',V.intLight);$('#hRelease').setAttribute('aria-pressed',V.release);
 }
 renderBtnCard();
@@ -3438,15 +3446,16 @@ let last=performance.now(),hoverT=0,slowT=0;const fwd=new THREE.Vector3();
 setMode('walk');applyLighting();
 /* ================= Parametre listesi: şasi parametre listesi oluştur / araç listesini içe aktar =================
    Excel (reserved parameters): Reserve Name = BSW PARA_NAME, ASW Name = C kodundaki Nv. Eşleşme ASW Name üzerinden. */
-const PLX={db:null,p:null,rows:[],byAsw:new Map(),byRes:new Map(),flt:'code',ecu:'eIO-B24',ex:{},sach:{},offFmt:'hex',boolFmt:'bit',sec:'AANN_PARA',imp:null,out:'',nvKey:'',nv:null,msg:''};
-try{const o=JSON.parse(localStorage.getItem('otobus.pl')||'{}');['flt','ecu','ex','sach','offFmt','boolFmt','sec'].forEach(k=>{if(o[k]!=null)PLX[k]=o[k];});}catch(e){}
-const plSave=()=>{try{localStorage.setItem('otobus.pl',JSON.stringify({flt:PLX.flt,ecu:PLX.ecu,ex:PLX.ex,sach:PLX.sach,offFmt:PLX.offFmt,boolFmt:PLX.boolFmt,sec:PLX.sec}));}catch(e){}};
+const PL_ECU='eIO-B24'; // şimdilik yalnızca EIOB24
+const PLX={db:null,p:null,rows:[],byAsw:new Map(),byRes:new Map(),flt:'nz',ecu:PL_ECU,q:'',paste:'',ex:{},sach:{},offFmt:'hex',boolFmt:'bit',sec:'AANN_PARA',imp:null,out:'',nvKey:'',nv:null,msg:''};
+try{const o=JSON.parse(localStorage.getItem('otobus.pl2')||'{}');['flt','ex','sach','offFmt','boolFmt','sec'].forEach(k=>{if(o[k]!=null)PLX[k]=o[k];});}catch(e){}
+const plSave=()=>{try{localStorage.setItem('otobus.pl2',JSON.stringify({flt:PLX.flt,ex:PLX.ex,sach:PLX.sach,offFmt:PLX.offFmt,boolFmt:PLX.boolFmt,sec:PLX.sec}));}catch(e){}};
 const PL_TY={bool:{bits:1,lbl:'Bit',len:1,dt:'U',max:1},uint8:{bits:8,lbl:'Byte',len:1,dt:'U',max:255},sint8:{bits:8,lbl:'Byte',len:1,dt:'S',min:-128,max:127},
   uint16:{bits:16,lbl:'Word',len:2,dt:'U',max:65535},sint16:{bits:16,lbl:'Word',len:2,dt:'S',min:-32768,max:32767},uint32:{bits:32,lbl:'DWord',len:4,dt:'U',max:4294967295},sint32:{bits:32,lbl:'DWord',len:4,dt:'S',min:-2147483648,max:2147483647}};
 function plIndex(d){PLX.db=d;const ix=Object.fromEntries(d.cols.map((c,i)=>[c,i]));PLX.rows=d.rows.map((r,i)=>({i,ecu:r[ix.ecu],reserve:r[ix.reserve],asw:r[ix.asw]||'',addr:r[ix.addr]||'',byte:+r[ix.byte]||0,bit:+r[ix.bit]||0,type:r[ix.type]||'',isRes:!!r[ix.isRes],active:!!r[ix.active],src:r[ix.src]||''}));
   PLX.byAsw=new Map();PLX.byRes=new Map();const add=(m,k,r)=>{if(!k)return;(m.get(k)||m.set(k,[]).get(k)).push(r);};
   PLX.rows.forEach(r=>{add(PLX.byAsw,r.asw,r);add(PLX.byAsw,r.asw.toLowerCase(),r);add(PLX.byRes,r.reserve,r);add(PLX.byRes,r.reserve.toLowerCase(),r);});
-  if(!PLX.rows.some(r=>r.ecu===PLX.ecu))PLX.ecu=(PLX.rows[0]||{}).ecu||'';}
+  PLX.ecu=PL_ECU;}
 function plLoad(){if(PLX.p)return PLX.p;
   PLX.p=IDB.get('nvdb').catch(()=>null).then(d=>d&&d.rows?Object.assign(d,{user:true}):fetch('data/nv_params.json').then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})).then(d=>{plIndex(d);return d;});
   PLX.p.catch(()=>{PLX.p=null;});return PLX.p;}
@@ -3461,7 +3470,7 @@ const plVal=n=>{const p=CSIM.params[n];if(p!=null)return +p;const g=CSIM.G&&CSIM
 const plSrc=n=>CSIM.params[n]!=null?(PLX.imp&&PLX.imp.set.has(n)?'araç listesi':'elle'):(CSIM.paramInit&&n in CSIM.paramInit)?'C kodu':'—';
 const plOk=(r,v)=>{const t=PL_TY[r.type];return t&&Number.isInteger(v)&&v>=(t.min||0)&&v<=t.max;};
 function plSetVal(n,v){if(v==null||v===''){delete CSIM.params[n];if(CSIM.G&&CSIM.paramInit&&n in CSIM.paramInit)CSIM.G[n]=CSIM.paramInit[n];}else{CSIM.params[n]=v;if(CSIM.G)CSIM.G[n]=v;}cSaveCfg();}
-function plList(){const q=($('#docSearch').value||'').trim().toLowerCase(),ecuOk=r=>PLX.ecu==='*'||r.ecu===PLX.ecu;let rows=[],miss=[];
+function plList(){const q=($('#docSearch').value||'').trim().toLowerCase(),ecuOk=r=>r.ecu===PL_ECU;let rows=[],miss=[];
   if(PLX.flt==='code'){const nv=plCodeNv();nv.forEach((e,n)=>{const rs=(PLX.byAsw.get(n)||PLX.byAsw.get(n.toLowerCase())||[]).filter(ecuOk);if(rs.length)rs.forEach(r=>{if(!rows.includes(r))rows.push(r);});else if(!(PLX.byAsw.get(n)||PLX.byAsw.get(n.toLowerCase())))miss.push(n);});}
   else if(PLX.flt==='imp'){rows=PLX.imp?PLX.imp.rows.filter(ecuOk):[];}
   else if(PLX.flt==='nz'){rows=PLX.rows.filter(r=>ecuOk(r)&&plVal(plKey(r))!==0);}
@@ -3483,15 +3492,16 @@ function plBuild(){const {rows}=plList(),inc=rows.filter(r=>!PLX.ex[r.i]),bad=in
   PLX.msg=`${ok.length} parametre listeye yazıldı.`+(bad.length?` ${bad.length} satır değer tip aralığı dışında olduğu için alınmadı: ${bad.slice(0,6).map(r=>plKey(r)).join(', ')}${bad.length>6?' …':''}.`:'')+(noS.length?` Uyarı: ${noS.join(', ')} için SACHNR_PSW boş.`:'');}
 /* araç parametre listesini içe aktar: PARA_NAME → Reserve Name → ASW Name (Nv) → değer */
 function plParse(txt){const out=[];let cur=null;txt.split(/\r?\n/).forEach(l=>{const m=l.match(/^\s*\[([^\]]+)\]?\s*$/);if(m){cur={sec:m[1]};out.push(cur);return;}const k=l.indexOf('=');if(cur&&k>0)cur[l.slice(0,k).trim().toUpperCase()]=l.slice(k+1).trim();});return out.filter(x=>x.PARA_NAME);}
-function plImport(txt,fname){const sec=plParse(txt),set=new Set(),rows=[],un=[],noCode=[],nv=plCodeNv();let n=0;
+function plImport(txt,fname){const sec=plParse(txt),set=new Set(),rows=[],un=[],noCode=[],skip=[],nv=plCodeNv();let n=0;
   sec.forEach(x=>{const pn=x.PARA_NAME.split(',')[0].trim();const rs=PLX.byRes.get(pn)||PLX.byRes.get(pn.toLowerCase())||PLX.byAsw.get(pn)||[];
     const sg=(x.SG||'').split(',')[0].trim(),sach=(x.SACHNR_PSW||'').split(',')[0].trim();if(sg&&sach&&!PLX.sach[sg])PLX.sach[sg]=sach;
-    let r=rs.find(y=>plSG(y.ecu)===sg)||rs[0];if(!r){un.push(pn);return;}
+    if(sg&&!/^EIOB/i.test(sg)){skip.push(sg);return;}if(sg&&sg.toUpperCase()!==plSG(PL_ECU)){skip.push(sg);return;}
+    let r=rs.find(y=>y.ecu===PL_ECU);if(!r){un.push(pn);return;}
     let v=parseFloat((x.BESCHREIBUNG||'').replace(',','.'));
     if(!Number.isFinite(v)){const w=parseInt(x.PARAWERT||'0',16)||0,mk=parseInt(x.PARAMASKE||'0',16)||0;v=r.type==='bool'?((w&(mk||1<<r.bit))?1:0):w;}
     const k=plKey(r);plSetVal(k,v);set.add(k);rows.push(r);n++;if(r.asw&&!nv.has(r.asw))noCode.push(r.asw);});
-  PLX.imp={file:fname,n,set,rows,un,noCode,secs:sec.length};PLX.flt='imp';plSave();
-  log(`Parametre listesi içe aktarıldı (${fname}): ${sec.length} bölüm, ${n} eşleşti, ${un.length} Excel’de yok${noCode.length?`, ${noCode.length} NV yüklenen C kodunda yok`:''}`);}
+  PLX.imp={file:fname,n,set,rows,un,noCode,skip,secs:sec.length};PLX.flt='nz';plSave();
+  log(`Parametre listesi içe aktarıldı (${fname}): ${sec.length} bölüm, ${n} eşleşti, ${un.length} Excel’de yok, ${skip.length} başka SG (alınmadı)${noCode.length?`, ${noCode.length} NV yüklenen C kodunda yok`:''}`);}
 /* Excel’i sayfada içe aktar (SheetJS, gerektiğinde yüklenir) */
 function plXlsxLib(){if(window.XLSX)return Promise.resolve(window.XLSX);return new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=()=>window.XLSX?res(window.XLSX):rej(new Error('XLSX yüklenemedi'));s.onerror=()=>rej(new Error('Excel okuyucu (SheetJS) indirilemedi'));document.head.appendChild(s);});}
 async function plImportXlsx(file){const X=await plXlsxLib();const wb=X.read(await file.arrayBuffer(),{type:'array'});const cols=['ecu','reserve','asw','alt','addr','byte','bit','type','isRes','active','nvm','src','plant'],rows=[],ecus={};
@@ -3509,15 +3519,18 @@ async function plDownload(btn){plBuild();if(!PLX.out){btn.textContent='Liste bo�
 function renderPar(){const m=$('#dmain');
   if(!PLX.db){$('#dtoc').innerHTML='<div class="tochead">ECU’lar</div>';m.innerHTML='<div class="dwrap wide"><p class="note">NV listesi yükleniyor…</p></div>';
     plLoad().then(()=>{if(VIEW==='par')renderPar();}).catch(e=>{if(VIEW==='par')m.innerHTML=`<div class="dwrap wide"><p class="note">NV listesi (data/nv_params.json) yüklenemedi: ${esc(String(e.message||e))}</p>${plXlsBtn()}</div>`;});return;}
-  const ecus=[...new Set(PLX.rows.map(r=>r.ecu))],nv=plCodeNv(),cnt=e=>PLX.rows.filter(r=>r.ecu===e).length,inCode=e=>PLX.rows.filter(r=>r.ecu===e&&r.asw&&nv.has(r.asw)).length;
-  $('#dtoc').innerHTML=`<div class="tochead">ECU’lar (SG)</div>${['*',...ecus].map(e=>`<a class="tocg${PLX.ecu===e?' cur':''}" href="#" data-plecu="${esc(e)}"><span>${e==='*'?'Tümü':esc(e)}</span><em>${e==='*'?PLX.rows.length:cnt(e)}${e!=='*'&&nv.size?' · kodda '+inCode(e):''}</em></a>`).join('')}
-    <p class="note tocnote">Kaynak: ${esc(PLX.db.source||'')}${PLX.db.user?' (bu tarayıcıda içe aktarıldı)':' (sayfaya gömülü)'} · ${esc(PLX.db.built||'')}</p>`;
-  const flts=[['code','C kodundaki NV’ler'],['nz','Değeri ≠ 0'],['active','Excel: Active = yes'],['all','Tümü'],...(PLX.imp?[['imp','Araç listesinden ('+PLX.imp.n+')']]:[])];
-  const sgs=[...new Set(PLX.rows.filter(r=>PLX.ecu==='*'||r.ecu===PLX.ecu).map(r=>plSG(r.ecu)))];
+  const nv=plCodeNv(),B=PLX.rows.filter(r=>r.ecu===PL_ECU),nAct=B.filter(r=>plVal(plKey(r))!==0).length,nCode=B.filter(r=>r.asw&&nv.has(r.asw)).length;
+  $('#dtoc').innerHTML=`<div class="tochead">SG</div><a class="tocg cur" href="#"><span>${esc(plSG(PL_ECU))}</span><em>${B.length}</em></a>
+    <div class="plstat"><div><b>${nAct}</b> aktif (≠ 0)</div><div><b>${nCode}</b> C kodunda</div><div><b>${B.filter(r=>r.active&&r.asw).length}</b> Excel’de Active</div></div>
+    <p class="note tocnote">Şimdilik yalnızca EIOB24. Listede başka SG’ler (EIOB22, EIOB30 …) alınmaz. Kaynak: ${esc(PLX.db.source||'')}${PLX.db.user?' (bu tarayıcıda içe aktarıldı)':''} · ${esc(PLX.db.built||'')}</p>`;
+  const flts=[['nz','Aktif parametreler (≠ 0)'],['code','C kodundaki NV’ler'],['active','Excel: Active = yes'],['all','Tümü'],...(PLX.imp?[['imp','Araç listesinden ('+PLX.imp.n+')']]:[])];
+  const sgs=[plSG(PL_ECU)];
   m.innerHTML=`<div class="dwrap wide pwrap"><div class="dsum"><div><div class="eyebrow">Şasi parametre listesi · Parameterliste erzeugen</div><h3>Parametre listesi</h3>
     <p>C kodundaki her Nv, Excel’deki <b>ASW Name</b> ile eşleşir; aynı satırdaki <b>Reserve Name</b> listedeki <code>PARA_NAME</code>’dir (BSW adı). LID, ofset, bit ve tip de o satırdan gelir. Değerleri elle girin ya da bir aracın parametre listesini içe aktarın; değer C kodunda hemen kullanılır ve listeye <code>BESCHREIBUNG</code> olarak yazılır.</p></div></div>
-    <div class="pltools"><label class="pbtn">Araç parametre listesini içe aktar<input type="file" id="plImp" accept=".txt,.ini,.par,.csv,text/plain" hidden></label>${plXlsBtn()}${PLX.db.user?'<button class="sfb" data-plact="dbreset">Gömülü listeye dön</button>':''}</div>
-    ${PLX.imp?`<div class="cmsg info"><b>İçe aktarılan: ${esc(PLX.imp.file)}</b><div>${PLX.imp.secs} bölüm · ${PLX.imp.n} parametre Excel’le eşleşti, değerleri yazıldı${PLX.imp.un.length?` · ${PLX.imp.un.length} PARA_NAME Excel’de yok: ${PLX.imp.un.slice(0,8).map(esc).join(', ')}${PLX.imp.un.length>8?' …':''}`:''}${PLX.imp.noCode.length?` · ${PLX.imp.noCode.length} NV yüklenen C kodunda geçmiyor`:''}</div></div>`:''}
+    <div class="cmsg plfind"><b>NV ara ve aktif et</b><input type="search" id="plQ" placeholder="NV ya da PARA_NAME yazın, ör. DR_StsFctEnaNv" value="${esc(PLX.q)}" autocomplete="off" aria-label="NV ara"><div id="plHits"></div></div>
+    <details class="cmsg plpaste"${PLX.paste?' open':''}><summary>Parametre listesini metin olarak yapıştır</summary><textarea id="plPaste" class="plout" spellcheck="false" placeholder="[AANN_PARA_1]&#10;SG=EIOB24,0000&#10;PARA_NAME=B24_DR_p_StsFctEna,000&#10;…&#10;BESCHREIBUNG=1">${esc(PLX.paste)}</textarea><div class="pltools"><button class="pbtn" data-plact="paste">Yapıştırılanı içe aktar</button><button class="sfb" data-plact="pasteclr">Temizle</button></div></details>
+    <div class="pltools"><label class="pbtn">Araç parametre listesini dosyadan içe aktar<input type="file" id="plImp" accept=".txt,.ini,.par,.csv,text/plain" hidden></label>${plXlsBtn()}${PLX.db.user?'<button class="sfb" data-plact="dbreset">Gömülü listeye dön</button>':''}</div>
+    ${PLX.imp?`<div class="cmsg info"><b>İçe aktarılan: ${esc(PLX.imp.file)}</b><div>${PLX.imp.secs} bölüm · ${PLX.imp.n} parametre Excel’le eşleşti, değerleri yazıldı${PLX.imp.un.length?` · ${PLX.imp.un.length} PARA_NAME Excel’de yok: ${PLX.imp.un.slice(0,8).map(esc).join(', ')}${PLX.imp.un.length>8?' …':''}`:''}${PLX.imp.noCode.length?` · ${PLX.imp.noCode.length} NV yüklenen C kodunda geçmiyor`:''}${PLX.imp.skip.length?` · ${PLX.imp.skip.length} bölüm başka SG’den (${[...new Set(PLX.imp.skip)].slice(0,4).map(esc).join(', ')}), alınmadı`:''}</div></div>`:''}
     <div class="ctabs" role="tablist">${flts.map(([k,l])=>`<button class="sfb" data-plflt="${k}" aria-pressed="${PLX.flt===k}">${l}</button>`).join('')}</div>
     <div id="plBody"></div>
     <details class="cmsg plset"><summary>Liste ayarları</summary>
@@ -3528,7 +3541,10 @@ function renderPar(){const m=$('#dmain');
       <p class="note">VARSAYIM: Örnekte yalnızca uint16 (ofset 0) vardı. bool satırlarda PARALAENGE=1, PARAMASKE = bitin maskesi (bit 5 → 20), PARAWERT = değer × maske. Ofset varsayılan olarak onaltılık. Gerçek bir listeyle karşılaştırıp gerekirse buradan değiştirin.</p></details>
     <div class="pltools"><button class="pbtn" data-plact="build">Parametre listesini oluştur</button><button class="sfb" data-plact="dl" data-lbl="İndir (.txt)">İndir (.txt)</button><button class="sfb" data-plact="copy">Kopyala</button><span class="note" id="plMsg">${esc(PLX.msg)}</span></div>
     <textarea id="plOut" class="plout" readonly spellcheck="false" placeholder="“Parametre listesini oluştur” ile seçili satırlar burada listelenir.">${esc(PLX.out)}</textarea></div>`;
-  renderParBody();}
+  renderParBody();plHits();}
+function plHits(){const el=$('#plHits');if(!el)return;const q=PLX.q.trim().toLowerCase();if(q.length<2){el.innerHTML='<span class="note">En az 2 karakter. EIOB24’teki tüm NV’ler aranır; “Aktif et” değeri 1 yapar.</span>';return;}
+  const f=x=>x.toLowerCase().includes(q),hit=PLX.rows.filter(r=>r.ecu===PL_ECU&&(f(r.asw)||f(r.reserve))).sort((a,b)=>(a.asw.toLowerCase().startsWith(q)?0:1)-(b.asw.toLowerCase().startsWith(q)?0:1)||(a.asw<b.asw?-1:1));
+  el.innerHTML=hit.length?`<table class="stable plhit"><tbody>${hit.slice(0,12).map(r=>{const k=plKey(r),v=plVal(k),t=PL_TY[r.type]||{};return `<tr><td><code>${esc(r.asw||'—')}</code><div class="en">${esc(r.reserve)} · ${esc(r.type)}</div></td><td><input class="cpar" type="number" step="1" min="${t.min||0}" max="${t.max!=null?t.max:''}" data-plv="${esc(k)}" value="${esc(String(v))}" aria-label="${esc(k)} değeri"></td><td class="plbtns"><button class="pbtn" data-plon="${esc(k)}"${v===1?' disabled':''}>Aktif et</button><button class="sfb" data-ploff="${esc(k)}"${v===0?' disabled':''}>Pasif</button></td></tr>`;}).join('')}</tbody></table>${hit.length>12?`<span class="note">${hit.length} eşleşme, ilk 12 gösteriliyor.</span>`:''}`:`<span class="note">EIOB24’te “${esc(PLX.q)}” bulunamadı (ASW Name ya da Reserve Name).</span>`;}
 const plXlsBtn=()=>'<label class="sfb">NV Excel’i yükle (.xlsx)<input type="file" id="plXls" accept=".xlsx,.xlsm" hidden></label>';
 function renderParBody(){const el=$('#plBody');if(!el)return;const {rows,miss}=plList(),nv=plCodeNv(),noCode=PLX.flt==='code'&&!Object.keys(CSIM.asws).length;
   const inc=rows.filter(r=>!PLX.ex[r.i]).length,LIM=600;
@@ -3542,7 +3558,10 @@ function renderParBody(){const el=$('#plBody');if(!el)return;const {rows,miss}=p
 function plClick(e){const t=e.target.closest('button,a,input[type=checkbox]');if(!t)return false;
   if(t.dataset.plflt){PLX.flt=t.dataset.plflt;plSave();renderPar();return true;}
   if(t.dataset.plinc!=null){const i=+t.dataset.plinc;if(t.checked)delete PLX.ex[i];else PLX.ex[i]=1;plSave();t.closest('tr').classList.toggle('off',!t.checked);return true;}
+  if(t.dataset.plon||t.dataset.ploff){const k=t.dataset.plon||t.dataset.ploff,v=t.dataset.plon?1:0;plSetVal(k,v);if(PLX.imp)PLX.imp.set.delete(k);log(`Parametre listesi → ${k}=${v} (${v?'aktif':'pasif'})`);plHits();renderParBody();renderParToc();return true;}
   const a=t.dataset.plact;if(!a)return false;e.preventDefault();
+  if(a==='paste'){const x=$('#plPaste').value;PLX.paste=x;if(!plParse(x).length){cNotice('Yapıştırılan metinde PARA_NAME içeren [bölüm] bulunamadı','bad');return true;}plImport(x,'yapıştırılan metin');PLX.paste='';renderPar();return true;}
+  if(a==='pasteclr'){PLX.paste='';$('#plPaste').value='';return true;}
   if(a==='build'){plBuild();$('#plOut').value=PLX.out;$('#plMsg').textContent=PLX.msg;}
   else if(a==='dl'){plDownload(t).then(()=>{$('#plOut').value=PLX.out;$('#plMsg').textContent=PLX.msg;});}
   else if(a==='copy'){plBuild();$('#plOut').value=PLX.out;$('#plMsg').textContent=PLX.msg;(navigator.clipboard?navigator.clipboard.writeText(PLX.out):Promise.reject()).then(()=>{t.textContent='Kopyalandı';setTimeout(()=>t.textContent='Kopyala',1200);}).catch(()=>{const ta=$('#plOut');ta.select();document.execCommand&&document.execCommand('copy');});}
@@ -3550,7 +3569,8 @@ function plClick(e){const t=e.target.closest('button,a,input[type=checkbox]');if
   else if(a==='dbreset'){IDB.set('nvdb',null).catch(()=>{});PLX.db=null;PLX.p=null;PLX.imp=null;renderPar();}
   return true;}
 function plInput(e){const t=e.target;
-  if(t.dataset.plv){const n=t.dataset.plv,r=(PLX.byAsw.get(n)||PLX.byRes.get(n)||[])[0],v=t.value===''?null:+t.value;plSetVal(n,v);if(r)t.classList.toggle('bad',v!=null&&!plOk(r,v));if(PLX.imp)PLX.imp.set.delete(n);const s=t.closest('tr').lastElementChild;if(s)s.textContent=plSrc(n);return true;}
+  if(t.dataset.plv){const n=t.dataset.plv,r=(PLX.byAsw.get(n)||PLX.byRes.get(n)||[])[0],v=t.value===''?null:+t.value;plSetVal(n,v);if(r)t.classList.toggle('bad',v!=null&&!plOk(r,v));if(PLX.imp)PLX.imp.set.delete(n);const s=t.closest('tr').lastElementChild;if(s&&!t.closest('.plhit'))s.textContent=plSrc(n);renderParToc();return true;}
+  if(t.id==='plQ'){PLX.q=t.value;plHits();return true;}if(t.id==='plPaste'){PLX.paste=t.value;return true;}
   if(t.dataset.plsach){PLX.sach[t.dataset.plsach]=t.value.trim();plSave();return true;}
   if(t.id==='plSec'){PLX.sec=t.value.trim()||'AANN_PARA';plSave();return true;}
   return false;}
@@ -3559,7 +3579,7 @@ function plChange(e){const t=e.target;
   if(t.id==='plImp'&&t.files[0]){const f=t.files[0];f.text().then(x=>{plImport(x,f.name);renderPar();}).catch(err=>cNotice('Liste okunamadı: '+err.message,'bad'));return true;}
   if(t.id==='plXls'&&t.files[0]){const f=t.files[0];$('#plMsg')&&($('#plMsg').textContent='Excel okunuyor…');plImportXlsx(f).then(()=>renderPar()).catch(err=>cNotice('Excel içe aktarılamadı: '+err.message,'bad'));return true;}
   return false;}
-document.addEventListener('click',e=>{const a=e.target.closest('[data-plecu]');if(!a)return;e.preventDefault();PLX.ecu=a.dataset.plecu;plSave();renderPar();});
+function renderParToc(){const st=document.querySelector('.plstat');if(!st)return;const nv=plCodeNv(),B=PLX.rows.filter(r=>r.ecu===PL_ECU);st.firstElementChild.innerHTML=`<b>${B.filter(r=>plVal(plKey(r))!==0).length}</b> aktif (≠ 0)`;}
 const hashView=()=>{const h=location.hash;if(h==='#gereksinimler')setView('reqs');else if(h==='#sinyaller')setView('sigs');else if(h==='#ckod')setView('code');else if(h==='#parametre')setView('par');};hashView();addEventListener('hashchange',hashView);
 function needRender(now){const c=PERF_CFG[PERF.mode];if(now-PERF.lastR<1000/c.fps-4)return false;
   const p=camera.position,r=camera.rotation,key=`${p.x.toFixed(3)},${p.y.toFixed(3)},${p.z.toFixed(3)},${r.x.toFixed(4)},${r.y.toFixed(4)},${r.z.toFixed(4)},${camera.fov},${renderer.domElement.width}`;
