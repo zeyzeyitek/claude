@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev Y)
+# Otobüs Tasarım Stüdyosu (konsept, Rev Z)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -167,3 +167,7 @@ Sinyaller: DoorRelease, DoorState_K2
 ## Rev Y
 - Simulink S-Function dosyaları (S_FUNCTION_NAME / simstruc.h / mdlInitializeSizes, ör. ButtonBlock.c) ECU koduna girmediği için otomatik atlanır; asıl mantık …_wrapper.c dosyasında derlenir.
 - ASW’nin ana model dosyası dışındaki bir .c dosyası (ör. donanım okuyan KSWpinningReadPwmInput.c) derlenemezse ASW durmaz; dosya atlanır ve “derlemeye alınmadı” listesinde gösterilir. Ana model dosyasındaki hatalar yine hata olarak gösterilir.
+
+## Rev Z
+- İşaretçi desteği: `&değişken` (yerel, global, yapı alanı, dizi elemanı), `*p = …`, `p[i]`, `p->alan`, `(*p).alan`, işaretçi üzerinden ++. Örn. Dem_GetEventStatus(id, &status) ve S-Function wrapper çıkışları (y0[0] = …). gcc ile karşılaştırma: tools/ctest/ptr (1200 adım, 0 fark).
+- Ana model dışındaki dosyada simülasyona çevrilemeyen fonksiyon ASW’yi durdurmaz; uyarı verir, çağrıldığında 0 döndürür.

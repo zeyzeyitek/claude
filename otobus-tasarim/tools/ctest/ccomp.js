@@ -298,19 +298,25 @@ function compile(fileMap,opts){
     ctx.warnings.push({msg:`Tanımsız değişken ${name} → 0 kabul edildi`,file:tok&&tok.f,line:tok&&tok.l});
     return {kind:'global',ty:TY.unk,js:`G[${JSON.stringify(name)}]`};}
   /* bir ifadeyi "nesne/dizi tabanı" olarak üret (struct/dizi) */
+  const isPtrTy=t=>!t||t.k==='ptr'||t.k==='unk';
   function genBase(e){
-    if(e.k==='id'){const r=lookup(e.name,e.tok);if(r.kind==='local')return {js:r.js,ty:r.ty};return {js:`$o(G,${JSON.stringify(e.name)})`,ty:r.ty};}
-    if(e.k==='mem'){const b=genBase(e.e);const st=structOf(b.ty);const fty=fieldTy(st,e.f);return {js:`$o(${b.js},${JSON.stringify(e.f)})`,ty:fty};}
-    if(e.k==='idx'){const b=genBase(e.a);const i=gen(e.i);const et=b.ty&&b.ty.k==='arr'?b.ty.of:TY.unk;return {js:`$o(${b.js},${i.js})`,ty:et};}
-    if(e.k==='un'&&e.op==='*'){return genBase(e.e);}
+    if(e.k==='id'){const r=lookup(e.name,e.tok);if(r.kind==='local')return {js:r.ty&&r.ty.k==='ptr'?`$dobj(${r.js})`:r.js,ty:r.ty};return {js:`$o(G,${JSON.stringify(e.name)})`,ty:r.ty};}
+    if(e.k==='mem'){const b=genBase(e.e);const st=structOf(b.ty);const fty=fieldTy(st,e.f);return {js:`$o(${e.arrow?`$dobj(${b.js})`:b.js},${JSON.stringify(e.f)})`,ty:fty};}
+    if(e.k==='idx'){const b=genBase(e.a);const i=gen(e.i);const et=b.ty&&b.ty.k==='arr'?b.ty.of:b.ty&&b.ty.k==='ptr'?b.ty.to:TY.unk;return {js:`$o($dobj(${b.js}),${i.js})`,ty:et};}
+    if(e.k==='un'&&e.op==='*'){const x=gen(e.e);return {js:`$dobj(${x.js})`,ty:x.ty&&x.ty.k==='ptr'?x.ty.to:TY.unk};}
+    if(e.k==='cast'){const b=genBase(e.e);return {js:b.js,ty:e.ty};}
     throw new CErr('Bu ifade nesne olarak kullanılamaz',e.tok);}
   function structOf(ty){if(!ty)return null;if(ty.k==='ptr')ty=ty.to;if(ty.k==='struct'){if(!ty.fields&&ty.name){const td=ctx.typedefs.get(ty.name)||ctx.structTags.get(ty.name);if(td&&td.fields)return td;}return ty;}return null;}
   function fieldTy(st,f){if(st&&st.fields){const fd=st.fields.find(x=>x.name===f);if(fd)return fd.ty;}return TY.unk;}
+  const plain=(js,ty)=>({get:`(${js}??0)`,set:v=>`(${js}=${v})`,ty});
   function lval(e){
-    if(e.k==='id'){const r=lookup(e.name,e.tok);if(r.kind==='const')throw new CErr(`${e.name} sabittir, atanamaz`,e.tok);if(r.kind==='global')io.writes&&io.writes.add(e.name);return {js:r.js,ty:r.ty};}
-    if(e.k==='mem'){const b=genBase(e.e);const st=structOf(b.ty);return {js:`${b.js}[${JSON.stringify(e.f)}]`,ty:fieldTy(st,e.f)};}
-    if(e.k==='idx'){const b=genBase(e.a);const i=gen(e.i);return {js:`${b.js}[${i.js}]`,ty:b.ty&&b.ty.k==='arr'?b.ty.of:TY.unk};}
-    if(e.k==='un'&&e.op==='*')throw new CErr('İşaretçi üzerinden atama desteklenmiyor',e.tok);
+    if(e.k==='id'){const r=lookup(e.name,e.tok);if(r.kind==='const')throw new CErr(`${e.name} sabittir, atanamaz`,e.tok);if(r.kind==='global')io.writes&&io.writes.add(e.name);return plain(r.js,r.ty);}
+    if(e.k==='mem'){const b=genBase(e.e);const st=structOf(b.ty);return plain(`${e.arrow?`$dobj(${b.js})`:b.js}[${JSON.stringify(e.f)}]`,fieldTy(st,e.f));}
+    if(e.k==='idx'){const base=e.a.k==='id'?lookup(e.a.name,e.a.tok):null;
+      if(base&&base.kind==='local'&&isPtrTy(base.ty)){const i=gen(e.i);const t=base.ty&&base.ty.k==='ptr'?base.ty.to:TY.unk;return {get:`$rd(${base.js},${i.js})`,set:v=>`$wr(${base.js},${i.js},${v})`,ty:t};}
+      const b=genBase(e.a);const i=gen(e.i);return plain(`${b.js}[${i.js}]`,b.ty&&b.ty.k==='arr'?b.ty.of:TY.unk);}
+    if(e.k==='un'&&e.op==='*'){const x=gen(e.e);const t=x.ty&&x.ty.k==='ptr'?x.ty.to:TY.unk;return {get:`$rd(${x.js},0)`,set:v=>`$wr(${x.js},0,${v})`,ty:t};}
+    if(e.k==='cast')return lval(e.e);
     throw new CErr('Atanamayan ifade',e.tok);}
   function binop(op,a,b){const at=promote(a.ty),bt=promote(b.ty);
     if(['==','!=','<','>','<=','>='].includes(op)){const jop=op==='=='?'===':op==='!='?'!==':op;return {js:`((${a.js})${jop}(${b.js})?1:0)`,ty:TY.i32};}
@@ -329,10 +335,19 @@ function compile(fileMap,opts){
     case 'id':{const r=lookup(e.name,e.tok);if(r.kind==='global')io.reads&&io.reads.add(e.name);
       if(r.kind==='global'&&r.ty&&(r.ty.k==='struct'||r.ty.k==='arr'))return {js:`$o(G,${JSON.stringify(e.name)})`,ty:r.ty};
       if(r.kind==='global')return {js:`(${r.js}??0)`,ty:r.ty};return {js:r.js,ty:r.ty};}
-    case 'mem':{const b=genBase(e.e);const st=structOf(b.ty);const ft=fieldTy(st,e.f);if(ft.k==='struct'||ft.k==='arr')return {js:`$o(${b.js},${JSON.stringify(e.f)})`,ty:ft};return {js:`(${b.js}[${JSON.stringify(e.f)}]??0)`,ty:ft};}
-    case 'idx':{const b=genBase(e.a);const i=gen(e.i);const et=b.ty&&b.ty.k==='arr'?b.ty.of:TY.unk;return {js:`(${b.js}[${i.js}]??0)`,ty:et};}
-    case 'un':{if(e.op==='&'){const b=genBase(e.e);return {js:b.js,ty:{k:'ptr',to:b.ty}};}
-      if(e.op==='*'){const b=genBase(e.e);return {js:b.js,ty:b.ty&&b.ty.k==='ptr'?b.ty.to:TY.unk};}
+    case 'mem':{const b=genBase(e.e);const st=structOf(b.ty);const ft=fieldTy(st,e.f);const bj=e.arrow?`$dobj(${b.js})`:b.js;if(ft.k==='struct'||ft.k==='arr')return {js:`$o(${bj},${JSON.stringify(e.f)})`,ty:ft};return {js:`(${bj}[${JSON.stringify(e.f)}]??0)`,ty:ft};}
+    case 'idx':{const base=e.a.k==='id'?lookup(e.a.name,e.a.tok):null;
+      if(base&&base.kind==='local'&&isPtrTy(base.ty)){const i=gen(e.i);return {js:`$rd(${base.js},${i.js})`,ty:base.ty&&base.ty.k==='ptr'?base.ty.to:TY.unk};}
+      const b=genBase(e.a);const i=gen(e.i);const et=b.ty&&b.ty.k==='arr'?b.ty.of:TY.unk;return {js:`(${b.js}[${i.js}]??0)`,ty:et};}
+    case 'un':{if(e.op==='&'){const t=e.e;
+        if(t.k==='id'){const r=lookup(t.name,t.tok);if(r.kind==='local'){if(r.ty&&(r.ty.k==='struct'||r.ty.k==='arr'))return {js:r.js,ty:{k:'ptr',to:r.ty}};return {js:`{$r:1,g:()=>${r.js},s:v=>{${r.js}=v;}}`,ty:{k:'ptr',to:r.ty}};}
+          if(r.ty&&(r.ty.k==='struct'||r.ty.k==='arr'))return {js:`$o(G,${JSON.stringify(t.name)})`,ty:{k:'ptr',to:r.ty}};return {js:`$amp(G,${JSON.stringify(t.name)})`,ty:{k:'ptr',to:r.ty}};}
+        if(t.k==='mem'){const b=genBase(t.e);const st=structOf(b.ty);const ft=fieldTy(st,t.f);const bj=t.arrow?`$dobj(${b.js})`:b.js;
+          if(ft.k==='struct'||ft.k==='arr')return {js:`$o(${bj},${JSON.stringify(t.f)})`,ty:{k:'ptr',to:ft}};return {js:`$amp(${bj},${JSON.stringify(t.f)})`,ty:{k:'ptr',to:ft}};}
+        if(t.k==='idx'){const b=genBase(t.a);const i=gen(t.i);return {js:`$amp($dobj(${b.js}),${i.js})`,ty:{k:'ptr',to:b.ty&&b.ty.k==='arr'?b.ty.of:TY.unk}};}
+        if(t.k==='un'&&t.op==='*')return gen(t.e);
+        const b=genBase(t);return {js:b.js,ty:{k:'ptr',to:b.ty}};}
+      if(e.op==='*'){const x=gen(e.e);return {js:`$rd(${x.js},0)`,ty:x.ty&&x.ty.k==='ptr'?x.ty.to:TY.unk};}
       const x=gen(e.e);const t=promote(x.ty);
       if(e.op==='!')return {js:`((${x.js})?0:1)`,ty:TY.i32};
       if(e.op==='+')return {js:x.js,ty:t};
@@ -343,11 +358,11 @@ function compile(fileMap,opts){
     case 'cond':{const c=gen(e.c),a=gen(e.a),b=gen(e.b);return {js:`((${c.js})?(${a.js}):(${b.js}))`,ty:(a.ty.k==='float'||b.ty.k==='float')?TY.f64:arith(promote(a.ty),promote(b.ty))};}
     case 'cast':{const x=gen(e.e);if(e.ty.k==='ptr'||e.ty.k==='struct'||e.ty.k==='void')return {js:x.js,ty:e.ty};return {js:conv(e.ty,x.js,x.ty),ty:e.ty};}
     case 'comma':{const a=gen(e.a),b=gen(e.b);return {js:`((${a.js}),(${b.js}))`,ty:b.ty};}
-    case 'asg':{const l=lval(e.l);const r=gen(e.r);
-      if(e.op==='=')return {js:`(${l.js}=${conv(l.ty.k==='unk'?null:l.ty,r.js,r.ty)})`,ty:l.ty};
-      const cur={js:`(${l.js}??0)`,ty:l.ty};const v=binop(e.op.slice(0,-1),cur,r);return {js:`(${l.js}=${conv(l.ty.k==='unk'?null:l.ty,v.js,v.ty)})`,ty:l.ty};}
-    case 'pre':case 'post':{const l=lval(e.e);const one={js:'1',ty:TY.i32};const v=binop(e.op==='++'?'+':'-',{js:`(${l.js}??0)`,ty:l.ty},one);const nv=conv(l.ty.k==='unk'?null:l.ty,v.js,v.ty);
-      if(e.k==='pre')return {js:`(${l.js}=${nv})`,ty:l.ty};return {js:`(($t=(${l.js}??0)),(${l.js}=${nv}),$t)`,ty:l.ty};}
+    case 'asg':{const l=lval(e.l);const r=gen(e.r);const lt=!l.ty||l.ty.k==='unk'||l.ty.k==='ptr'||l.ty.k==='struct'?null:l.ty;
+      if(e.op==='=')return {js:l.set(conv(lt,r.js,r.ty)),ty:l.ty};
+      const cur={js:l.get,ty:l.ty};const v=binop(e.op.slice(0,-1),cur,r);return {js:l.set(conv(lt,v.js,v.ty)),ty:l.ty};}
+    case 'pre':case 'post':{const l=lval(e.e);const lt=!l.ty||l.ty.k==='unk'||l.ty.k==='ptr'?null:l.ty;const one={js:'1',ty:TY.i32};const v=binop(e.op==='++'?'+':'-',{js:l.get,ty:l.ty},one);const nv=conv(lt,v.js,v.ty);
+      if(e.k==='pre')return {js:l.set(nv),ty:l.ty};return {js:`(($t=${l.get}),${l.set(nv)},$t)`,ty:l.ty};}
     case 'call':{if(e.f.k!=='id')throw new CErr('Fonksiyon işaretçileri desteklenmiyor',e.tok);const name=e.f.name;
       if(F.has(name)||protos.has(name)){const fd=F.get(name)||protos.get(name);if(!F.has(name))throw new CErr(`${name} fonksiyonunun gövdesi yok (yalnızca bildirim)`,e.tok);
         io.funcsCalled.add(name);const args=e.args.map((a,i)=>{const x=gen(a);const pt=fd.params[i]&&fd.params[i].ty;return pt&&pt.k!=='ptr'&&pt.k!=='struct'&&pt.k!=='arr'?conv(pt,x.js,x.ty):x.js;});
@@ -394,14 +409,20 @@ function compile(fileMap,opts){
   const reach=new Set(),q=[...F.values()].filter(f=>!/\.h$/i.test(f.tok&&f.tok.f||'')).map(f=>f.name);
   while(q.length){const n=q.pop();if(reach.has(n)||!F.has(n))continue;reach.add(n);callsOf(F.get(n)).forEach(c=>{if(F.has(c)&&!reach.has(c))q.push(c);});}
   for(const [name,f] of F){if(!reach.has(name))continue;fnCtx={scopes:[new Map(f.params.map(p=>[p.name,p.ty]))],ret:f.ret};
-    const body=genStmt(f.body,1);fnJS.push(`F.${id(name)}=function(${f.params.map(p=>id(p.name)).join(',')}){let $t;\n${body}\n};`);fnCtx=null;}
+    const ffile=f.tok&&f.tok.f||'';let body;
+    try{body=genStmt(f.body,1);}catch(err){fnCtx=null;const SUF2=/_(Local|Output|Input|System_Input|data|types|private|Interface|MemMap|Data|ConstB|ConstP|Global|Cal)$/i;
+      if(opts.primary&&ffile.replace(/\.(c|h)$/i,'').replace(SUF2,'')!==opts.primary){ctx.warnings.push({msg:`${name}() simülasyona çevrilemedi (${err.message}); çağrıldığında 0 döndürür`,file:err.file||ffile,line:err.line});fnJS.push(`F.${id(name)}=function(){return 0;};`);continue;}throw err;}
+    fnJS.push(`F.${id(name)}=function(${f.params.map(p=>id(p.name)).join(',')}){let $t;\n${body}\n};`);fnCtx=null;}
   /* global başlangıç */
   const gInit=[];
   for(const [name,g] of G){if(g.storage==='extern'&&!g.init)continue;const ty=g.ty;
     if(g.init)gInit.push(`G[${JSON.stringify(name)}]=${initJS(ty,g.init)};`);
     else if(ty.k==='struct')gInit.push(`G[${JSON.stringify(name)}]={};`);else if(ty.k==='arr')gInit.push(`G[${JSON.stringify(name)}]=[];`);
     else gInit.push(`G[${JSON.stringify(name)}]=0;`);}
-  const js=`"use strict";const $o=(o,k)=>{let v=o[k];if(v==null||typeof v!=='object'){v=o[k]={};}return v;};const $mset=(o,v)=>{if(o&&typeof o==='object'){for(const k in o){if(o[k]&&typeof o[k]==='object')$mset(o[k],v);else o[k]=v;}}return 0;};const $mcpy=(d,s)=>{if(d&&s&&typeof d==='object'&&typeof s==='object'){for(const k in s){if(s[k]&&typeof s[k]==='object'){if(!d[k]||typeof d[k]!=='object')d[k]=Array.isArray(s[k])?[]:{};$mcpy(d[k],s[k]);}else d[k]=s[k];}}return 0;};let $it=0;const F={};let G={};\n${fnJS.join('\n')}\nfunction $init(g){G=g;${gInit.join('\n')}}\nreturn {F,$init,resetIt(){$it=0;}};`;
+  const js=`"use strict";const $o=(o,k)=>{let v=o[k];if(v==null||typeof v!=='object'){v=o[k]={};}return v;};const $amp=(o,k)=>{const v=o[k];return (v&&typeof v==='object')?v:{$r:1,o,k};};const $dobj=p=>{if(p&&p.$r){if(p.g){return {};}let v=p.o[p.k];if(!v||typeof v!=='object')v=p.o[p.k]={};return v;}return p;};
+const $rd=(p,i)=>{if(p==null||typeof p!=='object')return 0;if(p.$r){if(p.g)return i?0:p.g();if(typeof p.k==='number')return p.o[p.k+i]??0;if(!i){const v=p.o[p.k];return v&&typeof v==='object'?(v[0]??0):(v??0);}const a=p.o[p.k];return a&&typeof a==='object'?(a[i]??0):0;}return p[i]??0;};
+const $wr=(p,i,v)=>{if(p==null||typeof p!=='object')return v;if(p.$r){if(p.s){if(!i)p.s(v);return v;}if(typeof p.k==='number'){p.o[p.k+i]=v;return v;}if(!i&&!(p.o[p.k]&&typeof p.o[p.k]==='object')){p.o[p.k]=v;return v;}let a=p.o[p.k];if(!a||typeof a!=='object')a=p.o[p.k]=[];a[i]=v;return v;}p[i]=v;return v;};
+const $mset=(o,v)=>{if(o&&typeof o==='object'){for(const k in o){if(o[k]&&typeof o[k]==='object')$mset(o[k],v);else o[k]=v;}}return 0;};const $mcpy=(d,s)=>{if(d&&s&&typeof d==='object'&&typeof s==='object'){for(const k in s){if(s[k]&&typeof s[k]==='object'){if(!d[k]||typeof d[k]!=='object')d[k]=Array.isArray(s[k])?[]:{};$mcpy(d[k],s[k]);}else d[k]=s[k];}}return 0;};let $it=0;const F={};let G={};\n${fnJS.join('\n')}\nfunction $init(g){G=g;${gInit.join('\n')}}\nreturn {F,$init,resetIt(){$it=0;}};`;
   /* adım / init / reset fonksiyonları */
   const called=io.funcsCalled;const roots=[...F.values()].filter(f=>!called.has(f.name)&&f.params.length===0);
   const steps=roots.filter(f=>/(\d+)ms$/i.test(f.name)||/step/i.test(f.name)).map(f=>({name:f.name,period:+(/(\d+)ms$/i.exec(f.name)||[0,10])[1]}));
