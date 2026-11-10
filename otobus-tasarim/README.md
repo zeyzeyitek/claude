@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev Z)
+# Otobüs Tasarım Stüdyosu (konsept, Rev AA)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -171,3 +171,7 @@ Sinyaller: DoorRelease, DoorState_K2
 ## Rev Z
 - İşaretçi desteği: `&değişken` (yerel, global, yapı alanı, dizi elemanı), `*p = …`, `p[i]`, `p->alan`, `(*p).alan`, işaretçi üzerinden ++. Örn. Dem_GetEventStatus(id, &status) ve S-Function wrapper çıkışları (y0[0] = …). gcc ile karşılaştırma: tools/ctest/ptr (1200 adım, 0 fark).
 - Ana model dışındaki dosyada simülasyona çevrilemeyen fonksiyon ASW’yi durdurmaz; uyarı verir, çağrıldığında 0 döndürür.
+
+## Rev AA
+- Adsız parametreli fonksiyon tanımları (`void f(uint8 a, uint8)`) ve okunamayan parametre adları artık benzersiz adlandırılıyor (önceden “Duplicate parameter name” iç hatası).
+- Her fonksiyonun üretilen kodu tek tek doğrulanıyor; ana model dışındaki dosyada çevrilemeyen fonksiyon 0 döndüren taslak olur, ana dosyada ise hata fonksiyon adı ve satırla gösterilir.

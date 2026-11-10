@@ -350,7 +350,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev Z</div>
+    <div class="eyebrow">Konsept · Rev AA</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
   </div>
@@ -2604,11 +2604,16 @@ function compile(fileMap,opts){
   const callsOf=f=>{const out=new Set();const walk=n=>{if(!n||typeof n!=='object')return;if(Array.isArray(n)){n.forEach(walk);return;}if(n.k==='call'&&n.f&&n.f.k==='id')out.add(n.f.name);for(const k in n){if(k!=='tok'&&k!=='ty')walk(n[k]);}};walk(f.body);return out;};
   const reach=new Set(),q=[...F.values()].filter(f=>!/\.h$/i.test(f.tok&&f.tok.f||'')).map(f=>f.name);
   while(q.length){const n=q.pop();if(reach.has(n)||!F.has(n))continue;reach.add(n);callsOf(F.get(n)).forEach(c=>{if(F.has(c)&&!reach.has(c))q.push(c);});}
-  for(const [name,f] of F){if(!reach.has(name))continue;fnCtx={scopes:[new Map(f.params.map(p=>[p.name,p.ty]))],ret:f.ret};
+  for(const [name,f] of F){if(!reach.has(name))continue;{const seen=new Set();f.params=f.params.filter(p=>!(p.ty&&p.ty.k==='void'&&!p.name)).map((p,i)=>{let n=p.name;if(!n||seen.has(n))n='_p'+i+(n?'_'+n:'');seen.add(n);return Object.assign({},p,{name:n});});}
+    fnCtx={scopes:[new Map(f.params.map(p=>[p.name,p.ty]))],ret:f.ret};
     const ffile=f.tok&&f.tok.f||'';let body;
     try{body=genStmt(f.body,1);}catch(err){fnCtx=null;const SUF2=/_(Local|Output|Input|System_Input|data|types|private|Interface|MemMap|Data|ConstB|ConstP|Global|Cal)$/i;
       if(opts.primary&&ffile.replace(/\.(c|h)$/i,'').replace(SUF2,'')!==opts.primary){ctx.warnings.push({msg:`${name}() simülasyona çevrilemedi (${err.message}); çağrıldığında 0 döndürür`,file:err.file||ffile,line:err.line});fnJS.push(`F.${id(name)}=function(){return 0;};`);continue;}throw err;}
-    fnJS.push(`F.${id(name)}=function(${f.params.map(p=>id(p.name)).join(',')}){let $t;\n${body}\n};`);fnCtx=null;}
+    const chunk=`F.${id(name)}=function(${f.params.map(p=>id(p.name)).join(',')}){let $t;\n${body}\n};`;
+    try{Function('F','G','$o','$amp','$dobj','$rd','$wr','$mset','$mcpy','$it',chunk);}catch(err){const SUF3=/_(Local|Output|Input|System_Input|data|types|private|Interface|MemMap|Data|ConstB|ConstP|Global|Cal)$/i;
+      if(opts.primary&&ffile.replace(/\.(c|h)$/i,'').replace(SUF3,'')!==opts.primary){ctx.warnings.push({msg:`${name}() simülasyona çevrilemedi (${err.message}); çağrıldığında 0 döndürür`,file:ffile,line:f.tok&&f.tok.l});fnJS.push(`F.${id(name)}=function(){return 0;};`);fnCtx=null;continue;}
+      throw new CErr(`${name}() simülasyona çevrilemedi: ${err.message}`,f.tok);}
+    fnJS.push(chunk);fnCtx=null;}
   /* global başlangıç */
   const gInit=[];
   for(const [name,g] of G){if(g.storage==='extern'&&!g.init)continue;const ty=g.ty;
