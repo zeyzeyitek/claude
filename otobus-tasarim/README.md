@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (sürüm 1.1.2)
+# Otobüs Tasarım Stüdyosu (sürüm 1.1.3)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -186,6 +186,27 @@ Sinyaller: DoorRelease, DoorState_K2
 ---
 # Sürümler ve yama notları
 Bundan sonra her güncelleme bir sürüm numarası alır: 1.1.0, 1.1.1 … 1.1.9, sonra 1.2.0. Yama notları uygulamada sol üstteki “Sürüm” bağlantısından da okunur.
+
+## 1.1.3 · 10.11.2026
+- **Simülatör NV’ye göre çalışır.** Program atılmamış araçta tüm NV’ler 0’dır ve fonksiyonlar çıkış vermez. Kapılanan fonksiyonlar ve NV’leri:
+
+  | Fonksiyon | NV |
+  |---|---|
+  | Türfreigabe | `DR_StsFctEnaNv` |
+  | Kapı temel kontrolü | `BBC_StsFctEnaNv` |
+  | Kapı x kurulu | `DOP_StDoorxInstdNv` |
+  | Sürücü butonu Kx | `DxM_StsFctEnaNv` |
+  | Otomatik mod | `DxA_StsFctEnaNv` |
+  | STOP / AÇ butonu | `DxSR_StsFcnEnaNv` |
+  | Bebek arabası / engelli / yaşlı | `DxPB_StsFcnEnaNv`, `DxW_StsFcnEnaNv`, `DOM_StsFctEnaNv` |
+  | Durak freni | `DBSBR_StsFctEnaNv` |
+  | Kabin kapısı | `DAD_StsFctEnaNv` |
+  | Kapanma buzzer’ı | `DxBZ_StsFcnEnaNv` |
+  | Elektrikli rampa | `ER_StsFctEnaNv`, `ER_StDoor2RampInstdNv` |
+  | Manuel rampa | `MR_CfgFctEnaNv`, `MR_StDoor3RampInstdNv` |
+
+  NV değeri: elle girilen / içe aktarılan değer, yoksa C kodundaki değer, yoksa 0. Engellenen işlem günlüğe NV adıyla yazılır. “Simülatör NV’ye göre çalışsın” anahtarı kapatılırsa eski davranış. Otomatik testler NV’den bağımsız çalışır.
+- **Parametreler sayfası yeniden tasarlandı**: özet kartları, NV arama ve anahtarlar, fonksiyon kartları, filtreli tablo; sağda içe aktarma ve şasi parametre listesi oluşturma.
 
 ## 1.1.2 · 10.11.2026
 - Düzeltme: 1.1.1’de simülatör donuyordu (yürüme, sürüş, kapılar). RAMPA butonuna eklenen LED fonksiyonu (`b.led`) butonun 3D LED nesnesiyle aynı adı taşıyordu ve her karede hata veriyordu; adı `ledFn` oldu. Gerçek Three.js r128 ile yürüme ve sürüş denendi.

@@ -350,6 +350,54 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
 .pltable tr.off td{opacity:.45} .cpar.bad{border-color:#d0302a;color:#d0302a} .pwrap .stable-wrap{max-height:62vh;overflow:auto}
 .plout{width:100%;min-height:220px;font:500 12.5px/1.45 var(--f-mono);padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);resize:vertical;white-space:pre}
 @media (max-width:640px){.plgrid{grid-template-columns:1fr}}
+/* Parametreler sayfası */
+#docs.pz-full .dtoc{display:none} #docs.pz-full .dbody{grid-template-columns:minmax(0,1fr)}
+.pz{max-width:1280px;margin:0 auto;display:grid;gap:18px}
+.pz-head{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;justify-content:space-between}
+.pz-title{max-width:640px} .pz-title h3{font:700 30px/1.1 var(--f-display);margin:4px 0 8px} .pz-title p{margin:0;color:var(--muted);line-height:1.5}
+.pz-mode{display:grid;grid-template-columns:auto auto;gap:4px 12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.pz-mode span{font:600 14px var(--f-display);letter-spacing:.02em} .pz-mode em{grid-column:1/-1;font-style:normal;font-size:12.5px;color:var(--muted)}
+.pz-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.pz-kpi{padding:12px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--line);display:grid;gap:2px}
+.pz-kpi b{font:600 26px/1 var(--f-mono);color:var(--ink)} .pz-kpi b small{font-size:14px;color:var(--muted)} .pz-kpi span{font-size:12.5px;color:var(--muted)}
+.pz-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+.pz-main,.pz-side{display:grid;gap:18px;min-width:0} .pz-side{position:sticky;top:0}
+.pz-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px;min-width:0}
+.pz-card h4{font:700 17px var(--f-display);margin:0;letter-spacing:.01em} .pz-card .note{margin:0}
+.pz-sech{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:flex-end}
+.pz-acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pz-search{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;background:var(--bg)} .pz-search:focus-within{border-color:var(--accent)}
+.pz-search svg{width:20px;height:20px;fill:none;stroke:var(--muted);stroke-width:2;flex:none} .pz-search input{flex:1;min-width:0;border:0;background:none;outline:none;font:500 15px var(--f-mono);padding:13px 0;color:var(--ink)}
+.pz-hits{list-style:none;margin:0;padding:0;display:grid} .pz-hits li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 4px;border-top:1px solid var(--line)}
+.pz-hits li>div,.pz-t td:nth-child(2){min-width:0} code.n{display:block;font:500 13px var(--f-mono);color:var(--ink);overflow-wrap:anywhere} code.b{display:block;font:400 11.5px var(--f-mono);color:var(--muted);overflow-wrap:anywhere;margin-top:2px}
+.pz-fns{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;align-items:start}
+.pz-fn{border:1px solid var(--line);border-left:4px solid var(--obst);border-radius:10px;padding:10px 12px;display:grid;gap:6px;align-content:start;background:var(--bg)}
+.pz-fn.on{border-left-color:var(--ok)} .pz-fn.part{border-left-color:var(--accent)} .pz-fn header{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.pz-fn header b{font:700 15px var(--f-display)} .pz-fn p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.4}
+.pz-fn ul{list-style:none;margin:2px 0 0;padding:0;display:grid;gap:6px} .pz-fn li{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pz-fn li>div{min-width:0} .pz-fn li span{display:block;font-size:13px} .pz-fn li code{display:block;font:400 11px var(--f-mono);color:var(--muted);overflow-wrap:anywhere} .pz-fn li em{font-style:normal;font-size:11px;color:var(--warn)}
+.pz-pill{font:600 11px var(--f-mono);letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:var(--chip);color:var(--muted);white-space:nowrap}
+.pz-pill.on{background:var(--ok-soft);color:var(--ok)} .pz-pill.part{background:var(--accent-soft);color:var(--accent)}
+.sw{position:relative;display:inline-block;width:38px;height:22px;flex:none;cursor:pointer} .sw input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:1}
+.sw i{position:absolute;inset:0;border-radius:22px;background:var(--line);transition:background .15s} .sw i::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .15s}
+.sw input:checked+i{background:var(--ok)} .sw input:checked+i::after{transform:translateX(16px)} .sw input:focus-visible+i{outline:2px solid var(--accent);outline-offset:2px}
+.sw.big{width:46px;height:26px} .sw.big i::after{width:20px;height:20px} .sw.big input:checked+i::after{transform:translateX(20px)}
+.pz-seg{display:inline-flex;flex-wrap:wrap;background:var(--chip);border-radius:10px;padding:3px;gap:2px}
+.pz-seg button{appearance:none;border:0;background:none;color:var(--muted);font:600 12.5px var(--f-display);letter-spacing:.03em;padding:6px 11px;border-radius:8px;cursor:pointer}
+.pz-seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.pz-tw{max-height:60vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.pz-t{width:100%;border-collapse:collapse;font-size:13px} .pz-t th{position:sticky;top:0;background:var(--panel);text-align:left;font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line);z-index:2}
+.pz-t td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle} .pz-t tr:last-child td{border-bottom:0} .pz-t tr.off td{opacity:.45}
+.pz-t td.a{font:500 12.5px var(--f-mono);white-space:nowrap} .pz-t td.a span{color:var(--muted)} .pz-t td.a small{display:block;color:var(--muted);font-size:11px} .pz-t td.v{text-align:right;white-space:nowrap}
+.pz-t .tag{display:inline-block;margin-top:4px;margin-right:4px;font:500 10.5px var(--f-mono);padding:1px 6px;border-radius:4px;background:var(--chip);color:var(--muted)} .pz-t .tag.imp{background:var(--accent-soft);color:var(--accent)}
+.pz-empty{text-align:center;color:var(--muted);padding:28px 12px!important;line-height:1.5}
+.pz-num{width:96px;font:500 13px var(--f-mono);padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);text-align:right} .pz-num.bad{border-color:var(--warn);color:var(--warn)} .pz-bad{color:var(--warn);font:500 12px var(--f-mono)}
+.pz-ta{width:100%;min-height:150px;font:500 12px/1.45 var(--f-mono);padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);resize:vertical;white-space:pre} .pz-ta.out{min-height:120px}
+.pz-lbl{font:600 12px var(--f-mono);color:var(--muted)} .pz-in{font:500 13px var(--f-mono);padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+.pz-res{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;padding:10px 12px;border-radius:10px;background:var(--ok-soft);font-size:13px} .pz-res span{color:var(--ok);font-weight:600} .pz-res span.w{color:var(--warn)} .pz-res .note{flex-basis:100%;overflow-wrap:anywhere}
+.pz-det summary{cursor:pointer;font-weight:600;font-size:13px} .pz-det .plgrid{margin-top:8px}
+@media (max-width:980px){.pz-grid{grid-template-columns:minmax(0,1fr)} .pz-side{position:static}}
+@media (max-width:640px){.pz-kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .pz-title h3{font-size:24px} .pz-t td.a{white-space:normal}}
 .dtype{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;margin-top:6px} .dtype select{font:500 13px var(--f-body);padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
 .cdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--line);margin-right:8px;vertical-align:1px} .cdot.ok{background:var(--ok)} .cdot.idle{background:transparent;box-shadow:inset 0 0 0 2px var(--ok)} .cbad{color:var(--warn)} .cdot.bad{background:var(--warn)}
 .csrc .chd2{align-items:flex-start} .crun{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)} .crun .sp{flex:1}
@@ -363,9 +411,9 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow"><button class="verbtn" id="verBtn" title="Yama notlarını aç">Sürüm <b id="verNo">1.1.2</b> · yama notları</button></div>
+    <div class="eyebrow"><button class="verbtn" id="verBtn" title="Yama notlarını aç">Sürüm <b id="verNo">1.1.3</b> · yama notları</button></div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
-    <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button><button class="vbtn" data-view="par" aria-current="false">Parametre listesi</button></nav>
+    <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button><button class="vbtn" data-view="par" aria-current="false">Parametreler</button></nav>
   </div>
 
   <div id="modebar" class="float" role="toolbar" aria-label="Görünüm">
@@ -422,6 +470,12 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
     </div>
 
     <div class="pbody" id="pSig" role="tabpanel" hidden>
+      <section>
+        <h3>Araç parametreleri (NV)</h3>
+        <div class="dtype"><span>NV’ye göre çalış</span><label class="sw"><input type="checkbox" id="nvSide" aria-label="Simülatör NV’ye göre çalışsın"><i></i></label></div>
+        <p class="note" id="nvSideSt"></p>
+        <div class="pz-acts"><button class="sfb" id="nvSideAll">Fonksiyon NV’lerini 1 yap</button><button class="sfb" data-goview="par">Parametreler</button></div>
+      </section>
       <section>
         <h3>Kapı tipleri</h3>
         <div class="dtype" id="dTypes"></div>
@@ -488,7 +542,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="docs" hidden>
     <header class="dhead">
       <h2 id="docTitle">Gereksinimler</h2>
-      <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="false">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button><button class="vbtn" data-view="par" aria-current="false">Parametre listesi</button></nav>
+      <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="false">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button><button class="vbtn" data-view="par" aria-current="false">Parametreler</button></nav>
       <input type="search" id="docSearch" placeholder="Ara…" aria-label="Ara">
     </header>
     <div class="dbody"><nav class="dtoc" id="dtoc" aria-label="İçindekiler"></nav><main class="dmain" id="dmain"></main></div>
@@ -519,6 +573,25 @@ const KIND={stroller:{name:'Bebek arabası',sig:z=>`D${z}PB_StStrqDoor${z}FromPr
 
 /* ================= Araç durumu ================= */
 const PRS={};const CSIM={asws:{},common:{},src:null,sel:null,cur:null,mods:{},errs:{},cache:{},chk:{},prod:{},extIn:[],order:[],tasks:[],t:0,build:null,G:{},on:false,paused:false,acc:0,steps:0,period:100,step:null,forces:{},params:{},tab:'out',added:[]};const pulse=k=>()=>performance.now()-(PRS[k]||-1e9)<300;
+/* ---- araç parametreleri (NV): simülatör fonksiyonları EIOB24 NV değerine göre çalışır. Hiç program atılmamış araç = tüm NV 0 = fonksiyon yok ---- */
+const NVM={on:true,demo:false,blkT:{}};try{const v=localStorage.getItem('otobus.nvmode');if(v!=null)NVM.on=v==='1';}catch(e){}
+function nvRaw(n){const p=CSIM.params[n];if(p!=null)return +p;const g=CSIM.G&&CSIM.G[n];if(g!=null&&typeof g!=='object')return +g;const i=CSIM.paramInit&&CSIM.paramInit[n];return i!=null&&typeof i!=='object'?+i:0;}
+const nvOn=n=>!NVM.on||NVM.demo||nvRaw(n)!==0;
+const nvOff=list=>list.find(n=>!nvOn(n))||null;
+const NV_FN=[
+  {id:'rel',ad:'Türfreigabe',ne:'Kapıları otomatik moda alır, DR_StDoorRelsActv çıkışı',nv:[['DR_StsFctEnaNv','Fonksiyon etkin']]},
+  {id:'bbc',ad:'Kapı temel kontrolü',ne:'BBC: kapılara CAN aç/kapa komutu',nv:[['BBC_StsFctEnaNv','Fonksiyon etkin']]},
+  ...[1,2,3].map(z=>({id:'d'+z,ad:'Kapı '+z,ne:'Kurulum, sürücü butonu, otomatik mod, durak isteği, kapanma buzzer’ı',nv:[[`DOP_StDoor${z}InstdNv`,'Kapı kurulu'],[`D${z}M_StsFctEnaNv`,'Sürücü butonu K'+z],[`D${z}A_StsFctEnaNv`,'Otomatik mod'],[`D${z}SR_StsFcnEnaNv`,'Durak isteği / AÇ butonu'],[`D${z}BZ_StsFcnEnaNv`,'Kapanma buzzer’ı']]})),
+  {id:'spc',ad:'Özel istekler',ne:'Bebek arabası, engelli ve yaşlı yolcu butonları',nv:[['D2PB_StsFcnEnaNv','Bebek arabası K2'],['D3PB_StsFcnEnaNv','Bebek arabası K3'],['D2W_StsFcnEnaNv','Engelli K2'],['D3W_StsFcnEnaNv','Engelli K3'],['DOM_StsFctEnaNv','Yaşlı yolcu']]},
+  {id:'bsb',ad:'Durak freni',ne:'DBSBR: kapı açık / Türfreigabe → GW_AcvBstbrkOn',nv:[['DBSBR_StsFctEnaNv','Fonksiyon etkin']]},
+  {id:'dad',ad:'Kabin kapısı',ne:'DAD: sürücü kabini kapı mıknatısı',nv:[['DAD_StsFctEnaNv','Fonksiyon etkin']]},
+  {id:'er',ad:'Elektrikli rampa (K2)',ne:'ER: RAMPA butonu ve rampa motoru',nv:[['ER_StsFctEnaNv','Fonksiyon etkin'],['ER_StDoor2RampInstdNv','Kapı 2’de rampa kurulu']]},
+  {id:'mr',ad:'Manuel rampa (K3)',ne:'MR: kapı engelleri, durak freni, cluster sembolü (2025.02181)',nv:[['MR_CfgFctEnaNv','Fonksiyon etkin'],['MR_StDoor3RampInstdNv','Kapı 3’te rampa kurulu']]}];
+const NV_ALL=[...new Set(NV_FN.flatMap(f=>f.nv.map(x=>x[0])))];
+function nvBlock(src,what,n){const k=what+n,t=performance.now();if(t-(NVM.blkT[k]||0)<1200)return false;NVM.blkT[k]=t;
+  log(`${src} → ${what} çalışmadı: ${n} = 0 (araçta bu fonksiyon programlı değil). Parametreler sayfasından etkinleştirin.`,'warn');try{SFX.buzz([5.4,1,-0.5]);}catch(e){}return false;}
+function nvMode(on,src){NVM.on=on;try{localStorage.setItem('otobus.nvmode',on?'1':'0');}catch(e){}log(`${src} → Simülatör ${on?'NV değerlerine göre çalışıyor':'NV’lerden bağımsız (tüm fonksiyonlar açık)'}`);}
+function nvSetAll(v,src){NV_ALL.forEach(n=>{CSIM.params[n]=v;if(CSIM.G)CSIM.G[n]=v;});try{cSaveCfg();}catch(e){}log(`${src} → ${NV_ALL.length} fonksiyon NV’si = ${v}`);}
 const V={speed:0,rpm:620,gear:'N',stopReq:false,req:{stroller:false,prm:false,elderly:false},temp:17,odo:47389,stopBrake:false,intLight:true,night:false,
   release:false,kneel:false,kneelPos:0,fog:false,wiper:false,rampPos:0,rampDir:0,rampBtn:false,rampKey:1,rampErly:false,mramp:false,mrampPos:0,mrBlkDis:false,dim:false,engine:true,hazard:false,head:false,park:true,stopBrakeMan:false,doorLock:false};
 const DOOR_T=2.4;
@@ -526,6 +599,11 @@ const DOOR_T=2.4;
 const airMin=()=>Math.min(...DOORS.map(d=>doorS[d.id].air));Object.defineProperty(V,'air',{get:airMin,enumerable:false});
 /* ---- sürüm / yama notları: 1.1.0, 1.1.1 … 1.1.9 → 1.2.0 ---- */
 const CHANGELOG=[
+ {v:'1.1.3',d:'10.11.2026',items:[
+  'Simülatör artık araca yazılmış NV değerlerine göre çalışıyor. Program atılmamış araçta tüm NV’ler 0: Türfreigabe çıkış vermez (DR_StsFctEnaNv), sürücü K butonları (DxM), otomatik mod (DxA), STOP / AÇ butonları (DxSR), bebek arabası / engelli / yaşlı (DxPB, DxW, DOM), durak freni (DBSBR), kabin kapısı (DAD), kapı kurulumu (DOP_StDoorxInstd), kapı temel kontrolü (BBC), kapanma buzzer’ı (DxBZ), elektrikli rampa (ER) ve manuel rampa (MR) kendi NV’leri 0 iken çalışmaz. Engellenen her işlem günlüğe hangi NV’nin 0 olduğunu yazar.',
+  'Türfreigabe açıkken DR_StsFctEnaNv 0’a çekilirse Türfreigabe kapanır.',
+  '“Simülatör NV’ye göre çalışsın” anahtarı (Parametreler sayfası ve yan panel → Sinyal). Kapatınca eski davranış: tüm fonksiyonlar NV’den bağımsız. Otomatik testler fonksiyon mantığını doğruladığı için NV’den bağımsız çalışır.',
+  'Parametreler sayfası yeniden tasarlandı: üstte özet (aktif parametre, etkin fonksiyon, kodda NV), büyük NV arama kutusu ve açma / kapama anahtarları, simülatör fonksiyon kartları (her fonksiyonun NV’leri ve durumu), filtreli parametre tablosu; sağda içe aktarma (yapıştır / dosya) ve şasi parametre listesi oluşturma.']},
  {v:'1.1.2',d:'10.11.2026',items:[
   'Düzeltme: 1.1.1’de simülatör donuyordu (yürüme, sürüş ve kapılar çalışmıyordu). RAMPA butonunun LED fonksiyonu butonun 3D LED nesnesiyle aynı adı taşıyordu; her karede hata veriyordu.',
   'Parametre listesi şimdilik yalnızca EIOB24: içe aktarmada başka SG’ler (EIOB22, EIOB30 …) alınmaz, sayılıp bildirilir.',
@@ -1440,7 +1518,8 @@ function setView(v,query){
   const s=$('#docSearch');s.value=query||'';
   if(v==='reqs'){$('#docTitle').textContent='Gereksinimler';s.placeholder='Ara: REQ no, metin, sinyal…';renderDocReqs();}
   if(v==='code'){$('#docTitle').textContent='C Kod';s.placeholder='Ara: giriş, çıkış, parametre…';renderCode();}
-  if(v==='par'){$('#docTitle').textContent='Parametre listesi';s.placeholder='Ara: Nv, PARA_NAME, LID, tip…';renderPar();}
+  $('#docs').classList.toggle('pz-full',v==='par');s.hidden=v==='par';
+  if(v==='par'){$('#docTitle').textContent='Parametreler';renderPar();}
   if(v==='sigs'){$('#docTitle').textContent='Sinyaller';s.placeholder='Ara: sinyal adı, açıklama (envanterde 6.082 sinyal)…';loadInv().catch(()=>{});renderSigView();}
   if(v!=='sim'){$('#dmain').scrollTop=0;}else $('#view').focus({preventScroll:true});
   try{const h=v==='reqs'?'#gereksinimler':v==='sigs'?'#sinyaller':v==='code'?'#ckod':v==='par'?'#parametre':'';if(location.hash!==h)history.replaceState(null,'',h||location.pathname+location.search);}catch(e){}
@@ -1529,7 +1608,8 @@ $('#dtoc').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)retu
 /* ================= Fonksiyonlar ================= */
 const RQ=(k,st_,ev)=>{const r=reqFor(k);if(r)setReq(r,st_,ev);};
 let AUTO_T=3; // D2A_StDoor2AutoOpndTiGp (2021.18637 / 2021.18647: standart 3 s)
-const mrBlk=()=>!V.mramp||V.mrBlkDis?null:doorS[3].state==='CLOSED'?'open':'close'; // 2021.29327 / 2025.02180
+const mrOn=()=>V.mramp&&nvOn('MR_CfgFctEnaNv')&&nvOn('MR_StDoor3RampInstdNv');
+const mrBlk=()=>!mrOn()||V.mrBlkDis?null:doorS[3].state==='CLOSED'?'open':'close'; // 2021.29327 / 2025.02180
 const doorBlockedOpen=id=>V.doorLock?'Kapı kilidi aktif':V.speed>1?'araç hareket halinde (>1 km/h; 2021.19027, 2023.03864)':id===2&&V.rampDir!==0?'Rampa hareket ediyor (rampa dururken açılır)':id===3&&mrBlk()==='open'?'Manuel rampa kapalı değil (açılma engeli, 2025.02180 / 2025.03112)':null;
 const doorBlockedClose=id=>id===3&&mrBlk()==='close'?'Manuel rampa açık (kapanma engeli, 2021.29327 / 2025.03111)':null;
 const RQs=(k,flag,need,ev)=>{const r=reqFor(k);if(!r)return;r.seen[flag]=true;const miss=need.filter(x=>!r.seen[x]);setReq(r,miss.length?(r.status==='pass'?'pass':'progress'):'pass',ev+(miss.length?` · kalan: ${miss.map(x=>RQ_FLAG[x]||x).join(', ')}`:''));};
@@ -1547,6 +1627,7 @@ function airLeak(id,on,src){doorS[id].leak=on;log(`${src} → Kapı ${id} hava k
 let cDoorNoteT=0;function cDoorNote(id,src,what){const t=performance.now();if(t-cDoorNoteT>1500){cDoorNoteT=t;log(`${src} → kapı ${id} ${what}: karar C kodunda (Doors_BBCAN komutu bekleniyor)`);}}
 function openDoor(id,src,auto){
   if(src!=='C kodu'&&cDrivesDoors()){cDoorNote(id,src,'açma');return false;}
+  if(src!=='C kodu'){const n=nvOff(['BBC_StsFctEnaNv',`DOP_StDoor${id}InstdNv`,...(auto?[`D${id}A_StsFctEnaNv`]:[])]);if(n)return nvBlock(src,`Kapı ${id} açma`,n);}
   const s=doorS[id],d=DOORS[id-1],b=doorBlockedOpen(id);
   if(b){log(`${src} → Kapı ${id} açılamadı: ${b}`,'warn');SFX.buzz(doorPos(d));if(b.indexOf('Manuel rampa')===0)RQs('mramp','ob',MRN,`Kapı ${id} kapalı ve manuel rampa kapalı değil → kapı açılmadı (açılma engeli)`);
     if(V.speed>1){RQ('block03864','pass',`${V.speed.toFixed(0)} km/h hızda kapı ${id} açılmadı`);if(!auto){const r=reqFor('drvbtn19027');if(r){r.seen.blk=true;setReq(r,r.seen.ok?'pass':'progress','Hareket halinde sürücü butonu kapıyı açmadı'+(r.seen.ok?'':' (araç dururken de dene)'));}}}return false;}
@@ -1559,6 +1640,7 @@ function openDoor(id,src,auto){
 }
 function closeDoor(id,src,reason){
   if(src!=='C kodu'&&cDrivesDoors()){cDoorNote(id,src,'kapama');return false;}
+  if(src!=='C kodu'){const n=nvOff(['BBC_StsFctEnaNv',`DOP_StDoor${id}InstdNv`]);if(n)return nvBlock(src,`Kapı ${id} kapama`,n);}
   const s=doorS[id],d=DOORS[id-1],b=doorBlockedClose(id);
   if(b){log(`${src} → Kapı ${id} kapanamadı: ${b}`,'warn');SFX.buzz(doorPos(d));if(b.indexOf('Manuel rampa')===0)RQs('mramp','cb',MRN,`Manuel rampa açıkken kapı ${id} kapanmadı (kapanma engeli)`);return false;}
   const prev=s.state;if(prev==='CLOSED'||prev==='CLOSING')return true;
@@ -1568,7 +1650,7 @@ function closeDoor(id,src,reason){
   if(!airUse(id,src))return false;
   s.state='CLOSING';s.beepT=0;s.timer=0;s.hold=false;log(`${src} → Kapı ${id}: ${prev} → CLOSING`+(reason?` (${reason})`:''));return true;
 }
-function doorToggle(id,src){PRS['DrvBtn_K'+id]=performance.now();SFX.click([5.36,0.98,-0.32]);const s=doorS[id];if(s.state==='CLOSED'||s.state==='CLOSING')openDoor(id,src,false);else closeDoor(id,src);}
+function doorToggle(id,src){PRS['DrvBtn_K'+id]=performance.now();SFX.click([5.36,0.98,-0.32]);if(!cDrivesDoors()&&!nvOn(`D${id}M_StsFctEnaNv`))return nvBlock(src,`Sürücü butonu K${id}`,`D${id}M_StsFctEnaNv`);const s=doorS[id];if(s.state==='CLOSED'||s.state==='CLOSING')openDoor(id,src,false);else closeDoor(id,src);}
 function autoOpen(ids,src,forceHold){
   ids.forEach(id=>{const s=doorS[id],hold=!!forceHold||zoneHold(id);
     if(s.state==='OPEN'||s.state==='OPENING'){
@@ -1579,6 +1661,7 @@ function autoOpen(ids,src,forceHold){
 }
 function setRelease(on,src){
   if(src!=='C kodu'&&cDrivesRelease()){cRelease(on,src);return true;}
+  if(on&&src!=='C kodu'&&!nvOn('DR_StsFctEnaNv'))return nvBlock(src,'Türfreigabe','DR_StsFctEnaNv');
   if(on&&V.speed>0.5&&src!=='C kodu'){log(`${src} → Türfreigabe verilemedi: araç duruyor olmalı (2021.18715)`,'warn');{const r=reqFor('tfstand18715');if(r){r.seen.ref=true;setReq(r,'progress',`Araç ${V.speed.toFixed(0)} km/h iken Türfreigabe reddedildi`);}}return false;}
   V.release=on;
   if(on){const r=reqFor('tfstand18715');if(r&&r.seen.ref)setReq(r,'pass','Araç durduktan sonra Türfreigabe kabul edildi');RQ('tfled03870','pass','Türfreigabe aktif → B01 LED’i yandı, kapı tabelalarında “KAPI SERBEST”');}log(`${src} → DR_StDoorRelsActv=${on?1:0}`);
@@ -1591,6 +1674,7 @@ function setRelease(on,src){
 }
 function doorRequest(id,src){
   PRS['OeffBtn_K'+id]=performance.now();
+  if(!nvOn(`D${id}SR_StsFcnEnaNv`))return nvBlock(src,`Kapı ${id} AÇ butonu`,`D${id}SR_StsFcnEnaNv`);
   SFX.click(camera.position.toArray());const s=doorS[id],r=reqFor('oeffnung');
   if(s.state==='OPEN'||s.state==='OPENING'){if(V.release&&s.auto&&!s.hold&&s.state==='OPEN'){s.timer=AUTO_T;s.armAt=performance.now();log(`${src} → Kapı ${id} açık, kapanma sayacı yeniden başladı`);}else log(`${src} → Kapı ${id} zaten açık`);return;}
   if(!V.release){if(!s.reqOpen){s.reqOpen=true;const fs=!V.stopReq;ZR[id].stop=true;recompute();refreshStop();if(fs)SFX.ding();log(`${src} → D${id}SR_StBtnIntDoor${id}=1, D${id}SR_StStrqDoor${id}Saved=1 (saklandı, Türfreigabe bekleniyor)`);}else log(`${src} → D${id}SR_StBtnIntDoor${id} zaten kayıtlı`);
@@ -1603,6 +1687,7 @@ function doorRequest(id,src){
 }
 function stopRequest(kind,src,zone){
   PRS[(kind?'SpecBtn_K':'StopBtn_K')+zone]=performance.now();if(kind)PRS[kind+'_K'+zone]=performance.now();
+  {const n=kind==='stroller'?`D${zone}PB_StsFcnEnaNv`:kind==='prm'?`D${zone}W_StsFcnEnaNv`:kind==='elderly'?'DOM_StsFctEnaNv':`D${zone}SR_StsFcnEnaNv`;if(!nvOn(n))return nvBlock(src,kind?KIND[kind].name+' butonu':'STOP butonu',n);}
   if(doorS[zone].state!=='CLOSED'){SFX.click(camera.position.toArray());log(`${src} → Kapı ${zone} kapalı değil, istek saklanmadı (2021.19171)`+(V.release&&kind?'; otomatik kapı mantığı uygulandı':''));if(V.release&&kind)autoOpen([zone],src,true);return;}
   SFX.click(camera.position.toArray());const Z=ZR[zone],firstStop=!V.stopReq;
   if(kind&&!Z[kind]){Z[kind]=true;log(`${src} → ${KIND[kind].sig(zone)}=1`);SFX.chime();}
@@ -1676,7 +1761,7 @@ function applyLighting(){
   MAT.head.color.set(V.head?'#ffffff':(n?'#4a4843':'#cfcdc4'));MAT.drl.color.set(V.engine?'#eaf6ff':'#7d8186');
 }
 /* ---- elektrikli rampa (kapı 2): 2021.29298 / 29299 / 29301-03 / 29315, 2025.03167 / 03168 ---- */
-function rampWhy(){return V.rampKey===0?'rampa anahtarı 0 (rampa kapalı, 2021.29302)':V.rampKey===2?'rampa anahtarı 2 (acil mod, 2021.29303)':V.speed>=1?'araç hızı 1 km/h’den yüksek':doorS[2].state!=='CLOSED'?'kapı 2 kapalı değil (rampa yalnızca kapı kapalıyken hareket eder)':doorS[2].err?'kapı 2’de arıza var':null;}
+function rampWhy(){const nv=nvOff(['ER_StsFctEnaNv','ER_StDoor2RampInstdNv']);return nv?nv+' = 0 (elektrikli rampa programlı değil)':V.rampKey===0?'rampa anahtarı 0 (rampa kapalı, 2021.29302)':V.rampKey===2?'rampa anahtarı 2 (acil mod, 2021.29303)':V.speed>=1?'araç hızı 1 km/h’den yüksek':doorS[2].state!=='CLOSED'?'kapı 2 kapalı değil (rampa yalnızca kapı kapalıyken hareket eder)':doorS[2].err?'kapı 2’de arıza var':null;}
 function rampButton(down,src){
   if(down===V.rampBtn)return true;V.rampBtn=down;PRS['RampBtn']=performance.now();
   if(!down){if(V.rampDir>0&&V.rampPos<1){V.rampDir=-1;V.rampErly=true;log(`${src} → RAMPA bırakıldı, rampa tam açılmadan → geri toplanıyor (2021.29299)`);}return true;}
@@ -1712,6 +1797,7 @@ function announce(src){log(`${src} → Anons: Sonraki durak Belediye Meydanı`);
 /* ---------- kabin kapısı ---------- */
 const playerInCabDoor=()=>st.mode==='walk'&&st.x>CAB_X&&st.x<5.4&&st.z>-0.5&&st.z<(CAB.pos>0.1?0.8:-0.02)&&(st.z<-0.02||st.x>4.95);
 function cabRelease(src){
+  if(!nvOn('DAD_StsFctEnaNv'))return nvBlock(src,'Kabin kapısı','DAD_StsFctEnaNv');
   const r=reqFor('cablock');
   if(!V.park){log(`${src} → Kabin kapısı açılamadı: park freni çekili değil`,'warn');SFX.buzz([4.7,1,-0.3]);
     r.seen.blocked=true;setReq(r,r.seen.opened?'pass':'progress','Park freni inikken mıknatıs bırakılmadı, kapı kilitli kaldı'+(r.seen.opened?'':' (park freni çekiliyken de dene)'));return false;}
@@ -1884,7 +1970,7 @@ Object.assign(DEMOS,{
 DEMOS.ac18646=DEMOS.autoclose;
 async function runDemo(r,batch){
   if(DEMO&&!batch)return false;const sc=DEMOS[r.kind];if(!sc)return false;
-  if(!batch)DEMO={cancel:false};DEMO.r=r;ensureAudio();resetSim();setView('sim');log(`Otomatik test başladı: ${r.id}`,'req');
+  if(!batch)DEMO={cancel:false};DEMO.r=r;NVM.demo=true;ensureAudio();resetSim();setView('sim');log(`Otomatik test başladı: ${r.id}`,'req');
   document.body.classList.add('demo-on');$('#demo').hidden=false;$('#demoTitle').textContent=(batch?`[${batch}] `:'')+r.id+' · '+r.title_tr;
   $('#demoSteps').innerHTML=sc.map((s,i)=>`<li class="todo" id="ds${i}"><span class="sn">${i+1}</span><span class="tx">${esc(s[0])}</span><time></time></li>`).join('');
   $('#demoRes').innerHTML='';DEMO.sigs=[...new Set(['DR_StDoorRelsActv','GW_AcvBstbrkOn',...(r.signals||[])])].map(n=>SIG_DB.find(s=>s.n===n)).filter(s=>s&&s.sim);renderDemoSig();
@@ -1895,7 +1981,7 @@ async function runDemo(r,batch){
   r.rec={t0,t1:REC.now()};REQS.forEach(x=>{if(x!==r&&x.kind===r.kind)x.rec=r.rec;});
   DRV.force=null;V.speed=0;rig.position.set(0,0,0);rig.rotation.y=0;
   log(`Otomatik test ${ok?'bitti':'durduruldu'}: ${r.id} → ${RS[r.status]}`,'req');
-  if(!batch){DEMO=null;$('#demo').hidden=true;document.body.classList.remove('demo-on');if(ok)openReq(r.id);}
+  if(!batch){DEMO=null;NVM.demo=false;$('#demo').hidden=true;document.body.classList.remove('demo-on');if(ok)openReq(r.id);}
   return ok;
 }
 function renderDemoSig(){if(!DEMO||!DEMO.sigs)return;const tb=$('#demoSig');if(!tb)return;
@@ -1903,7 +1989,7 @@ function renderDemoSig(){if(!DEMO||!DEMO.sigs)return;const tb=$('#demoSig');if(!
 async function runAllDemos(){
   if(DEMO)return;const seen=new Set(),list=REQS.filter(r=>DEMOS[r.kind]&&!seen.has(r.kind)&&seen.add(r.kind));DEMO={cancel:false};let n=0;
   for(const r of list){n++;if(!await runDemo(r,`${n}/${list.length}`))break;}
-  DEMO=null;$('#demo').hidden=true;document.body.classList.remove('demo-on');resetSim();const all=REQS.filter(r=>DEMOS[r.kind]),c=counts(all);
+  DEMO=null;NVM.demo=false;$('#demo').hidden=true;document.body.classList.remove('demo-on');resetSim();const all=REQS.filter(r=>DEMOS[r.kind]),c=counts(all);
   log(`Tüm otomatik testler (${list.length} senaryo, ${all.length} gereksinim): ${c.pass} geçti, ${c.fail} kaldı, ${c.progress} devam ediyor, ${c.untested} test edilmedi`,'req');setView('reqs');
 }
 function scenarioSteps(r){
@@ -1964,6 +2050,7 @@ function setDoorType(id,t,quiet){if(!DOOR_TYPES[t])return;DCFG[id]=t;try{localSt
 function playerInDoor(d){return st.mode==='walk'&&st.x>d.x0-0.05&&st.x<d.x1+0.05&&st.z>IN-0.6&&st.z<HW+0.5;}
 let blink=0,hazOn=false,hazPrev=false;
 function updateDoors(dt){
+  if(V.release&&!cDrivesRelease()&&!nvOn('DR_StsFctEnaNv')){V.release=false;log('DR_StsFctEnaNv = 0 → Türfreigabe kapandı (DR_StDoorRelsActv=0)','warn');refreshBtns();}
   blink+=dt;const bl=(blink%0.6)<0.3;
   hazOn=V.hazard&&(blink%0.8)<0.4;if(hazOn!==hazPrev){hazPrev=hazOn;MAT.ind.color.set(hazOn?'#ffa31a':'#3a2a10');if(V.hazard)SFX.tick();}
   rampTick(dt);
@@ -1991,17 +2078,17 @@ function updateDoors(dt){
           setReq(reqFor('autoclose'),Math.abs(dur-AUTO_T)<0.4?'pass':'fail',`Kapı ${d.id} son tetiklemeden ${dur.toFixed(1)} s sonra kendiliğinden kapandı (parametre ${AUTO_T} s)`);
           RQ('ac18646',Math.abs(dur-AUTO_T)<0.4?'pass':'fail',`Işık bariyeri serbest, rampa kapalı → süre (${AUTO_T} s) sonunda kapama isteği gönderildi`);
           if(s.lbHit){s.lbHit=false;const r=reqFor('barrier');setReq(r,Math.abs(dur-AUTO_T)<0.4?'pass':'fail',`Bariyer serbest kaldıktan ${dur.toFixed(1)} s sonra kapandı (beklenen ${AUTO_T} s)`);}}}}
-    else if(s.state==='CLOSING'){s.beepT-=dt;if(s.beepT<=0){s.beepT=0.5;SFX.beep(doorPos(d));}
+    else if(s.state==='CLOSING'){s.beepT-=dt;if(s.beepT<=0){s.beepT=0.5;if(nvOn(`D${d.id}BZ_StsFcnEnaNv`))SFX.beep(doorPos(d));}
       s.pos=Math.max(0,s.pos-dt/DOOR_T);if(s.pos<=0){s.state='CLOSED';s.auto=false;s.hold=false;s.timer=0;s.lb=false;s.lbHit=false;log(`Kapı ${d.id}: CLOSED`);SFX.thunk(doorPos(d));}}
     const p=s.pos,e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
     doorPose(d.id,e);
     s.btnMat.emissive.set(s.state==='CLOSED'?'#300000':s.state==='OPEN'?'#ff2a14':(bl?'#ff2a14':'#400000'));
   });
-  const sb=cDrivesBrake()?(V.stopBrakeMan||!!CSIM.G.DBSBR_StBstbrkReq):(V.stopBrakeMan||V.release||V.mramp||DOORS.some(d=>doorS[d.id].state!=='CLOSED')); // 2025.02179: manuel rampa açıkken durak freni
+  const sb=cDrivesBrake()?(V.stopBrakeMan||!!CSIM.G.DBSBR_StBstbrkReq):(V.stopBrakeMan||(nvOn('DBSBR_StsFctEnaNv')&&(V.release||mrOn()||DOORS.some(d=>doorS[d.id].state!=='CLOSED')))); // 2025.02179: manuel rampa açıkken durak freni
   if(sb!==V.stopBrake){V.stopBrake=sb;log(`GW_AcvBstbrkOn=${sb?1:0}`+(sb?' (hareket engeli aktif)':''));
     {const r=reqFor('bsb13674');if(r){if(sb&&V.release){r.seen.on=true;setReq(r,r.status==='pass'?'pass':'progress','Türfreigabe aktif → GW_AcvBstbrkOn=1');}else if(!sb&&r.seen.on)setReq(r,'pass','Türfreigabe kapatıldı → GW_AcvBstbrkOn=0');}}
     if(sb&&!V.release&&DOORS.some(d=>doorS[d.id].state!=='CLOSED'))RQ('bsb18762','pass','Kapı kapalı değil → GW_AcvBstbrkOn=1');}
-  if(V.mramp&&V.stopBrake&&!V.release&&!V.stopBrakeMan&&DOORS.every(d=>doorS[d.id].state==='CLOSED')){const r=reqFor('mramp');if(r&&!r.seen.bsb)RQs('mramp','bsb',MRN,'Kapılar kapalı, manuel rampa açık → GW_AcvBstbrkOn=1');}
+  if(mrOn()&&V.stopBrake&&!V.release&&!V.stopBrakeMan&&DOORS.every(d=>doorS[d.id].state==='CLOSED')){const r=reqFor('mramp');if(r&&!r.seen.bsb)RQs('mramp','bsb',MRN,'Kapılar kapalı, manuel rampa açık → GW_AcvBstbrkOn=1');}
 }
 
 /* ================= Cluster ================= */
@@ -2073,9 +2160,10 @@ $('#hDrive').onclick=()=>toggleDrive('Gösterge HUD');$('#hHome').onclick=()=>go
 $('#hLight').onclick=()=>pressBtn(BTN[4],'Gösterge HUD');$('#hC').onclick=()=>setView('code');$('#hAir').onclick=()=>airSupply('Gösterge HUD');
 {const box=$('#dAir');box.innerHTML=DOORS.map(d=>`<span>Kapı ${d.id}</span><b id="air${d.id}">—</b><button class="sfb" data-airfill="${d.id}">Hava ver</button><button class="sfb" data-airleak="${d.id}" aria-pressed="false">Kaçak</button>`).join('');
   box.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;if(t.dataset.airfill)airSupply('Yan panel',+t.dataset.airfill);if(t.dataset.airleak){const z=+t.dataset.airleak;airLeak(z,!doorS[z].leak,'Yan panel');}updSidePanel();});
+  $('#nvSide').addEventListener('change',e=>nvMode(e.target.checked,'Yan panel'));$('#nvSideAll').onclick=()=>{nvSetAll(1,'Yan panel');updSidePanel();};
   $('#rKey').addEventListener('change',e=>setRampKey(e.target.value,'Yan panel'));$('#mrBtn').onclick=()=>{setMRamp(!V.mramp,'Yan panel');updSidePanel();};$('#mrDis').addEventListener('change',e=>{V.mrBlkDis=e.target.checked;log(`Yan panel → MR_CfgDoorBlkgDisNv=${V.mrBlkDis?1:0}`);});
   const rh=$('#rHold'),up=()=>{if(V.rampBtn)holdBtn(BB('RAMPA'),false,'Yan panel');};rh.onpointerdown=e=>{e.preventDefault();holdBtn(BB('RAMPA'),true,'Yan panel');};rh.onpointerup=up;rh.onpointerleave=up;rh.onpointercancel=up;}
-function updSidePanel(){if($('#pSig').hidden)return;DOORS.forEach(d=>{const s=doorS[d.id],el=$('#air'+d.id);const t=s.air.toFixed(1)+' bar'+(s.state==='POWERLESS'?' · POWERLESS':'');if(el.textContent!==t)el.textContent=t;el.className=s.state==='POWERLESS'?'bad':s.air<AIR.ok?'warn':'';
+function updSidePanel(){if($('#pSig').hidden)return;{const on=NVM.on,fon=NV_FN.filter(f=>f.nv.every(([n])=>nvRaw(n)!==0)).length,t=on?`${fon} / ${NV_FN.length} fonksiyon NV’si tam etkin. NV = 0 olan fonksiyon çıkış vermez.`:'Kapalı: tüm fonksiyonlar NV’den bağımsız çalışır.';const el=$('#nvSideSt');if(el.textContent!==t)el.textContent=t;$('#nvSide').checked=on;}DOORS.forEach(d=>{const s=doorS[d.id],el=$('#air'+d.id);const t=s.air.toFixed(1)+' bar'+(s.state==='POWERLESS'?' · POWERLESS':'');if(el.textContent!==t)el.textContent=t;el.className=s.state==='POWERLESS'?'bad':s.air<AIR.ok?'warn':'';
     const lb=document.querySelector(`[data-airleak="${d.id}"]`);lb.setAttribute('aria-pressed',s.leak);});
   $('#rState').textContent=rampState()+' · %'+Math.round(V.rampPos*100);$('#rHold').setAttribute('aria-pressed',V.rampBtn);$('#mrBtn').setAttribute('aria-pressed',V.mramp);$('#mrState').textContent=V.mramp?(mrBlk()==='open'?'açık · K3 açılma engeli':mrBlk()==='close'?'açık · K3 kapanma engeli':'açık'):'kapalı';
   const k=$('#rKey');if(k.value!==String(V.rampKey))k.value=String(V.rampKey);$('#mrDis').checked=V.mrBlkDis;}
@@ -3516,70 +3604,85 @@ async function plDownload(btn){plBuild();if(!PLX.out){btn.textContent='Liste bo�
   let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){}
   if(dl){try{await dl.save({filename:fn,data:blob});btn.textContent='İndirildi';}catch(e){btn.textContent=e&&e.code==='declined'?'İptal edildi':'İndirilemedi';}setTimeout(()=>btn.textContent=btn.dataset.lbl,1500);return;}
   try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}catch(e){btn.textContent='İndirilemedi';}}
-function renderPar(){const m=$('#dmain');
-  if(!PLX.db){$('#dtoc').innerHTML='<div class="tochead">ECU’lar</div>';m.innerHTML='<div class="dwrap wide"><p class="note">NV listesi yükleniyor…</p></div>';
-    plLoad().then(()=>{if(VIEW==='par')renderPar();}).catch(e=>{if(VIEW==='par')m.innerHTML=`<div class="dwrap wide"><p class="note">NV listesi (data/nv_params.json) yüklenemedi: ${esc(String(e.message||e))}</p>${plXlsBtn()}</div>`;});return;}
-  const nv=plCodeNv(),B=PLX.rows.filter(r=>r.ecu===PL_ECU),nAct=B.filter(r=>plVal(plKey(r))!==0).length,nCode=B.filter(r=>r.asw&&nv.has(r.asw)).length;
-  $('#dtoc').innerHTML=`<div class="tochead">SG</div><a class="tocg cur" href="#"><span>${esc(plSG(PL_ECU))}</span><em>${B.length}</em></a>
-    <div class="plstat"><div><b>${nAct}</b> aktif (≠ 0)</div><div><b>${nCode}</b> C kodunda</div><div><b>${B.filter(r=>r.active&&r.asw).length}</b> Excel’de Active</div></div>
-    <p class="note tocnote">Şimdilik yalnızca EIOB24. Listede başka SG’ler (EIOB22, EIOB30 …) alınmaz. Kaynak: ${esc(PLX.db.source||'')}${PLX.db.user?' (bu tarayıcıda içe aktarıldı)':''} · ${esc(PLX.db.built||'')}</p>`;
-  const flts=[['nz','Aktif parametreler (≠ 0)'],['code','C kodundaki NV’ler'],['active','Excel: Active = yes'],['all','Tümü'],...(PLX.imp?[['imp','Araç listesinden ('+PLX.imp.n+')']]:[])];
-  const sgs=[plSG(PL_ECU)];
-  m.innerHTML=`<div class="dwrap wide pwrap"><div class="dsum"><div><div class="eyebrow">Şasi parametre listesi · Parameterliste erzeugen</div><h3>Parametre listesi</h3>
-    <p>C kodundaki her Nv, Excel’deki <b>ASW Name</b> ile eşleşir; aynı satırdaki <b>Reserve Name</b> listedeki <code>PARA_NAME</code>’dir (BSW adı). LID, ofset, bit ve tip de o satırdan gelir. Değerleri elle girin ya da bir aracın parametre listesini içe aktarın; değer C kodunda hemen kullanılır ve listeye <code>BESCHREIBUNG</code> olarak yazılır.</p></div></div>
-    <div class="cmsg plfind"><b>NV ara ve aktif et</b><input type="search" id="plQ" placeholder="NV ya da PARA_NAME yazın, ör. DR_StsFctEnaNv" value="${esc(PLX.q)}" autocomplete="off" aria-label="NV ara"><div id="plHits"></div></div>
-    <details class="cmsg plpaste"${PLX.paste?' open':''}><summary>Parametre listesini metin olarak yapıştır</summary><textarea id="plPaste" class="plout" spellcheck="false" placeholder="[AANN_PARA_1]&#10;SG=EIOB24,0000&#10;PARA_NAME=B24_DR_p_StsFctEna,000&#10;…&#10;BESCHREIBUNG=1">${esc(PLX.paste)}</textarea><div class="pltools"><button class="pbtn" data-plact="paste">Yapıştırılanı içe aktar</button><button class="sfb" data-plact="pasteclr">Temizle</button></div></details>
-    <div class="pltools"><label class="pbtn">Araç parametre listesini dosyadan içe aktar<input type="file" id="plImp" accept=".txt,.ini,.par,.csv,text/plain" hidden></label>${plXlsBtn()}${PLX.db.user?'<button class="sfb" data-plact="dbreset">Gömülü listeye dön</button>':''}</div>
-    ${PLX.imp?`<div class="cmsg info"><b>İçe aktarılan: ${esc(PLX.imp.file)}</b><div>${PLX.imp.secs} bölüm · ${PLX.imp.n} parametre Excel’le eşleşti, değerleri yazıldı${PLX.imp.un.length?` · ${PLX.imp.un.length} PARA_NAME Excel’de yok: ${PLX.imp.un.slice(0,8).map(esc).join(', ')}${PLX.imp.un.length>8?' …':''}`:''}${PLX.imp.noCode.length?` · ${PLX.imp.noCode.length} NV yüklenen C kodunda geçmiyor`:''}${PLX.imp.skip.length?` · ${PLX.imp.skip.length} bölüm başka SG’den (${[...new Set(PLX.imp.skip)].slice(0,4).map(esc).join(', ')}), alınmadı`:''}</div></div>`:''}
-    <div class="ctabs" role="tablist">${flts.map(([k,l])=>`<button class="sfb" data-plflt="${k}" aria-pressed="${PLX.flt===k}">${l}</button>`).join('')}</div>
-    <div id="plBody"></div>
-    <details class="cmsg plset"><summary>Liste ayarları</summary>
-      <div class="plgrid"><label for="plSec">Bölüm adı</label><input id="plSec" value="${esc(PLX.sec)}">
-      ${sgs.map(sg=>`<label for="plS_${sg}">SACHNR_PSW · ${sg}</label><input id="plS_${sg}" data-plsach="${sg}" value="${esc(PLX.sach[sg]||'')}" placeholder="ör. 33258062093">`).join('')}
-      <label for="plOff">LOCAL_ID_OFFSET</label><select id="plOff"><option value="hex"${PLX.offFmt==='hex'?' selected':''}>Byte, onaltılık (0126)</option><option value="dec"${PLX.offFmt==='dec'?' selected':''}>Byte, ondalık (0294)</option></select>
-      <label for="plBool">bool biçimi</label><select id="plBool"><option value="bit"${PLX.boolFmt==='bit'?' selected':''}>KENNWERT_BIT_LAENGE=1,Bit</option><option value="byte"${PLX.boolFmt==='byte'?' selected':''}>KENNWERT_BIT_LAENGE=8,Byte</option></select></div>
-      <p class="note">VARSAYIM: Örnekte yalnızca uint16 (ofset 0) vardı. bool satırlarda PARALAENGE=1, PARAMASKE = bitin maskesi (bit 5 → 20), PARAWERT = değer × maske. Ofset varsayılan olarak onaltılık. Gerçek bir listeyle karşılaştırıp gerekirse buradan değiştirin.</p></details>
-    <div class="pltools"><button class="pbtn" data-plact="build">Parametre listesini oluştur</button><button class="sfb" data-plact="dl" data-lbl="İndir (.txt)">İndir (.txt)</button><button class="sfb" data-plact="copy">Kopyala</button><span class="note" id="plMsg">${esc(PLX.msg)}</span></div>
-    <textarea id="plOut" class="plout" readonly spellcheck="false" placeholder="“Parametre listesini oluştur” ile seçili satırlar burada listelenir.">${esc(PLX.out)}</textarea></div>`;
+/* ---- Parametreler sayfası (EIOB24): üst özet + fonksiyon anahtarları + parametre tablosu · sağda içe / dışa aktar ---- */
+const plSw=(k,v,lbl)=>`<label class="sw" title="${esc(k)}"><input type="checkbox" data-plsw="${esc(k)}" ${v?'checked':''} aria-label="${esc(lbl||k)}"><i></i></label>`;
+function plValCell(r){const k=plKey(r),v=plVal(k),t=PL_TY[r.type]||{};
+  return r.type==='bool'?plSw(k,v!==0,k)+(v!==0&&v!==1?` <span class="pz-bad">${esc(String(v))}</span>`:''):`<input class="pz-num${plOk(r,v)?'':' bad'}" type="number" step="1" min="${t.min||0}" max="${t.max!=null?t.max:''}" data-plv="${esc(k)}" value="${esc(String(v))}" aria-label="${esc(k)} değeri">`;}
+const plRowOf=n=>(PLX.byAsw.get(n)||[]).find(r=>r.ecu===PL_ECU);
+function plFnState(f){const off=f.nv.filter(([n])=>nvRaw(n)===0).length;return off===0?'on':off===f.nv.length?'off':'part';}
+function plKpiHTML(){const nv=plCodeNv(),B=PLX.rows.filter(r=>r.ecu===PL_ECU),act=B.filter(r=>plVal(plKey(r))!==0).length,fon=NV_FN.filter(f=>plFnState(f)==='on').length;
+  return `<div class="pz-kpi"><b>${act}</b><span>aktif parametre</span></div><div class="pz-kpi"><b>${fon}<small> / ${NV_FN.length}</small></b><span>fonksiyon tam etkin</span></div><div class="pz-kpi"><b>${B.filter(r=>r.asw&&nv.has(r.asw)).length}</b><span>NV C kodunda</span></div><div class="pz-kpi"><b>${B.length}</b><span>EIOB24 satırı</span></div>`;}
+function renderPar(){const m=$('#dmain');$('#docs').classList.add('pz-full');
+  if(!PLX.db){m.innerHTML='<div class="pz"><p class="note">NV listesi yükleniyor…</p></div>';
+    plLoad().then(()=>{if(VIEW==='par')renderPar();}).catch(e=>{if(VIEW==='par')m.innerHTML=`<div class="pz"><p class="note">NV listesi (data/nv_params.json) yüklenemedi: ${esc(String(e.message||e))}</p>${plXlsBtn()}</div>`;});return;}
+  const flts=[['nz','Aktif'],['code','C kodunda'],['active','Excel Active'],['all','Tümü'],...(PLX.imp?[['imp','Araç listesi']]:[])];
+  m.innerHTML=`<div class="pz">
+   <header class="pz-head"><div class="pz-title"><div class="eyebrow">EIOB24 · araç parametre seti</div><h3>Parametreler</h3>
+      <p>Simülatör, araca yazılmış NV değerleriyle çalışır. Program atılmamış araçta tüm NV’ler 0’dır ve fonksiyonlar çıkış vermez. Bir fonksiyonu açmak için NV’sini 1 yapın ya da bir aracın parametre listesini yapıştırın.</p></div>
+     <div class="pz-mode"><span>Simülatör NV’ye göre çalışsın</span>${`<label class="sw big"><input type="checkbox" id="pzMode" ${NVM.on?'checked':''} aria-label="Simülatör NV’ye göre çalışsın"><i></i></label>`}<em>${NVM.on?'Açık: NV = 0 olan fonksiyon çalışmaz':'Kapalı: tüm fonksiyonlar NV’den bağımsız çalışır'}</em></div></header>
+   <div class="pz-kpis" id="pzKpi">${plKpiHTML()}</div>
+   <div class="pz-grid"><div class="pz-main">
+    <section class="pz-card"><div class="pz-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input type="search" id="plQ" placeholder="NV ya da PARA_NAME ara, ör. DR_StsFctEnaNv" value="${esc(PLX.q)}" autocomplete="off" aria-label="NV ara"></div><div id="plHits"></div></section>
+    <section class="pz-card"><div class="pz-sech"><div><h4>Simülatör fonksiyonları</h4><p class="note">Her kart simülatördeki bir fonksiyonu açan NV’leri gösterir.</p></div><div class="pz-acts"><button class="sfb" data-plact="fnall1">Hepsini 1 yap</button><button class="sfb" data-plact="fnall0">Hepsini 0 yap</button></div></div>
+      <div class="pz-fns" id="pzFns">${plFnsHTML()}</div></section>
+    <section class="pz-card"><div class="pz-sech"><div><h4>Parametre tablosu</h4><p class="note" id="plCount"></p></div><div class="pz-seg" role="tablist">${flts.map(([k,l])=>`<button data-plflt="${k}" aria-pressed="${PLX.flt===k}">${l}</button>`).join('')}</div></div><div id="plBody"></div></section>
+   </div><aside class="pz-side">
+    <section class="pz-card"><h4>Araç listesini içe aktar</h4><p class="note">Parametre listesini buraya yapıştırın (Ctrl+V). Yalnızca SG = EIOB24 bölümleri alınır.</p>
+      <textarea id="plPaste" class="pz-ta" spellcheck="false" placeholder="[AANN_PARA_1]&#10;SG=EIOB24,0000&#10;PARA_NAME=B24_DR_p_StsFctEna,000&#10;…&#10;BESCHREIBUNG=1">${esc(PLX.paste)}</textarea>
+      <div class="pz-acts"><button class="pbtn" data-plact="paste">İçe aktar</button><label class="sfb">Dosyadan<input type="file" id="plImp" accept=".txt,.ini,.par,.csv,text/plain" hidden></label></div>
+      ${PLX.imp?`<div class="pz-res"><b>${esc(PLX.imp.file)}</b><span>${PLX.imp.n} eşleşti</span>${PLX.imp.un.length?`<span class="w">${PLX.imp.un.length} Excel’de yok</span>`:''}${PLX.imp.skip.length?`<span class="w">${PLX.imp.skip.length} başka SG</span>`:''}${PLX.imp.un.length?`<div class="note">${PLX.imp.un.slice(0,6).map(esc).join(', ')}${PLX.imp.un.length>6?' …':''}</div>`:''}</div>`:''}</section>
+    <section class="pz-card"><h4>Şasi parametre listesi oluştur</h4><p class="note">Tablodaki seçili satırlar <code>[${esc(PLX.sec)}_n]</code> bölümleri olarak yazılır.</p>
+      <label class="pz-lbl" for="plS_EIOB24">SACHNR_PSW · EIOB24</label><input class="pz-in" id="plS_EIOB24" data-plsach="EIOB24" value="${esc(PLX.sach.EIOB24||'')}" placeholder="ör. 33258062093">
+      <div class="pz-acts"><button class="pbtn" data-plact="build">Oluştur</button><button class="sfb" data-plact="dl" data-lbl="İndir .txt">İndir .txt</button><button class="sfb" data-plact="copy">Kopyala</button></div>
+      <p class="note" id="plMsg">${esc(PLX.msg)}</p><textarea id="plOut" class="pz-ta out" readonly spellcheck="false" placeholder="Önizleme">${esc(PLX.out)}</textarea>
+      <details class="pz-det"><summary>Biçim ayarları</summary><div class="plgrid"><label for="plSec">Bölüm adı</label><input id="plSec" value="${esc(PLX.sec)}">
+        <label for="plOff">LOCAL_ID_OFFSET</label><select id="plOff"><option value="hex"${PLX.offFmt==='hex'?' selected':''}>onaltılık (0126)</option><option value="dec"${PLX.offFmt==='dec'?' selected':''}>ondalık (0294)</option></select>
+        <label for="plBool">bool</label><select id="plBool"><option value="bit"${PLX.boolFmt==='bit'?' selected':''}>1,Bit</option><option value="byte"${PLX.boolFmt==='byte'?' selected':''}>8,Byte</option></select></div>
+        <p class="note">VARSAYIM: bool’da PARAMASKE = bit maskesi, PARAWERT = değer × maske.</p></details></section>
+    <section class="pz-card pz-db"><h4>NV veritabanı</h4><p class="note">${esc(PLX.db.source||'')}${PLX.db.user?' · bu tarayıcıda yüklendi':''} · ${esc(PLX.db.built||'')}</p><div class="pz-acts">${plXlsBtn()}${PLX.db.user?'<button class="sfb" data-plact="dbreset">Gömülü listeye dön</button>':''}</div></section>
+   </aside></div></div>`;
   renderParBody();plHits();}
-function plHits(){const el=$('#plHits');if(!el)return;const q=PLX.q.trim().toLowerCase();if(q.length<2){el.innerHTML='<span class="note">En az 2 karakter. EIOB24’teki tüm NV’ler aranır; “Aktif et” değeri 1 yapar.</span>';return;}
+function plFnsHTML(){return NV_FN.map(f=>{const st=plFnState(f);return `<article class="pz-fn ${st}"><header><b>${esc(f.ad)}</b><span class="pz-pill ${st}">${st==='on'?'Çalışıyor':st==='off'?'Kapalı':'Kısmen'}</span></header><p>${esc(f.ne)}</p>
+  <ul>${f.nv.map(([n,l])=>{const r=plRowOf(n);return `<li><div><span>${esc(l)}</span><code>${esc(n)}</code>${r?'':'<em>Excel’de yok</em>'}</div>${plSw(n,nvRaw(n)!==0,l)}</li>`;}).join('')}</ul></article>`;}).join('');}
+const plXlsBtn=()=>'<label class="sfb">Excel yükle (.xlsx)<input type="file" id="plXls" accept=".xlsx,.xlsm" hidden></label>';
+function renderParBody(){const el=$('#plBody');if(!el)return;const {rows,miss}=plList(),nv=plCodeNv(),LIM=500,inc=rows.filter(r=>!PLX.ex[r.i]).length;
+  const c=$('#plCount');if(c)c.innerHTML=`${rows.length} satır · ${inc} listeye dahil · <button class="linkbtn" data-plact="all1">tümünü seç</button> · <button class="linkbtn" data-plact="all0">hiçbiri</button>`;
+  const empty=PLX.flt==='nz'?'Aktif parametre yok. Araç programsız: tüm NV’ler 0. Yukarıdan arayıp aktif edin ya da sağdan bir parametre listesi yapıştırın.':PLX.flt==='code'&&!Object.keys(CSIM.asws).length?'Yüklenmiş C kodu yok. C Kod sayfasından B24 kodunu yükleyin.':'Eşleşen satır yok.';
+  el.innerHTML=`<div class="pz-tw"><table class="pz-t"><thead><tr><th></th><th>NV · PARA_NAME</th><th>Adres</th><th>Değer</th></tr></thead><tbody>${rows.slice(0,LIM).map(r=>{const e=r.asw&&nv.get(r.asw),k=plKey(r);
+    return `<tr${PLX.ex[r.i]?' class="off"':''}><td><input type="checkbox" data-plinc="${r.i}" ${PLX.ex[r.i]?'':'checked'} aria-label="${esc(k)} listeye"></td><td><code class="n">${esc(r.asw||'—')}</code><code class="b">${esc(r.reserve)}</code>${e?`<span class="tag">${e.built?'derlendi':'kodda'}</span>`:''}${PLX.imp&&PLX.imp.set.has(k)?'<span class="tag imp">araç listesi</span>':''}</td>
+      <td class="a">${esc(String(r.addr).replace(/^0x/i,''))}<span>·${r.byte}·${r.bit}</span><small>${esc(r.type)}</small></td><td class="v">${plValCell(r)}</td></tr>`;}).join('')||`<tr><td colspan="4" class="pz-empty">${esc(empty)}</td></tr>`}</tbody></table></div>`
+    +(rows.length>LIM?`<p class="note">İlk ${LIM} satır gösteriliyor; arama ile daraltın (listeye hepsi yazılır).</p>`:'')
+    +(miss.length?`<details class="pz-det"><summary>${miss.length} NV C kodunda var ama Excel’de yok</summary><div class="note">${miss.slice(0,200).map(x=>`<code>${esc(x)}</code>`).join(' ')}</div></details>`:'');}
+function plHits(){const el=$('#plHits');if(!el)return;const q=PLX.q.trim().toLowerCase();if(q.length<2){el.innerHTML='';return;}
   const f=x=>x.toLowerCase().includes(q),hit=PLX.rows.filter(r=>r.ecu===PL_ECU&&(f(r.asw)||f(r.reserve))).sort((a,b)=>(a.asw.toLowerCase().startsWith(q)?0:1)-(b.asw.toLowerCase().startsWith(q)?0:1)||(a.asw<b.asw?-1:1));
-  el.innerHTML=hit.length?`<table class="stable plhit"><tbody>${hit.slice(0,12).map(r=>{const k=plKey(r),v=plVal(k),t=PL_TY[r.type]||{};return `<tr><td><code>${esc(r.asw||'—')}</code><div class="en">${esc(r.reserve)} · ${esc(r.type)}</div></td><td><input class="cpar" type="number" step="1" min="${t.min||0}" max="${t.max!=null?t.max:''}" data-plv="${esc(k)}" value="${esc(String(v))}" aria-label="${esc(k)} değeri"></td><td class="plbtns"><button class="pbtn" data-plon="${esc(k)}"${v===1?' disabled':''}>Aktif et</button><button class="sfb" data-ploff="${esc(k)}"${v===0?' disabled':''}>Pasif</button></td></tr>`;}).join('')}</tbody></table>${hit.length>12?`<span class="note">${hit.length} eşleşme, ilk 12 gösteriliyor.</span>`:''}`:`<span class="note">EIOB24’te “${esc(PLX.q)}” bulunamadı (ASW Name ya da Reserve Name).</span>`;}
-const plXlsBtn=()=>'<label class="sfb">NV Excel’i yükle (.xlsx)<input type="file" id="plXls" accept=".xlsx,.xlsm" hidden></label>';
-function renderParBody(){const el=$('#plBody');if(!el)return;const {rows,miss}=plList(),nv=plCodeNv(),noCode=PLX.flt==='code'&&!Object.keys(CSIM.asws).length;
-  const inc=rows.filter(r=>!PLX.ex[r.i]).length,LIM=600;
-  el.innerHTML=(noCode?`<div class="cmsg warn"><b>Yüklenmiş C kodu yok</b><div>C Kod sayfasından B24 kodunu yükleyince koddaki Nv’ler burada listelenir. Şimdilik “Excel: Active = yes” ya da “Tümü” ile çalışabilirsiniz.</div><button class="sfb" data-goview="code">C Kod sayfasına git</button></div>`:'')
-    +`<p class="note">${rows.length} satır · ${inc} listeye dahil${rows.length>LIM?` · ilk ${LIM} gösteriliyor, aramayla daraltın (listeye hepsi yazılır)`:''} · <button class="linkbtn" data-plact="all1">tümünü seç</button> · <button class="linkbtn" data-plact="all0">hiçbirini seçme</button></p>
-    <div class="stable-wrap"><table class="stable pltable"><thead><tr><th></th><th>ASW (Nv)</th><th>PARA_NAME (BSW)</th><th>SG · LID · ofset · bit</th><th>Tip</th><th>Değer</th><th>Kaynak</th></tr></thead><tbody>${rows.slice(0,LIM).map(r=>{const k=plKey(r),v=plVal(k),t=PL_TY[r.type]||{},e=r.asw&&nv.get(r.asw);
-      return `<tr${PLX.ex[r.i]?' class="off"':''}><td><input type="checkbox" data-plinc="${r.i}" ${PLX.ex[r.i]?'':'checked'} aria-label="${esc(k)} listeye"></td><td><code>${esc(r.asw||'—')}</code>${e?`<div class="en">${e.built?'derlendi':'kaynakta'} · ${[...e.asw].slice(0,2).map(esc).join(', ')}</div>`:''}</td><td><code>${esc(r.reserve)}</code>${r.isRes?'<div class="en">rezerv</div>':''}${r.active?'':'<div class="en">Active = no</div>'}</td>
-        <td class="stype">${esc(plSG(r.ecu))} · ${esc(String(r.addr).replace(/^0x/i,''))} · ${r.byte} · ${r.bit}</td><td class="stype">${esc(r.type)}</td>
-        <td><input class="cpar${plOk(r,v)?'':' bad'}" type="number" step="1" min="${t.min||0}" max="${t.max!=null?t.max:''}" data-plv="${esc(k)}" value="${esc(String(v))}" aria-label="${esc(k)} değeri"></td><td class="stype">${esc(plSrc(k))}</td></tr>`;}).join('')||'<tr><td colspan="7" class="note">Eşleşen satır yok.</td></tr>'}</tbody></table></div>`
-    +(miss.length?`<details class="cmsg"><summary>${miss.length} Nv C kodunda var ama Excel’de ASW Name olarak yok</summary><div class="note">${miss.slice(0,200).map(x=>`<code>${esc(x)}</code>`).join(' ')}${miss.length>200?' …':''}</div><div class="note">Bu NV’lerin BSW (Reserve Name) karşılığı listede tanımlı değil; parametre listesine yazılamaz.</div></details>`:'');}
+  el.innerHTML=hit.length?`<ul class="pz-hits">${hit.slice(0,10).map(r=>`<li><div><code class="n">${esc(r.asw||'—')}</code><code class="b">${esc(r.reserve)} · ${esc(r.type)}</code></div>${plValCell(r)}</li>`).join('')}</ul>${hit.length>10?`<p class="note">${hit.length} eşleşme, ilk 10.</p>`:''}`:`<p class="note">EIOB24’te “${esc(PLX.q)}” yok.</p>`;}
+function plRefresh(){const k=$('#pzKpi');if(k)k.innerHTML=plKpiHTML();const f=$('#pzFns');if(f)f.innerHTML=plFnsHTML();}
 function plClick(e){const t=e.target.closest('button,a,input[type=checkbox]');if(!t)return false;
-  if(t.dataset.plflt){PLX.flt=t.dataset.plflt;plSave();renderPar();return true;}
+  if(t.dataset.plflt){PLX.flt=t.dataset.plflt;plSave();document.querySelectorAll('[data-plflt]').forEach(b=>b.setAttribute('aria-pressed',b===t));renderParBody();return true;}
   if(t.dataset.plinc!=null){const i=+t.dataset.plinc;if(t.checked)delete PLX.ex[i];else PLX.ex[i]=1;plSave();t.closest('tr').classList.toggle('off',!t.checked);return true;}
-  if(t.dataset.plon||t.dataset.ploff){const k=t.dataset.plon||t.dataset.ploff,v=t.dataset.plon?1:0;plSetVal(k,v);if(PLX.imp)PLX.imp.set.delete(k);log(`Parametre listesi → ${k}=${v} (${v?'aktif':'pasif'})`);plHits();renderParBody();renderParToc();return true;}
+  if(t.dataset.plsw||t.id==='pzMode')return true;
   const a=t.dataset.plact;if(!a)return false;e.preventDefault();
-  if(a==='paste'){const x=$('#plPaste').value;PLX.paste=x;if(!plParse(x).length){cNotice('Yapıştırılan metinde PARA_NAME içeren [bölüm] bulunamadı','bad');return true;}plImport(x,'yapıştırılan metin');PLX.paste='';renderPar();return true;}
-  if(a==='pasteclr'){PLX.paste='';$('#plPaste').value='';return true;}
-  if(a==='build'){plBuild();$('#plOut').value=PLX.out;$('#plMsg').textContent=PLX.msg;}
+  if(a==='paste'){const x=$('#plPaste').value;PLX.paste=x;if(!plParse(x).length){cNotice('Yapıştırılan metinde PARA_NAME içeren [bölüm] bulunamadı','bad');return true;}plImport(x,'yapıştırılan metin');PLX.paste='';renderPar();}
+  else if(a==='fnall1'||a==='fnall0'){nvSetAll(a==='fnall1'?1:0,'Parametreler');renderParBody();plHits();plRefresh();}
+  else if(a==='build'){plBuild();$('#plOut').value=PLX.out;$('#plMsg').textContent=PLX.msg;}
   else if(a==='dl'){plDownload(t).then(()=>{$('#plOut').value=PLX.out;$('#plMsg').textContent=PLX.msg;});}
   else if(a==='copy'){plBuild();$('#plOut').value=PLX.out;$('#plMsg').textContent=PLX.msg;(navigator.clipboard?navigator.clipboard.writeText(PLX.out):Promise.reject()).then(()=>{t.textContent='Kopyalandı';setTimeout(()=>t.textContent='Kopyala',1200);}).catch(()=>{const ta=$('#plOut');ta.select();document.execCommand&&document.execCommand('copy');});}
   else if(a==='all1'||a==='all0'){plList().rows.forEach(r=>{if(a==='all1')delete PLX.ex[r.i];else PLX.ex[r.i]=1;});plSave();renderParBody();}
   else if(a==='dbreset'){IDB.set('nvdb',null).catch(()=>{});PLX.db=null;PLX.p=null;PLX.imp=null;renderPar();}
   return true;}
 function plInput(e){const t=e.target;
-  if(t.dataset.plv){const n=t.dataset.plv,r=(PLX.byAsw.get(n)||PLX.byRes.get(n)||[])[0],v=t.value===''?null:+t.value;plSetVal(n,v);if(r)t.classList.toggle('bad',v!=null&&!plOk(r,v));if(PLX.imp)PLX.imp.set.delete(n);const s=t.closest('tr').lastElementChild;if(s&&!t.closest('.plhit'))s.textContent=plSrc(n);renderParToc();return true;}
+  if(t.dataset.plv){const n=t.dataset.plv,r=(PLX.byAsw.get(n)||PLX.byRes.get(n)||[])[0],v=t.value===''?null:+t.value;plSetVal(n,v);if(r)t.classList.toggle('bad',v!=null&&!plOk(r,v));if(PLX.imp)PLX.imp.set.delete(n);plRefresh();return true;}
   if(t.id==='plQ'){PLX.q=t.value;plHits();return true;}if(t.id==='plPaste'){PLX.paste=t.value;return true;}
   if(t.dataset.plsach){PLX.sach[t.dataset.plsach]=t.value.trim();plSave();return true;}
   if(t.id==='plSec'){PLX.sec=t.value.trim()||'AANN_PARA';plSave();return true;}
   return false;}
 function plChange(e){const t=e.target;
+  if(t.dataset.plsw){const n=t.dataset.plsw,v=t.checked?1:0;plSetVal(n,v);if(PLX.imp)PLX.imp.set.delete(n);log(`Parametreler → ${n} = ${v}`);document.querySelectorAll(`[data-plsw="${CSS.escape(n)}"]`).forEach(x=>{if(x!==t)x.checked=t.checked;});plRefresh();if(PLX.flt==='nz')renderParBody();return true;}
+  if(t.id==='pzMode'){nvMode(t.checked,'Parametreler');renderPar();return true;}
   if(t.id==='plOff'){PLX.offFmt=t.value;plSave();return true;}if(t.id==='plBool'){PLX.boolFmt=t.value;plSave();return true;}
   if(t.id==='plImp'&&t.files[0]){const f=t.files[0];f.text().then(x=>{plImport(x,f.name);renderPar();}).catch(err=>cNotice('Liste okunamadı: '+err.message,'bad'));return true;}
-  if(t.id==='plXls'&&t.files[0]){const f=t.files[0];$('#plMsg')&&($('#plMsg').textContent='Excel okunuyor…');plImportXlsx(f).then(()=>renderPar()).catch(err=>cNotice('Excel içe aktarılamadı: '+err.message,'bad'));return true;}
+  if(t.id==='plXls'&&t.files[0]){const f=t.files[0];plImportXlsx(f).then(()=>renderPar()).catch(err=>cNotice('Excel içe aktarılamadı: '+err.message,'bad'));return true;}
   return false;}
-function renderParToc(){const st=document.querySelector('.plstat');if(!st)return;const nv=plCodeNv(),B=PLX.rows.filter(r=>r.ecu===PL_ECU);st.firstElementChild.innerHTML=`<b>${B.filter(r=>plVal(plKey(r))!==0).length}</b> aktif (≠ 0)`;}
 const hashView=()=>{const h=location.hash;if(h==='#gereksinimler')setView('reqs');else if(h==='#sinyaller')setView('sigs');else if(h==='#ckod')setView('code');else if(h==='#parametre')setView('par');};hashView();addEventListener('hashchange',hashView);
 function needRender(now){const c=PERF_CFG[PERF.mode];if(now-PERF.lastR<1000/c.fps-4)return false;
   const p=camera.position,r=camera.rotation,key=`${p.x.toFixed(3)},${p.y.toFixed(3)},${p.z.toFixed(3)},${r.x.toFixed(4)},${r.y.toFixed(4)},${r.z.toFixed(4)},${camera.fov},${renderer.domElement.width}`;
