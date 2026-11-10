@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev W)
+# Otobüs Tasarım Stüdyosu (konsept, Rev X)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -159,3 +159,7 @@ Sinyaller: DoorRelease, DoorState_K2
 ## Rev W
 - **C dosyalarını seç**: birden çok ASW’nin .c/.h dosyaları tek seferde seçilir, dosya adından ASW’lere ayrılır (…_Local/_Output/_Input/_data/… ekleri), ASW’ye ait olmayan başlıklar ortak başlık olur. **Tüm kodu sil** ve **Bu ASW’yi sil** düğmeleri.
 - Derleyici durmak yerine uyarıyla devam eder: tanımı olmayan fonksiyonlar (RTE/kütüphane) 0 döndürür, memset/memcpy desteklenir, metin sabitleri ve bilinmeyen tip adlı dönüşümler kabul edilir, adım fonksiyonu adından anlaşılamazsa parametresiz kök fonksiyonlar 100 ms adım sayılır.
+
+## Rev X
+- Önişlemci: birden çok satıra yayılan makro çağrıları açılıyor (ör. Gtm.h GTM_SFR_RUNTIME_USER_MODE_MODIFY32). Başlıklarda açılamayan makro derlemeyi durdurmaz, uyarı olur.
+- Düzeltme: `#define X (0U)` gibi adı ile parantez arasında boşluk olan tanımlar yanlışlıkla fonksiyon makrosu sayılıyordu; bu sabitler 0 kalıyordu.

@@ -350,7 +350,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev W</div>
+    <div class="eyebrow">Konsept · Rev X</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
   </div>
@@ -2221,14 +2221,14 @@ function lex(src,file){
     if(c==='\\'&&src[i+1]==='\r'&&src[i+2]==='\n'){i+=3;l++;continue;}
     if(c==='/'&&src[i+1]==='*'){const e=src.indexOf('*/',i+2);const end=e<0?n:e+2;for(let k=i;k<end;k++)if(src[k]==='\n')l++;i=end;continue;}
     if(c==='/'&&src[i+1]==='/'){while(i<n&&src[i]!=='\n')i++;continue;}
-    if(/[A-Za-z_]/.test(c)){let j=i+1;while(j<n&&/[A-Za-z0-9_]/.test(src[j]))j++;out.push({t:'id',v:src.slice(i,j),f:file,l});i=j;continue;}
+    if(/[A-Za-z_]/.test(c)){let j=i+1;while(j<n&&/[A-Za-z0-9_]/.test(src[j]))j++;out.push({t:'id',v:src.slice(i,j),f:file,l,o:i});i=j;continue;}
     if(/[0-9]/.test(c)||(c==='.'&&/[0-9]/.test(src[i+1]))){let j=i;
       if(c==='0'&&/[xX]/.test(src[i+1])){j=i+2;while(j<n&&/[0-9a-fA-F]/.test(src[j]))j++;}
       else{while(j<n&&/[0-9.]/.test(src[j]))j++;if(/[eE]/.test(src[j])){j++;if(/[+-]/.test(src[j]))j++;while(j<n&&/[0-9]/.test(src[j]))j++;}}
       let k=j;while(k<n&&/[uUlLfF]/.test(src[k]))k++;out.push({t:'num',v:src.slice(i,k),f:file,l});i=k;continue;}
     if(c==='"'||c==="'"){let j=i+1;while(j<n&&src[j]!==c){if(src[j]==='\\')j++;j++;}out.push({t:c==='"'?'str':'chr',v:src.slice(i,j+1),f:file,l});i=j+1;continue;}
     let p=PUN.find(p=>src.startsWith(p,i));if(!p){out.push({t:'p',v:c,f:file,l,junk:true});i++;continue;}
-    out.push({t:'p',v:p,f:file,l});i+=p.length;}
+    out.push({t:'p',v:p,f:file,l,o:i});i+=p.length;}
   out.push({t:'nl',f:file,l});return out;}
 
 /* ---------- önişlemci ---------- */
@@ -2268,11 +2268,13 @@ function preprocess(files,mainName,ctx){
   function run(name){
     if(stackInc.includes(name)||stackInc.length>40)return;
     const src=files.get(name);if(src==null){ctx.missingInc.add(name);return;}
-    stackInc.push(name);const toks=lex(src,name);const cond=[];let line=[];
+    stackInc.push(name);const toks=lex(src,name);const cond=[];let line=[],buf=[];
     const active=()=>cond.every(c=>c.on);
+    const flush=()=>{if(!buf.length)return;const B=buf;buf=[];
+      try{out.push(...expand(B,new Set()));}catch(e){if(!/\.h$/i.test(name))throw e;out.push(...B);(ctx.ppWarn=ctx.ppWarn||[]).push({file:e.file||name,line:e.line,msg:e.message});}};
     for(const t of toks){if(t.t!=='nl'){line.push(t);continue;}
       const L=line;line=[];if(!L.length)continue;
-      if(L[0].v==='#'){const d=L[1]&&L[1].v,rest=L.slice(2);
+      if(L[0].v==='#'){flush();const d=L[1]&&L[1].v,rest=L.slice(2);
         if(d==='ifdef'||d==='ifndef'){const on=macros.has(rest[0]&&rest[0].v);const v=d==='ifdef'?on:!on;cond.push({on:active()?v:false,taken:v,par:active()});continue;}
         if(d==='if'){const v=active()&&evalCond(rest);cond.push({on:v,taken:v,par:active()});continue;}
         if(d==='elif'){const c=cond[cond.length-1];if(!c)throw new CErr('#elif eşleşmiyor',L[0]);if(c.taken||!c.par){c.on=false;}else{const v=evalCond(rest);c.on=v;c.taken=v;}continue;}
@@ -2281,16 +2283,16 @@ function preprocess(files,mainName,ctx){
         if(!active())continue;
         if(d==='include'){let nm=rest.map(x=>x.v).join('');nm=nm.replace(/^["<]|[">]$/g,'');run(nm.split('/').pop());continue;}
         if(d==='define'){const nm=rest[0]&&rest[0].v;if(!nm)continue;rest.forEach((x,i)=>{if(x.v==='#'&&rest[i+1]&&rest[i+1].v==='#'){x.v='##';rest.splice(i+1,1);}});
-          if(rest[1]&&rest[1].v==='('&&rest[1].l===rest[0].l&&isAdj(rest[0],rest[1],src)){let j=2;const ps=[];while(j<rest.length&&rest[j].v!==')'){if(rest[j].t==='id')ps.push(rest[j].v);j++;}
+          if(rest[1]&&rest[1].v==='('&&isAdj(rest[0],rest[1])){let j=2;const ps=[];while(j<rest.length&&rest[j].v!==')'){if(rest[j].t==='id')ps.push(rest[j].v);j++;}
             macros.set(nm,{params:ps,body:rest.slice(j+1)});}
           else{macros.set(nm,{body:rest.slice(1)});if(nm==='RUNNABLE_ID'&&rest[1])ctx.runnables.add(rest[1].v);}
           continue;}
         if(d==='undef'){if(rest[0])macros.delete(rest[0].v);continue;}
         continue;}
       if(!active())continue;
-      out.push(...expand(L,new Set()));}
-    stackInc.pop();}
-  function isAdj(a,b,src){return true;}
+      buf.push(...L);}
+    flush();stackInc.pop();}
+  function isAdj(a,b){return a.o!=null&&b.o!=null?b.o===a.o+String(a.v).length:true;}
   run(mainName);return out;}
 
 /* ---------- ayrıştırıcı ---------- */
@@ -2600,7 +2602,7 @@ function compile(fileMap,opts){
   const globals={};for(const [n,g] of G)globals[n]={ty:g.ty,file:g.tok&&g.tok.f,line:g.tok&&g.tok.l,calib:!!(g.tok&&/_Local\.c$/i.test(g.tok.f)&&/_P$/.test(n))};
   let mod=null;if(!opts.noMod)try{mod=Function(js)();}catch(e){throw new CErr('İç hata (üretilen JS): '+e.message,null);}
   const types={};[...io.inputs,...io.outputs,...io.params].forEach(n=>{const t=typeOfGlobal(n);if(t)types[n]=tyName(t);});
-  const res={mod,js,steps,types,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.warnings.concat((ctx.hdrSkips||[]).slice(0,30).map(x=>({msg:'Başlıktaki tanım atlandı (simülasyon için gerekmiyor): '+x.msg,file:x.file,line:x.line})))),hdrSkips:(ctx.hdrSkips||[]).length,globals,typeOf:n=>typeOfGlobal(n)};if(opts.noMod){delete res.mod;delete res.typeOf;}return res;}
+  const res={mod,js,steps,types,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.warnings.concat((ctx.ppWarn||[]).slice(0,20).map(x=>({msg:'Başlıkta açılamayan makro atlandı: '+x.msg,file:x.file,line:x.line})),(ctx.hdrSkips||[]).slice(0,30).map(x=>({msg:'Başlıktaki tanım atlandı (simülasyon için gerekmiyor): '+x.msg,file:x.file,line:x.line})))),hdrSkips:(ctx.hdrSkips||[]).length,globals,typeOf:n=>typeOfGlobal(n)};if(opts.noMod){delete res.mod;delete res.typeOf;}return res;}
 function dedupe(w){const s=new Set();return w.filter(x=>{const k=x.msg;if(s.has(k))return false;s.add(k);return true;});}
 const tyName=t=>!t?'?':t.k==='bool'?'boolean':t.k==='int'?(t.signed?'int':'uint')+t.bits:t.k==='float'?'real'+(t.bits===32?'32':''):t.k;
 return {compile,CErr,tyName};
