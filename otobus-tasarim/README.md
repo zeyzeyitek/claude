@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev X)
+# Otobüs Tasarım Stüdyosu (konsept, Rev Y)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -163,3 +163,7 @@ Sinyaller: DoorRelease, DoorState_K2
 ## Rev X
 - Önişlemci: birden çok satıra yayılan makro çağrıları açılıyor (ör. Gtm.h GTM_SFR_RUNTIME_USER_MODE_MODIFY32). Başlıklarda açılamayan makro derlemeyi durdurmaz, uyarı olur.
 - Düzeltme: `#define X (0U)` gibi adı ile parantez arasında boşluk olan tanımlar yanlışlıkla fonksiyon makrosu sayılıyordu; bu sabitler 0 kalıyordu.
+
+## Rev Y
+- Simulink S-Function dosyaları (S_FUNCTION_NAME / simstruc.h / mdlInitializeSizes, ör. ButtonBlock.c) ECU koduna girmediği için otomatik atlanır; asıl mantık …_wrapper.c dosyasında derlenir.
+- ASW’nin ana model dosyası dışındaki bir .c dosyası (ör. donanım okuyan KSWpinningReadPwmInput.c) derlenemezse ASW durmaz; dosya atlanır ve “derlemeye alınmadı” listesinde gösterilir. Ana model dosyasındaki hatalar yine hata olarak gösterilir.

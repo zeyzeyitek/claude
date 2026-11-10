@@ -350,7 +350,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev X</div>
+    <div class="eyebrow">Konsept · Rev Y</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
   </div>
@@ -2454,7 +2454,16 @@ function compile(fileMap,opts){
   for(const [n,src] of files){if(opts.skipScan&&opts.skipScan.has(n))continue;const re=/extern\s+(?:const\s+)?([A-Za-z_]\w*)\s+([A-Za-z_]\w*)\s*;/g;let m;while((m=re.exec(src))){const t=BUILTIN_TYPEDEF[m[1]];if(t)externTy.set(m[2],t);}}
   /* sırayla: önce .h tipleri için tüm .c dosyaları aynı bağlamda */
   let items=[];
-  for(const cf of cfiles){const toks=preprocess(files,cf,ctx);items=items.concat(parse(toks,ctx));}
+  /* Simulink S-Function (MEX) dosyaları ECU koduna girmez: atlanır. Ana model dosyası dışındaki .c dosyalarında hata varsa o dosya atlanır. */
+  const SUF=/_(Local|Output|Input|System_Input|data|types|private|Interface|MemMap|Data|ConstB|ConstP|Global|Cal)$/i;
+  const primary=f=>!opts.primary||f.replace(/\.c$/i,'').replace(SUF,'')===opts.primary;
+  ctx.skippedFiles=[];
+  for(const cf of cfiles){const src=files.get(cf);
+    if(/#\s*define\s+S_FUNCTION_NAME\b/.test(src)||/#\s*include\s*[<"]simstruc\.h[>"]/.test(src)||/\bmdlInitializeSizes\s*\(/.test(src)){ctx.skippedFiles.push({file:cf,msg:'Simulink S-Function dosyası (yalnızca MATLAB simülasyonu için, ECU koduna girmez) atlandı'});continue;}
+    const snap=new Map(ctx.typedefs);
+    try{const toks=preprocess(files,cf,ctx);items=items.concat(parse(toks,ctx));}
+    catch(e){if(primary(cf))throw e;ctx.typedefs.clear();snap.forEach((v,k)=>ctx.typedefs.set(k,v));ctx.skippedFiles.push({file:cf,line:e.line,msg:`Derlenemediği için atlandı (${e.message}${e.file&&e.file!==cf?' · '+e.file+':'+e.line:''})`});}}
+  if(!items.length&&ctx.skippedFiles.length)throw new CErr('Derlenecek dosya kalmadı: '+ctx.skippedFiles.map(x=>x.file+' — '+x.msg).join('; '),null);
   const G=new Map();const F=new Map();const protos=new Map();
   items.forEach(it=>{if(it.k==='gvar'){const old=G.get(it.name);if(!old||it.storage!=='extern'||old.storage==='extern')G.set(it.name,Object.assign({},old||{},it,{init:it.init||(old&&old.init)}));if(it.storage==='extern'&&old&&old.storage!=='extern')G.set(it.name,old);}
     else if(it.k==='func'){if(F.has(it.name))throw new CErr(`${it.name} iki kez tanımlanmış`,it.tok);F.set(it.name,it);}else if(it.k==='proto')protos.set(it.name,it);});
@@ -2602,7 +2611,7 @@ function compile(fileMap,opts){
   const globals={};for(const [n,g] of G)globals[n]={ty:g.ty,file:g.tok&&g.tok.f,line:g.tok&&g.tok.l,calib:!!(g.tok&&/_Local\.c$/i.test(g.tok.f)&&/_P$/.test(n))};
   let mod=null;if(!opts.noMod)try{mod=Function(js)();}catch(e){throw new CErr('İç hata (üretilen JS): '+e.message,null);}
   const types={};[...io.inputs,...io.outputs,...io.params].forEach(n=>{const t=typeOfGlobal(n);if(t)types[n]=tyName(t);});
-  const res={mod,js,steps,types,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.warnings.concat((ctx.ppWarn||[]).slice(0,20).map(x=>({msg:'Başlıkta açılamayan makro atlandı: '+x.msg,file:x.file,line:x.line})),(ctx.hdrSkips||[]).slice(0,30).map(x=>({msg:'Başlıktaki tanım atlandı (simülasyon için gerekmiyor): '+x.msg,file:x.file,line:x.line})))),hdrSkips:(ctx.hdrSkips||[]).length,globals,typeOf:n=>typeOfGlobal(n)};if(opts.noMod){delete res.mod;delete res.typeOf;}return res;}
+  const res={mod,js,steps,types,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.skippedFiles.map(x=>({msg:x.file+': '+x.msg,file:x.file,line:x.line})).concat(ctx.warnings,(ctx.ppWarn||[]).slice(0,20).map(x=>({msg:'Başlıkta açılamayan makro atlandı: '+x.msg,file:x.file,line:x.line})),(ctx.hdrSkips||[]).slice(0,30).map(x=>({msg:'Başlıktaki tanım atlandı (simülasyon için gerekmiyor): '+x.msg,file:x.file,line:x.line})))),hdrSkips:(ctx.hdrSkips||[]).length,skippedFiles:ctx.skippedFiles,globals,typeOf:n=>typeOfGlobal(n)};if(opts.noMod){delete res.mod;delete res.typeOf;}return res;}
 function dedupe(w){const s=new Set();return w.filter(x=>{const k=x.msg;if(s.has(k))return false;s.add(k);return true;});}
 const tyName=t=>!t?'?':t.k==='bool'?'boolean':t.k==='int'?(t.signed?'int':'uint')+t.bits:t.k==='float'?'real'+(t.bits===32?'32':''):t.k;
 return {compile,CErr,tyName};
@@ -2710,6 +2719,10 @@ async function cAddFiles(list){const fs=[...list];if(!fs.length)return;
     if(k==='7z'||k==='rar'||k==='gz'){cNotice(`“${f.name}” bir ${k==='gz'?'tar.gz/gzip':k.toUpperCase()} arşivi. Tarayıcı yalnızca .zip açabiliyor: arşivi bilgisayarda açıp “Klasör seç” ile klasörü seçin ya da .zip olarak yeniden sıkıştırın.`,'bad');return;}}
   const src=fs.filter(f=>/\.(c|h)$/i.test(f.name));if(!src.length){cNotice(`Tanınmayan dosya: ${fs.map(f=>`“${f.name}”`).join(', ')}. B24 için .zip arşivi ya da “Klasör seç”, tek ASW için .c ve .h dosyaları kullanılabilir.`,'bad');return;}
   const arr=await Promise.all(src.map(f=>f.text().then(t=>[f.name,t.replace(/\r\n/g,'\n')])));
+  const isSfun=t=>/#\s*define\s+S_FUNCTION_NAME\b/.test(t)||/#\s*include\s*[<"]simstruc\.h[>"]/.test(t);
+  const sfun=arr.filter(([n,t])=>/\.c$/i.test(n)&&isSfun(t)).map(([n])=>n);if(sfun.length){for(let i=arr.length-1;i>=0;i--)if(sfun.includes(arr[i][0]))arr.splice(i,1);}
+  if(sfun.length)setTimeout(()=>cNotice(`${sfun.length} Simulink S-Function dosyası atlandı (yalnızca MATLAB simülasyonu için, ECU koduna girmez): ${sfun.join(', ')}`),2500);
+  if(!arr.length)return;
   /* dosya adından ASW: Doors_DoorsRels.c, Doors_DoorsRels_Local.c, …_Output.c, …_Input.h → Doors_DoorsRels */
   const SUF=/_(Local|Output|Input|System_Input|data|types|private|Interface|MemMap|Data|ConstB|ConstP|Global|Cal)$/i;
   const base=n=>n.replace(/\.(c|h)$/i,'').replace(SUF,'');
@@ -2759,7 +2772,7 @@ onmessage=e=>{const m=e.data;
   if(m.t==='init'){K=new Set(m.known);H=m.hints;return;}
   if(m.t==='common'){COM=m.common;CEXT=m.ext;SKIP=new Set(Object.keys(COM));return;}
   if(m.t==='compile'){const map=Object.assign({},COM,m.files);const t0=Date.now();
-    try{const r=CC.compile(map,{known:n=>K.has(n),typeHint:n=>H[n]||null,externCommon:CEXT,skipScan:SKIP,noMod:true});r.wms=Date.now()-t0;postMessage({t:'res',id:m.id,ok:true,r});}
+    try{const r=CC.compile(map,{known:n=>K.has(n),typeHint:n=>H[n]||null,externCommon:CEXT,skipScan:SKIP,noMod:true,primary:m.primary});r.wms=Date.now()-t0;postMessage({t:'res',id:m.id,ok:true,r});}
     catch(err){postMessage({t:'res',id:m.id,ok:false,err:{msg:String(err&&err.message||err),file:err&&err.file,line:err&&err.line}});}}};`;
       w=new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})));}catch(e){CW.state='fail';res(false);return;}
     const to=setTimeout(()=>{CW.state='fail';try{w.terminate();}catch(e){}res(false);},4000);
@@ -2774,10 +2787,10 @@ async function cCompileAsw(name){const a=CSIM.asws[name];const files={};Object.e
     b.typeOf=n=>{const t=T[n];return t?{k:/^boolean/.test(t)?'bool':/^real/.test(t)?'float':'int'}:null;};return b;};
   if(await cwStart()){const key=(INV?'i':'n')+SIGN.size;if(CW.initKey!==key){CW.w.postMessage({t:'init',known:cwKnown(),hints:cwHints()});CW.initKey=key;}
     if(CW.commonRef!==CSIM.common){CW.w.postMessage({t:'common',common:CSIM.common,ext:cCommonExtern()});CW.commonRef=CSIM.common;}
-    const id=++CW.seq;const r=await new Promise((res,rej)=>{const to=setTimeout(()=>{CW.jobs.delete(id);cwRestart();rej(new Error('Derleme 45 saniyeyi aştı; bu ASW atlandı (derleyici yeniden başlatıldı).'));},45000);CW.jobs.set(id,{res,rej,to});CW.w.postMessage({t:'compile',id,files});});
+    const id=++CW.seq;const r=await new Promise((res,rej)=>{const to=setTimeout(()=>{CW.jobs.delete(id);cwRestart();rej(new Error('Derleme 45 saniyeyi aştı; bu ASW atlandı (derleyici yeniden başlatıldı).'));},45000);CW.jobs.set(id,{res,rej,to});CW.w.postMessage({t:'compile',id,files,primary:name});});
     return finish(r);}
   const map=Object.assign({},CSIM.common,files);
-  return finish(CC.compile(map,{known:n=>SIGN.has(n)||!!(INV&&INV.byName.has(n)),typeHint:cTypeHint,externCommon:cCommonExtern(),skipScan:new Set(Object.keys(CSIM.common)),noMod:true}));}
+  return finish(CC.compile(map,{known:n=>SIGN.has(n)||!!(INV&&INV.byName.has(n)),typeHint:cTypeHint,externCommon:cCommonExtern(),skipScan:new Set(Object.keys(CSIM.common)),noMod:true,primary:name}));}
 async function cBuildOne(name,check){const a=CSIM.asws[name];if(!a)return false;const t0=performance.now();const rev=a.rev||0;
   if(!check){delete CSIM.errs[name];delete CSIM.mods[name];const c=CSIM.cache[name];if(c&&c.rev===rev){CSIM.mods[name]=c;a.dirty=false;return true;}}
   let b;try{b=await cCompileAsw(name);
@@ -2888,7 +2901,8 @@ function cMsgsHTML(){const n=CSIM.sel,b=CSIM.mods[n],a=CSIM.asws[n],o=[],er=CSIM
     if(a.files['SIM_varsayimlar.c'])o.push(`<div class="cmsg info"><b>Varsayım dosyası kullanılıyor: SIM_varsayimlar.c</b><div>Kodun kullandığı bazı sabitlerin tanımı yüklenen dosyalarda yok (ör. S-R flip-flop tablosu, süre sabitleri). Tahmini değerlerle çalışıyor; gerçek değerler için <code>…_data.c</code> dosyasını ekleyip bu dosyayı silin.</div><button class="linkbtn" data-cfile="SIM_varsayimlar.c">Dosyayı aç</button></div>`);
     const miss=b.missingInc.filter(x=>!/MemMap/i.test(x));
     if(miss.length)o.push(`<details class="cmsg"><summary>${miss.length} başlık dosyası bulunamadı</summary><div class="note">Tipler Excel envanterinden ve koddaki kullanımdan çıkarıldı: ${miss.map(esc).join(', ')}</div></details>`);
-    const w=b.warnings.filter(x=>!(a.files['SIM_varsayimlar.c']&&/Tanımsız değişken \w+(_Const[BP]|_C) /.test(x.msg)));
+    const w=b.warnings.filter(x=>!(a.files['SIM_varsayimlar.c']&&/Tanımsız değişken \w+(_Const[BP]|_C) /.test(x.msg))&&!(b.skippedFiles||[]).some(k=>x.msg.startsWith(k.file+': ')));
+    const sk=b.skippedFiles||[];if(sk.length)o.push(`<div class="cmsg info"><b>${sk.length} dosya derlemeye alınmadı</b>${sk.map(x=>`<div class="note"><button class="linkbtn" data-cfile="${esc(x.file)}">${esc(x.file)}</button>: ${esc(x.msg)}</div>`).join('')}<div class="note">Bu dosyalardaki fonksiyonları çağıran yer varsa simülasyonda 0 döner. ASW’nin ana model dosyası (${esc(CSIM.sel)}.c) her zaman derlenir.</div></div>`);
     const stub=w.filter(x=>/Tanımsız fonksiyon/.test(x.msg));if(stub.length)o.push(`<div class="cmsg info"><b>${stub.length} fonksiyonun tanımı yok; simülasyonda 0 döndürüyor</b><div class="note">${stub.slice(0,12).map(x=>esc(x.msg.replace(/^Tanımsız fonksiyon /,'').replace(/ →.*$/,''))).join(', ')}${stub.length>12?' …':''}. Bunlar genelde RTE/kütüphane çağrılarıdır; tanımlarının olduğu .c dosyasını eklerseniz gerçek değerle çalışır.</div></div>`);
     if(w.length)o.push(`<details class="cmsg"><summary>${w.length} uyarı</summary>${w.slice(0,40).map(x=>`<div class="note">${x.file?`<button class="linkbtn" data-cjump="${esc(x.file)}:${x.line}">${esc(x.file)}:${x.line}</button> `:''}${esc(x.msg)}</div>`).join('')}</details>`);}
   return o.join('');}

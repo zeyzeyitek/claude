@@ -258,7 +258,16 @@ function compile(fileMap,opts){
   for(const [n,src] of files){if(opts.skipScan&&opts.skipScan.has(n))continue;const re=/extern\s+(?:const\s+)?([A-Za-z_]\w*)\s+([A-Za-z_]\w*)\s*;/g;let m;while((m=re.exec(src))){const t=BUILTIN_TYPEDEF[m[1]];if(t)externTy.set(m[2],t);}}
   /* sırayla: önce .h tipleri için tüm .c dosyaları aynı bağlamda */
   let items=[];
-  for(const cf of cfiles){const toks=preprocess(files,cf,ctx);items=items.concat(parse(toks,ctx));}
+  /* Simulink S-Function (MEX) dosyaları ECU koduna girmez: atlanır. Ana model dosyası dışındaki .c dosyalarında hata varsa o dosya atlanır. */
+  const SUF=/_(Local|Output|Input|System_Input|data|types|private|Interface|MemMap|Data|ConstB|ConstP|Global|Cal)$/i;
+  const primary=f=>!opts.primary||f.replace(/\.c$/i,'').replace(SUF,'')===opts.primary;
+  ctx.skippedFiles=[];
+  for(const cf of cfiles){const src=files.get(cf);
+    if(/#\s*define\s+S_FUNCTION_NAME\b/.test(src)||/#\s*include\s*[<"]simstruc\.h[>"]/.test(src)||/\bmdlInitializeSizes\s*\(/.test(src)){ctx.skippedFiles.push({file:cf,msg:'Simulink S-Function dosyası (yalnızca MATLAB simülasyonu için, ECU koduna girmez) atlandı'});continue;}
+    const snap=new Map(ctx.typedefs);
+    try{const toks=preprocess(files,cf,ctx);items=items.concat(parse(toks,ctx));}
+    catch(e){if(primary(cf))throw e;ctx.typedefs.clear();snap.forEach((v,k)=>ctx.typedefs.set(k,v));ctx.skippedFiles.push({file:cf,line:e.line,msg:`Derlenemediği için atlandı (${e.message}${e.file&&e.file!==cf?' · '+e.file+':'+e.line:''})`});}}
+  if(!items.length&&ctx.skippedFiles.length)throw new CErr('Derlenecek dosya kalmadı: '+ctx.skippedFiles.map(x=>x.file+' — '+x.msg).join('; '),null);
   const G=new Map();const F=new Map();const protos=new Map();
   items.forEach(it=>{if(it.k==='gvar'){const old=G.get(it.name);if(!old||it.storage!=='extern'||old.storage==='extern')G.set(it.name,Object.assign({},old||{},it,{init:it.init||(old&&old.init)}));if(it.storage==='extern'&&old&&old.storage!=='extern')G.set(it.name,old);}
     else if(it.k==='func'){if(F.has(it.name))throw new CErr(`${it.name} iki kez tanımlanmış`,it.tok);F.set(it.name,it);}else if(it.k==='proto')protos.set(it.name,it);});
@@ -406,7 +415,7 @@ function compile(fileMap,opts){
   const globals={};for(const [n,g] of G)globals[n]={ty:g.ty,file:g.tok&&g.tok.f,line:g.tok&&g.tok.l,calib:!!(g.tok&&/_Local\.c$/i.test(g.tok.f)&&/_P$/.test(n))};
   let mod=null;if(!opts.noMod)try{mod=Function(js)();}catch(e){throw new CErr('İç hata (üretilen JS): '+e.message,null);}
   const types={};[...io.inputs,...io.outputs,...io.params].forEach(n=>{const t=typeOfGlobal(n);if(t)types[n]=tyName(t);});
-  const res={mod,js,steps,types,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.warnings.concat((ctx.ppWarn||[]).slice(0,20).map(x=>({msg:'Başlıkta açılamayan makro atlandı: '+x.msg,file:x.file,line:x.line})),(ctx.hdrSkips||[]).slice(0,30).map(x=>({msg:'Başlıktaki tanım atlandı (simülasyon için gerekmiyor): '+x.msg,file:x.file,line:x.line})))),hdrSkips:(ctx.hdrSkips||[]).length,globals,typeOf:n=>typeOfGlobal(n)};if(opts.noMod){delete res.mod;delete res.typeOf;}return res;}
+  const res={mod,js,steps,types,init,reset,assume,inputs:[...io.inputs].sort(),outputs:[...io.outputs].sort(),params:[...io.params].sort(),missingInc:[...ctx.missingInc].sort(),warnings:dedupe(ctx.skippedFiles.map(x=>({msg:x.file+': '+x.msg,file:x.file,line:x.line})).concat(ctx.warnings,(ctx.ppWarn||[]).slice(0,20).map(x=>({msg:'Başlıkta açılamayan makro atlandı: '+x.msg,file:x.file,line:x.line})),(ctx.hdrSkips||[]).slice(0,30).map(x=>({msg:'Başlıktaki tanım atlandı (simülasyon için gerekmiyor): '+x.msg,file:x.file,line:x.line})))),hdrSkips:(ctx.hdrSkips||[]).length,skippedFiles:ctx.skippedFiles,globals,typeOf:n=>typeOfGlobal(n)};if(opts.noMod){delete res.mod;delete res.typeOf;}return res;}
 function dedupe(w){const s=new Set();return w.filter(x=>{const k=x.msg;if(s.has(k))return false;s.add(k);return true;});}
 const tyName=t=>!t?'?':t.k==='bool'?'boolean':t.k==='int'?(t.signed?'int':'uint')+t.bits:t.k==='float'?'real'+(t.bits===32?'32':''):t.k;
 return {compile,CErr,tyName};
