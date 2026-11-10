@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (sürüm 1.1.0)
+# Otobüs Tasarım Stüdyosu (sürüm 1.1.1)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -186,6 +186,24 @@ Sinyaller: DoorRelease, DoorState_K2
 ---
 # Sürümler ve yama notları
 Bundan sonra her güncelleme bir sürüm numarası alır: 1.1.0, 1.1.1 … 1.1.9, sonra 1.2.0. Yama notları uygulamada sol üstteki “Sürüm” bağlantısından da okunur.
+
+## 1.1.1 · 10.11.2026
+- **Kapı başına hava sistemi**: her kapının kendi tankı var. Hareket başına 0,45 bar yalnızca o kapının tankından düşer; 5,5 bar altında yalnızca o kapı POWERLESS olur. Kompresör (motor çalışırken) her tankı 0,35 bar/s doldurur. Yan panel → Sinyal → Kapı hava sistemleri: kapı başına “Hava ver” ve “Kaçak” (0,5 bar/s). Sinyaller: `DC1_PAirDoor1`, `DC2_PAirDoor2`, `DC3_PAirDoor3` (mbar); `GW_PAirCirc4` en düşük tankı gösterir.
+- **Elektrikli rampa (kapı 2), gereksinime uygun**:
+  - 2021.29298 / 2025.03165: rampa yalnızca kapı 2 kapalı, hız < 1 km/h, anahtar 1 ve kapıda arıza yokken hareket eder. Kapı açıkken istek reddedilir. Rampa hareket ederken kapı 2 açılmaz.
+  - 2021.29299: RAMPA basılı tutulunca rampa çıkar; tam açılmadan bırakılırsa geri toplanır. Tam açıkken bir kez basılınca toplanır.
+  - 2021.29301-03: rampa anahtarı 0 kapalı, 1 açık, 2 acil mod (motor sürülmez, göstergede RAMPA ACİL).
+  - 2021.29315, 2025.03167/03168, 2023.03730: hareket ederken buzzer ve yanıp sönen LED, tam açıkken sürekli LED, rampa tam kapalı değilken kapı 2 uyarı lambası sinyali.
+  - Basılı tutma: 3D butonda fareyi basılı tut, yan paneldeki “RAMPA · basılı tut” ya da klavyede R.
+- **Manuel rampa (kapı 3)**: kapı açıkken rampa açıksa kapanma engeli (2021.29327, 2025.03111, 2021.19039); kapı kapalıyken rampa kapalı değilse açılma engeli (2025.02180, 2025.03112); rampa açıkken durak freni (2025.02179) ve göstergede engelli sembolü (2023.08582, 2021.29335). `MR_CfgDoorBlkgDisNv` ile engeller kapatılır (2021.29329). Rampaya tıklayınca açılır / kapanır.
+- **Otomatik testler**: `eramp` (9 adım), `rampkey`, `mramp`. Eski `ramp29327` testi (elektrikli rampayla kapanma engeli) gereksinimler manuel rampa için olduğundan `mramp`’a taşındı.
+- **Parametre listesi sayfası** (`#parametre`):
+  - NV veritabanı: `data/nv_params.json`, reserved-parameters Excel’inden `python3 data/build_nv_params.py <excel.xlsx>` ile üretilir. Yeni Excel sayfadan da yüklenebilir (SheetJS, tarayıcıda saklanır).
+  - Eşleşme: C kodundaki `…Nv` = Excel **ASW Name** → aynı satırın **Reserve Name**’i = `PARA_NAME` (BSW adı); LID = Address, ofset = Byte, bit, tip.
+  - Filtreler: C kodundaki NV’ler (varsayılan), değeri ≠ 0, Excel’de Active = yes, tümü, araç listesinden içe aktarılanlar. ECU (SG) seçimi solda.
+  - Araç parametre listesi içe aktarma: `PARA_NAME` Excel’de aranır, `BESCHREIBUNG` (yoksa `PARAWERT` / `PARAMASKE`) değer olarak NV’ye yazılır; C kodu bu değerle çalışır.
+  - Liste üretme: seçili satırlardan `[AANN_PARA_n]` bölümleri (SG, SACHNR_PSW, PARA_NAME, LOCAL_ID, LOCAL_ID_OFFSET, KENNWERT_BIT_LAENGE, DATATYP, PARALAENGE, PARAMASKE, PARAWERT, BESCHREIBUNG), CRLF, `.txt` indirme ya da kopyalama.
+  - VARSAYIM: örnekte yalnızca uint16 (ofset 0) vardı. bool için `PARAMASKE` = bit maskesi, `PARAWERT` = değer × maske; ofset onaltılık. İkisi de “Liste ayarları”ndan değiştirilebilir.
 
 ## 1.1.0 · 10.11.2026
 - Sürüm numarası ve yama notları.

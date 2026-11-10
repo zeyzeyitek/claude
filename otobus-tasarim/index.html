@@ -341,6 +341,13 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
 .cask{position:fixed;inset:0;z-index:210;background:rgba(10,14,16,.45);display:grid;place-items:center;padding:16px}
 .caskbox{background:var(--panel);color:var(--ink);border-radius:10px;padding:18px;max-width:460px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.25)} .caskbox p{margin:0 0 14px;line-height:1.5}
 .caskbtn{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.dair{display:grid;grid-template-columns:auto 1fr auto auto;gap:6px 8px;align-items:center;margin-top:6px} .dair b{font:600 13px var(--f-mono,monospace)} .dair b.warn{color:#c77700} .dair b.bad{color:#d0302a}
+.pltools{display:flex;flex-wrap:wrap;gap:8px;align-items:center} .plset summary{cursor:pointer;font-weight:600} .plgrid{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;width:100%;max-width:560px}
+.plgrid input,.plgrid select{font:500 13px var(--f-mono);padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);min-width:0}
+.pwrap{grid-template-columns:minmax(0,1fr)} .pwrap .ctabs{display:flex;flex-wrap:wrap;gap:6px} .pwrap .cmsg div{overflow-wrap:anywhere}
+.pltable tr.off td{opacity:.45} .cpar.bad{border-color:#d0302a;color:#d0302a} .pwrap .stable-wrap{max-height:62vh;overflow:auto}
+.plout{width:100%;min-height:220px;font:500 12.5px/1.45 var(--f-mono);padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);resize:vertical;white-space:pre}
+@media (max-width:640px){.plgrid{grid-template-columns:1fr}}
 .dtype{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;margin-top:6px} .dtype select{font:500 13px var(--f-body);padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
 .cdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--line);margin-right:8px;vertical-align:1px} .cdot.ok{background:var(--ok)} .cdot.idle{background:transparent;box-shadow:inset 0 0 0 2px var(--ok)} .cbad{color:var(--warn)} .cdot.bad{background:var(--warn)}
 .csrc .chd2{align-items:flex-start} .crun{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)} .crun .sp{flex:1}
@@ -356,7 +363,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="brand" class="float">
     <div class="eyebrow"><button class="verbtn" id="verBtn" title="Yama notlarını aç">Sürüm <b id="verNo">1.1.0</b> · yama notları</button></div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
-    <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
+    <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button><button class="vbtn" data-view="par" aria-current="false">Parametre listesi</button></nav>
   </div>
 
   <div id="modebar" class="float" role="toolbar" aria-label="Görünüm">
@@ -419,6 +426,21 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
         <p class="note">IST: içe salınımlı · AST: dışa salınımlı · SST: sürgülü-salınımlı. Seçim kapının hareketini ve iç geçişteki kanat engelini değiştirir; bu tarayıcıda saklanır.</p>
       </section>
       <section>
+        <h3>Kapı hava sistemleri</h3>
+        <div class="dair" id="dAir"></div>
+        <p class="note">Her kapının kendi hava tankı var. Kapı her hareketinde kendi tankından 0,45 bar harcar; 5,5 bar altında yalnızca o kapı POWERLESS olur, diğerleri çalışmaya devam eder. Motor çalışırken kompresör her tankı 0,35 bar/s doldurur. “Kaçak” bir tankı 0,5 bar/s boşaltır (kompresörden hızlı), tek kapı arızasını denemek için.</p>
+      </section>
+      <section>
+        <h3>Rampalar</h3>
+        <div class="dtype" id="dRamp">
+          <label for="rKey">Rampa anahtarı</label><select id="rKey"><option value="0">0 · kapalı</option><option value="1" selected>1 · açık</option><option value="2">2 · acil mod</option></select>
+          <span>Elektrikli (K2)</span><span><button class="sfb" id="rHold">RAMPA · basılı tut</button> <b id="rState" class="note"></b></span>
+          <span>Manuel (K3)</span><span><button class="sfb" id="mrBtn" aria-pressed="false">Manuel rampa</button> <b id="mrState" class="note"></b></span>
+          <span>Engeller</span><label class="note"><input type="checkbox" id="mrDis"> Manuel rampa kapı engellerini kapat (2021.29329)</label>
+        </div>
+        <p class="note">Elektrikli rampa yalnızca kapı 2 kapalıyken hareket eder: basılı tutunca çıkar, tam açılmadan bırakılırsa geri toplanır (2021.29299); tam açıkken bir kez basınca toplanır (2021.29298). Klavye: R basılı tut. Manuel rampa kapı 3’te: açıkken kapı kapanamaz, kapı kapalıyken rampa kapalı değilse kapı açılamaz.</p>
+      </section>
+      <section>
         <h3>İç aydınlatma devreleri</h3>
         <div class="kreis">
           <label for="kr1">Kreis 1 · ön bölge</label><input type="range" id="kr1" min="0" max="100" step="5" value="100"><output id="krv1">—</output>
@@ -464,7 +486,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="docs" hidden>
     <header class="dhead">
       <h2 id="docTitle">Gereksinimler</h2>
-      <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="false">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
+      <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="false">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button><button class="vbtn" data-view="par" aria-current="false">Parametre listesi</button></nav>
       <input type="search" id="docSearch" placeholder="Ara…" aria-label="Ara">
     </header>
     <div class="dbody"><nav class="dtoc" id="dtoc" aria-label="İçindekiler"></nav><main class="dmain" id="dmain"></main></div>
@@ -496,10 +518,18 @@ const KIND={stroller:{name:'Bebek arabası',sig:z=>`D${z}PB_StStrqDoor${z}FromPr
 /* ================= Araç durumu ================= */
 const PRS={};const CSIM={asws:{},common:{},src:null,sel:null,cur:null,mods:{},errs:{},cache:{},chk:{},prod:{},extIn:[],order:[],tasks:[],t:0,build:null,G:{},on:false,paused:false,acc:0,steps:0,period:100,step:null,forces:{},params:{},tab:'out',added:[]};const pulse=k=>()=>performance.now()-(PRS[k]||-1e9)<300;
 const V={speed:0,rpm:620,gear:'N',stopReq:false,req:{stroller:false,prm:false,elderly:false},temp:17,odo:47389,stopBrake:false,intLight:true,night:false,
-  release:false,kneel:false,kneelPos:0,fog:false,wiper:false,ramp:false,rampPos:0,air:8.5,dim:false,engine:true,hazard:false,head:false,park:true,stopBrakeMan:false,doorLock:false};
+  release:false,kneel:false,kneelPos:0,fog:false,wiper:false,rampPos:0,rampDir:0,rampBtn:false,rampKey:1,rampErly:false,mramp:false,mrampPos:0,mrBlkDis:false,dim:false,engine:true,hazard:false,head:false,park:true,stopBrakeMan:false,doorLock:false};
 const DOOR_T=2.4;
+/* her kapının kendi hava tankı var; V.air = en düşük kapı tankı (gösterge / GW_PAirCirc4 için) */
+const airMin=()=>Math.min(...DOORS.map(d=>doorS[d.id].air));Object.defineProperty(V,'air',{get:airMin,enumerable:false});
 /* ---- sürüm / yama notları: 1.1.0, 1.1.1 … 1.1.9 → 1.2.0 ---- */
 const CHANGELOG=[
+ {v:'1.1.1',d:'10.11.2026',items:[
+  'Her kapının kendi hava sistemi var: kapı her harekette kendi tankından hava harcar, 5,5 bar altında yalnızca o kapı POWERLESS olur. Göstergede K1 · K2 · K3 basınçları ayrı görünür. Yan panel → Sinyal → Kapı hava sistemleri’nden kapı başına “Hava ver” ve “Kaçak” (tek kapı arızası). Yeni sinyaller DC1..3_PAirDoorx; GW_PAirCirc4 en düşük tankı gösterir.',
+  'Elektrikli rampa gereksinimlere göre yeniden yazıldı: yalnızca kapı 2 kapalıyken hareket eder (2021.29298). RAMPA basılı tutulunca çıkar, tam açılmadan bırakılırsa geri toplanır (2021.29299); tam açıkken bir kez basınca toplanır. Rampa anahtarı 0 / 1 / 2 (kapalı / açık / acil mod, 2021.29301-03). Hareket ederken buzzer ve yanıp sönen LED, tam açıkken sürekli LED (2021.29315, 2025.03167/03168). Rampa hareket ederken kapı 2 açılmaz. Klavye: R basılı tut.',
+  'Manuel rampa (kapı 3): kapı açıkken rampa açıksa kapanma engeli (2021.29327, 2025.03111, 2021.19039); kapı kapalıyken rampa kapalı değilse açılma engeli (2025.02180, 2025.03112); rampa açıkken durak freni (2025.02179) ve göstergede engelli sembolü (2023.08582, 2021.29335). Engeller parametreyle kapatılabilir (2021.29329).',
+  'Yeni otomatik testler: elektrikli rampa (9 adım), rampa anahtarı, manuel rampa. 17 rampa gereksinimi otomatik doğrulanıyor.',
+  'Yeni sayfa “Parametre listesi” (#parametre): C kodundaki Nv’ler reserved-parameters Excel’iyle (ASW Name → Reserve Name = PARA_NAME) eşleşir. Değerler elle girilir ya da bir aracın parametre listesi içe aktarılır; değer C kodunda hemen kullanılır. “Parametre listesini oluştur” [AANN_PARA_n] biçiminde şasi parametre listesi üretir (indir / kopyala). Yeni NV Excel’i sayfadan yüklenebilir.']},
  {v:'1.1.0',d:'10.11.2026',items:[
   'Sürüm numarası ve yama notları eklendi (sol üstteki “Sürüm” bağlantısı). Bundan sonraki her güncelleme 1.1.1, 1.1.2 … diye ilerler; 1.1.9’dan sonra 1.2.0.',
   'AST (dışa salınımlı) kapı: kanatlar artık dışarı doğru yay çizerek açılıyor ve kapı boşluğunun yanında gövdeye paralel duruyor.',
@@ -508,11 +538,12 @@ const CHANGELOG=[
   'Önceki geliştirmeler (Rev A–AC, özet): 3D şehir otobüsü ve sürüş, 30 tuşlu gösterge, gereksinim kılavuzu ve otomatik testler, B24 ASW sinyal envanteri, fonksiyon zincirleri, sinyal grafiği, tarayıcıda C derleyicisi (gcc ile doğrulanmış), B24 zip/klasör/çoklu dosya içe aktarma, araç modu (kapıları C kodu sürer), IST/AST/SST kapı tipleri.']}];
 const APP_VER=CHANGELOG[0].v;
 /* kapı devresi havası (bar) */
-const AIR={max:10,start:8.5,min:5.5,ok:6.5,per:0.45,comp:0.35};
+const AIR={max:10,start:8.5,min:5.5,ok:6.5,per:0.45,comp:0.35,leak:0.5};
+const RAMP_T=3; // elektrikli rampa tam açılma süresi (s)
 /* kapı tipi: IST içe salınımlı, AST dışa salınımlı, SST sürgülü-salınımlı (Schwenkschiebetür) */
 const DOOR_TYPES={IST:{ad:'İçe salınımlı (IST)',kisa:'IST',desc:'Kanatlar menteşe etrafında araç içine döner.'},AST:{ad:'Dışa salınımlı (AST)',kisa:'AST',desc:'Kanatlar dışarı doğru yay çizerek açılır ve kapı boşluğunun yanında gövdeye paralel durur.'},SST:{ad:'Sürgülü-salınımlı (SST)',kisa:'SST',desc:'Kanatlar önce dışarı çıkar, sonra gövde boyunca yana kayar.'}};
 const DCFG=(()=>{const def={1:'IST',2:'SST',3:'AST'};try{const v=JSON.parse(localStorage.getItem('otobus.doortype')||'null');if(v&&[1,2,3].every(k=>DOOR_TYPES[v[k]]))return v;}catch(e){}return def;})();
-const doorS={};DOORS.forEach(d=>doorS[d.id]={state:'CLOSED',pos:0,pivots:[],btnMat:null,beepT:0,auto:false,hold:false,timer:0,openAt:0,reqOpen:false});
+const doorS={};DOORS.forEach(d=>doorS[d.id]={air:AIR.start,leak:false,state:'CLOSED',pos:0,pivots:[],btnMat:null,beepT:0,auto:false,hold:false,timer:0,openAt:0,reqOpen:false});
 const t0=performance.now();const now_s=()=>((performance.now()-t0)/1000).toFixed(1)+' s';
 const logEl=$('#log');let logN=0;
 function log(text,cls){
@@ -840,7 +871,7 @@ const doorIconTex=tex(128,128,g=>{g.strokeStyle='#fff';g.fillStyle='#fff';g.line
 const BTN=[
  {label:'SERBEST',name:'Türfreigabe (kapı serbest)',type:'toggle',impl:true,get:()=>V.release,fn:(on,src)=>setRelease(on,src),desc:'Kapıları otomatik moda alır (DR_StDoorRelsActv=1). Bekleyen (önceden saklanmış) isteği olan bölgenin kapısı açılır (bölgeleme: K1, K2, K3 ayrı). Türfreigabe aktifken STOP butonları kapı açmaz (Vorspeicherung); kapı üstü AÇ butonları her zaman açar. Türfreigabe aktifken durak freni devrededir. Normal istekte kapı, açık kalma süresi (parametre, varsayılan 3 s) dolunca kendiliğinden kapanır; ışık bariyeri süreyi yeniden başlatır. Bebek arabası, engelli veya yaşlı yolcu isteğinde kapı açık kalır, sürücü K butonuyla kapatır. Kapatınca otomatik açılmış kapılar kapanır.'},
  {label:'DİZ',name:'Diz çöktürme (kneeling)',type:'toggle',impl:true,get:()=>V.kneel,fn:(on,src)=>{V.kneel=on;SFX.hiss([2,0,HW]);SFX.motor();log(`${src} → Kneel=${on?1:0} (${on?'sağ taraf alçalıyor':'normal seviyeye dönüyor'})`);},desc:'Aracın kapı tarafını (sağ) yaklaşık 70 mm alçaltır; gövde sağa yatar. Tekrar basınca normal seviyeye döner. Cluster’da DİZ lambası yanar.'},
- {label:'RAMPA',name:'Elektrikli rampa · kapı 2',type:'toggle',impl:true,get:()=>V.ramp||!!V.rampPending,fn:(on,src)=>setRamp(on,src),desc:'Elektrikli rampayı kapı 2 zemininden dışarı çıkarır ve kaldırıma eğer; tekrar basınca toplar. Kapı 2 kapalıysa önce kapıyı açar. Rampa açıkken K2 kapanamaz.'},
+ {label:'RAMPA',name:'Elektrikli rampa · kapı 2',type:'hold',impl:true,get:()=>V.rampBtn,led:()=>rampLed(),fn:(on,src)=>rampButton(on,src),desc:'Basılı tut: kapı 2 kapalıyken rampa çıkar; tam açılmadan bırakırsan geri toplanır (2021.29299). Tam açıkken bir kez bas: toplanır (2021.29298). Koşullar: rampa anahtarı 1, hız < 1 km/h, kapı 2 kapalı ve arızasız. Hareket ederken buzzer çalar ve LED yanıp söner; tam açıkken LED sürekli yanar. Rampa hareket ederken kapı 2 açılmaz. Klavye: R basılı tut.'},
  {label:'İSTEK ↺',name:'Durak isteği sıfırla',type:'momentary',impl:true,fn:src=>resetStop(src),desc:'DSRD_StDoorsStopReqDisp ve tüm özel istekleri sıfırlar.'},
  {label:'IŞIK',name:'İç aydınlatma',type:'toggle',impl:true,get:()=>V.intLight,fn:(on,src)=>setIntLight(on,src),desc:'Yolcu salonu aydınlatmasını açar/kapatır. Cluster’da yeşil lamba.'},
  {label:'IŞIK ½',name:'İç aydınlatma %50',type:'toggle',impl:true,get:()=>V.dim,fn:(on,src)=>{V.dim=on;applyLighting();log(`${src} → IntLightDim=${on?1:0}`);},desc:'Aydınlatmayı yarı güce düşürür (gece sürüşü).'},
@@ -921,7 +952,7 @@ BTN.forEach((b,i)=>{
   const body=box(0.058,0.046,0.016,MAT_KEYS,x,y,0.012,P);
   const top=new THREE.Mesh(new THREE.PlaneGeometry(0.054,0.042),new THREE.MeshStandardMaterial({map:keyTex(b.label),roughness:0.45}));top.position.set(x,y,0.0205);P.add(top);b.top=top;
   b.ledM=new THREE.MeshBasicMaterial({color:'#1a2024'});const led=new THREE.Mesh(new THREE.PlaneGeometry(0.0145,0.0028),b.ledM);led.position.set(x,y+0.0158,0.0208);P.add(led);b.led=led;
-  const inf={name:b.id+' · '+b.name,code:'DASH-'+b.id,desc:b.desc||'Fonksiyon henüz tanımlı değil. Kuralı yazınca eklenecek.',tag:b.impl?'Fonksiyon: aktif':'Fonksiyon: sonra',action:()=>pressBtn(b,'Gösterge '+b.id)};
+  const inf={name:b.id+' · '+b.name,code:'DASH-'+b.id,desc:b.desc||'Fonksiyon henüz tanımlı değil. Kuralı yazınca eklenecek.',tag:b.impl?'Fonksiyon: aktif':'Fonksiyon: sonra',action:()=>pressBtn(b,'Gösterge '+b.id),hold:b.type==='hold'?(dn=>holdBtn(b,dn,'Gösterge '+b.id)):undefined};
   info(body,inf);info(top,inf);b.mesh=body;
 });
 const clusterTex=tex(880,330);
@@ -1045,7 +1076,11 @@ const rail=cyl(0.018,1.55,MAT.pole,0.88,0.85,-IN+0.09);rail.rotation.z=Math.PI/2
 /* elektrikli rampa: kapı 2 zemininin altından dışarı kayar, sonra kaldırıma eğilir */
 const RAMP_Z0=HW-0.9;const rampPivot=new THREE.Group();rampPivot.position.set(0.6,-0.035,RAMP_Z0);scene.add(rampPivot);
 const rampMesh=boxE(-0.55,0.55,-0.014,0,0,0.9,MAT.ramp,rampPivot);boxE(-0.55,0.55,0,0.003,0.84,0.9,MAT.yellow,rampPivot);boxE(-0.57,-0.55,-0.014,0.02,0,0.9,MAT.yellow,rampPivot);boxE(0.55,0.57,-0.014,0.02,0,0.9,MAT.yellow,rampPivot);
-info(rampMesh,{name:'Elektrikli rampa · kapı 2',code:'RAMP-01',desc:'Göstergedeki RAMPA butonuyla kapı 2 zemininin altından dışarı kayar ve kaldırıma eğilir. Kapı 2 kapalıysa önce kapı açılır. Rampa açıkken K2 kapanamaz.',tag:'Fonksiyon: aktif'});
+info(rampMesh,{name:'Elektrikli rampa · kapı 2',code:'RAMP-01',desc:'Göstergedeki RAMPA butonu basılı tutulunca kapı 2 kapalıyken eşiğin altından dışarı kayar ve kaldırıma eğilir. Tam açılmadan bırakılırsa geri toplanır. Rampa tam açılınca kapı 2 açılabilir; toplamak için kapı kapatılıp RAMPA’ya bir kez basılır.',tag:'Fonksiyon: aktif'});
+/* manuel rampa: kapı 3 eşiğinde, menteşe dış kenarda; elle dışarı katlanır */
+const mrPivot=new THREE.Group();mrPivot.position.set(-4.1,0.004,HW-0.02);scene.add(mrPivot);
+const mrMesh=boxE(-0.4,0.4,-0.018,0,-0.62,0,MAT.ramp,mrPivot);boxE(-0.4,0.4,0,0.002,-0.07,-0.01,MAT.yellow,mrPivot);boxE(-0.06,0.06,0,0.012,-0.6,-0.54,MAT.yellow,mrPivot);
+info(mrMesh,{name:'Manuel rampa · kapı 3',code:'RAMP-02',desc:'Tıkla: aç / kapat (elle katlanır). Kapı 3 açıkken rampa açılırsa kapı kapanamaz (2021.29327); kapı kapalıyken rampa kapalı değilse kapı açılamaz (2025.02180). Rampa açıkken durak freni devrede ve göstergede engelli sembolü yanar. Engeller parametreyle kapatılabilir (2021.29329).',tag:'Fonksiyon: aktif',action:()=>setMRamp(!V.mramp,'Manuel rampa (elle)')});
 
 /* ================= Özel istek panelleri (bölgeli) ================= */
 const specialMats={};[1,2,3].forEach(z=>specialMats[z]={stroller:[],prm:[],elderly:[]});
@@ -1280,11 +1315,16 @@ const GO={drv:[4.9,-0.72,1.3,-1.92,-0.45],door2:[0.6,-0.2,null,Math.PI,-0.08],do
  ['2021.18715','tfstand18715',['GW_SpdVehSig','DR_StDoorRelsActv'],'drv'],['2025.13674','bsb13674',['DR_StDoorRelsActv','GW_AcvBstbrkOn'],'drv'],
  ['2021.18762','bsb18762',['BBC_StDoor2','GW_AcvBstbrkOn'],'drv'],['2021.19560','hold19560',['D2A_StDoorClsngBlkgRqst','D2A_StDoor2AutoOpndTiGp','DOM_StStrqDoor2FromOldMBtn'],'eld'],
  ['2023.03870','tfled03870',['DR_StDoorRelsActv'],'drv'],['2021.19027','drvbtn19027',['GW_SpdVehSig','BBC_StDoor2'],'drv'],['2021.19032','drvled19032',['BBC_StDoor2'],'drv'],
- ['2021.29327','ramp29327',['ER_StRampAllOpnd','BBC_StDoor2'],'door2'],['2023.04582','assign04582',['D2PB_StStrqDoor2FromPrmBtn','BBC_StDoor1Wngfr','BBC_StDoor3'],'k2p'],
+ ['2021.29327','mramp',['MR_StDoor3RampOpnd','MR_StDoor3ClsngBlkg','BBC_StDoor3'],'door3'],['2023.04582','assign04582',['D2PB_StStrqDoor2FromPrmBtn','BBC_StDoor1Wngfr','BBC_StDoor3'],'k2p'],
  ['2021.19556','assign04582',['D3W_StStrqDoor3FromWhlchrBtn','BBC_StDoor1Wngfr','BBC_StDoor2'],'k2p'],['2023.04407','assign04582',['D2PB_StStrqDoor2FromPrmBtn','BBC_StDoor1Wngfr','BBC_StDoor3'],'k2p'],
  ['2021.18640','auto18637',['DR_StDoorRelsActv','D3SR_StBtnIntDoor3','BBC_StDoor3','GW_SpdVehSig'],'door3'],['2025.14118','auto18637',['DR_StDoorRelsActv','BBC_StDoor3'],'door3'],
  ['2021.17789','drvled19032',['BBC_StDoor2'],'drv'],['2021.17782','drvbtn19027',['GW_SpdVehSig','BBC_StDoor2','GW_AcvBstbrkOn'],'drv'],
- ['2025.03111','ramp29327',['ER_StRampAllOpnd','BBC_StDoor2'],'door2'],['2021.19039','ramp29327',['ER_StRampAllOpnd','BBC_StDoor2'],'door2'],
+ ['2025.03111','mramp',['MR_StDoor3RampOpnd','MR_StDoor3ClsngBlkg','BBC_StDoor3'],'door3'],['2021.19039','mramp',['MR_StDoor3RampOpnd','MR_StDoor3ClsngBlkg','BBC_StDoor3'],'door3'],
+ ['2025.02180','mramp',['MR_StDoor3RampOpnd','MR_StDoor3OpngBlkg','BBC_StDoor3'],'door3'],['2025.03112','mramp',['MR_StDoor3RampOpnd','MR_StDoor3OpngBlkg','BBC_StDoor3'],'door3'],
+ ['2025.02179','mramp',['MR_StDoor3RampOpnd','GW_AcvBstbrkOn'],'door3'],['2023.08582','mramp',['MR_StDoor3RampOpnd'],'door3'],['2021.29335','mramp',['MR_StDoor3RampOpnd'],'door3'],
+ ['2021.29299','eramp',['ER_StRampBtn','ER_StRampExtnRqst','ER_StRampRtrctnRqst','ER_StRampAllOpnd','ER_StRampClsd','BBC_StDoor2'],'door2'],['2021.29298','eramp',['ER_StRampBtn','ER_StRampRtrctnRqst','ER_StRampClsd','BBC_StDoor2'],'door2'],
+ ['2021.29315','eramp',['ER_StRampBuzActv','ER_StRampMvng'],'door2'],['2025.03167','eramp',['ER_StRampBtnLed','ER_StRampAllOpnd'],'door2'],['2025.03168','eramp',['ER_StRampBtnLed','ER_StRampMvng'],'door2'],['2023.03730','eramp',['ER_StRampLmpDoor2'],'door2'],
+ ['2021.29301','rampkey',['ER_StRampKeySwt','ER_StRampMvng','ER_StRampBtn'],'door2'],['2021.29302','rampkey',['ER_StRampKeySwt','ER_StRampMvng','ER_StRampBtn'],'door2'],['2021.29303','rampkey',['ER_StRampKeySwt','ER_StRampMvng','ER_StRampBtn'],'door2'],
  ['2023.04586','hold19560',['D2A_StDoorClsngBlkgRqst','D2A_StDoor2AutoOpndTiGp'],'eld'],['2021.18714','release',['DR_StDoorRelsActv'],'drv'],
  ['2021.17795','oeffnung',['DR_StDoorRelsActv','D2SR_StBtnIntDoor2','BBC_StDoor2'],'door2'],['2021.19035','oeffnung',['DR_StDoorRelsActv','D2SR_StBtnIntDoor2','BBC_StDoor2'],'door2'],
  ['2021.19167','stop',['DSRD_StDoorsStopReqDisp','D2SR_StStrqDoor2Saved'],'door2'],['2023.03984','stop',['DSRD_StDoorsStopReqDisp'],'door2'],['2023.04621','stop',['DSRD_StDoorsStopReqDisp'],'door2'],['2022.02046','stop',['DSRD_StDoorsStopReqDisp'],'door2'],
@@ -1392,9 +1432,10 @@ function setView(v,query){
   const s=$('#docSearch');s.value=query||'';
   if(v==='reqs'){$('#docTitle').textContent='Gereksinimler';s.placeholder='Ara: REQ no, metin, sinyal…';renderDocReqs();}
   if(v==='code'){$('#docTitle').textContent='C Kod';s.placeholder='Ara: giriş, çıkış, parametre…';renderCode();}
+  if(v==='par'){$('#docTitle').textContent='Parametre listesi';s.placeholder='Ara: Nv, PARA_NAME, LID, tip…';renderPar();}
   if(v==='sigs'){$('#docTitle').textContent='Sinyaller';s.placeholder='Ara: sinyal adı, açıklama (envanterde 6.082 sinyal)…';loadInv().catch(()=>{});renderSigView();}
   if(v!=='sim'){$('#dmain').scrollTop=0;}else $('#view').focus({preventScroll:true});
-  try{const h=v==='reqs'?'#gereksinimler':v==='sigs'?'#sinyaller':v==='code'?'#ckod':'';if(location.hash!==h)history.replaceState(null,'',h||location.pathname+location.search);}catch(e){}
+  try{const h=v==='reqs'?'#gereksinimler':v==='sigs'?'#sinyaller':v==='code'?'#ckod':v==='par'?'#parametre':'';if(location.hash!==h)history.replaceState(null,'',h||location.pathname+location.search);}catch(e){}
 }
 function applyDocSearch(){
   const q=$('#docSearch').value.trim().toLowerCase();
@@ -1406,6 +1447,7 @@ function applyDocSearch(){
       else{sec.hidden=false;d.open=OPEN_G.has(gid);const el=sec.querySelector('[data-gl]');if(d.open)fillChapter(gid,'');else{el.innerHTML='';el.dataset.filled='';}}});}
   if(VIEW==='sigs'){if(SIG_MODE==='inv')renderInvMain();else updateSigView(true);}
   if(VIEW==='code'){const io=$('#cIO');if(io)io.innerHTML=cIOHTML();if(Object.keys(CSIM.asws).length)$('#dtoc').innerHTML=cTocHTML();}
+  if(VIEW==='par')renderParBody();
 }
 let searchT=0;$('#docSearch').addEventListener('input',()=>{clearTimeout(searchT);searchT=setTimeout(applyDocSearch,160);});
 document.addEventListener('click',e=>{const b=e.target.closest('.vbtn');if(b)setView(b.dataset.view);const g=e.target.closest('[data-goview]');if(g)setView(g.dataset.goview);});
@@ -1414,7 +1456,7 @@ $('#dmain').addEventListener('mouseleave',()=>{CH.hx=null;},true);
 $('#dmain').addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classList.contains('aswd')&&d.open)fillAsw(d);if(!d.classList||!d.classList.contains('gdet')||d.dataset.g==='_add')return;const gid=d.dataset.g;
   if(d.open){if(!$('#docSearch').value.trim())OPEN_G.add(gid);const el=d.querySelector('[data-gl]');if(el&&!el.dataset.filled)fillChapter(gid,$('#docSearch').value.trim().toLowerCase());}
   else if(!$('#docSearch').value.trim())OPEN_G.delete(gid);},true);
-$('#dmain').addEventListener('input',e=>{if(VIEW==='code')cCodeInput(e);});
+$('#dmain').addEventListener('input',e=>{if(VIEW==='code')cCodeInput(e);if(VIEW==='par')plInput(e);});
 $('#dmain').addEventListener('scroll',e=>{if(e.target.id==='cTa'){const g=$('#cGut');if(g)g.scrollTop=e.target.scrollTop;}},true);
 $('#dmain').addEventListener('keydown',e=>{if(e.target.id==='cTa'&&e.key==='Tab'&&!e.shiftKey){e.preventDefault();const t=e.target,a=t.selectionStart;t.setRangeText('  ',a,t.selectionEnd,'end');cCodeInput({target:t});}
   if(e.target.id==='cTa'&&(e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();const A=CSIM.asws[CSIM.sel];if(A)A.active=true;cRebuildDirty().then(renderCode);}});
@@ -1426,12 +1468,13 @@ $('#dmain').addEventListener('drop',e=>{if(VIEW!=='code')return;e.preventDefault
       const r=en.createReader(),all=[];const more=()=>r.readEntries(b=>{if(!b.length){Promise.all(all.map(walk)).then(res);return;}all.push(...b);more();},()=>res());more();});
     const st=$('#cImp');if(st)st.textContent='Klasör okunuyor…';Promise.all(ents.map(walk)).then(()=>cImportEntries(out,ents.find(x=>x.isDirectory).name+' (klasör)')).catch(err=>{if(st)st.textContent='';cNotice('Klasör içe aktarılamadı: '+err.message,'bad');});return;}
   if(dt.files.length)cAddFiles(dt.files);});
-$('#dmain').addEventListener('change',e=>{if(VIEW==='code'&&cCodeChange(e))return;
+$('#dmain').addEventListener('change',e=>{if(VIEW==='code'&&cCodeChange(e))return;if(VIEW==='par'&&plChange(e))return;
   if(e.target.id==='cwin'){const v=+e.target.value;if(v){CH.win=v;CH.start=null;if(!CH.live)CH.end=REC.now();CH.title='';renderSigView();}return;}
   if(e.target.id==='cadd'){if(e.target.value){CH.sel.push(e.target.value);renderSigView();}return;}const s=e.target.closest('select[data-mv]');if(!s)return;const r=IMPORTED.find(x=>x.id===s.dataset.mv);if(!r)return;
   r.group=s.value;LST[r.id]=Object.assign(LST[r.id]||{},{g:s.value});saveLST();log(`${r.id} → bölüm: ${REQ_GROUPS.find(g=>g.id===s.value).tr}`);renderDocReqs();openReq(r.id);});
 $('#dmain').addEventListener('click',e=>{
   if(VIEW==='code'&&cCodeClick(e))return;
+  if(VIEW==='par'&&plClick(e))return;
   const t=e.target.closest('button,a');if(!t)return;
   if(t.dataset.sig){e.preventDefault();const n=t.dataset.sig;if(SIGN.has(n)){SIG_MODE='live';setView('sigs',n);}else{setView('sigs');openInvSig(n);}}
   if(t.id==='runAll'){runAllDemos();return;}
@@ -1478,21 +1521,26 @@ $('#dtoc').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)retu
 /* ================= Fonksiyonlar ================= */
 const RQ=(k,st_,ev)=>{const r=reqFor(k);if(r)setReq(r,st_,ev);};
 let AUTO_T=3; // D2A_StDoor2AutoOpndTiGp (2021.18637 / 2021.18647: standart 3 s)
-const doorBlockedOpen=id=>V.doorLock?'Kapı kilidi aktif':V.speed>1?'araç hareket halinde (>1 km/h; 2021.19027, 2023.03864)':null;
-const doorBlockedClose=id=>(id===2&&(V.ramp||V.rampPos>0.01))?'Rampa açık':null;
+const mrBlk=()=>!V.mramp||V.mrBlkDis?null:doorS[3].state==='CLOSED'?'open':'close'; // 2021.29327 / 2025.02180
+const doorBlockedOpen=id=>V.doorLock?'Kapı kilidi aktif':V.speed>1?'araç hareket halinde (>1 km/h; 2021.19027, 2023.03864)':id===2&&V.rampDir!==0?'Rampa hareket ediyor (rampa dururken açılır)':id===3&&mrBlk()==='open'?'Manuel rampa kapalı değil (açılma engeli, 2025.02180 / 2025.03112)':null;
+const doorBlockedClose=id=>id===3&&mrBlk()==='close'?'Manuel rampa açık (kapanma engeli, 2021.29327 / 2025.03111)':null;
+const RQs=(k,flag,need,ev)=>{const r=reqFor(k);if(!r)return;r.seen[flag]=true;const miss=need.filter(x=>!r.seen[x]);setReq(r,miss.length?(r.status==='pass'?'pass':'progress'):'pass',ev+(miss.length?` · kalan: ${miss.map(x=>RQ_FLAG[x]||x).join(', ')}`:''));};
+const RQ_FLAG={blk:'kapı açıkken red',early:'erken bırakınca toplanma',full:'basılı tutunca tam açılma',ret:'butonla toplanma',k0:'anahtar 0',k2:'anahtar 2',k1:'anahtar 1',cb:'kapanma engeli',ob:'açılma engeli',bsb:'durak freni',clu:'cluster sembolü'};
+const ERN=['blk','early','full','ret'],RKN=['k0','k2','k1'],MRN=['cb','ob','bsb','clu'];
 const zoneHold=id=>ZR[id].stroller||ZR[id].prm||ZR[id].elderly; // 2025.03465
 const snap=()=>DOORS.map(d=>doorS[d.id].state);
 function setPowerless(id,why){const s=doorS[id];if(s.state==='POWERLESS')return;s.state='POWERLESS';s.err=true;s.auto=false;s.hold=false;s.timer=0;s.pwT=0;
-  log(`Kapı ${id}: POWERLESS · hata (${why||'hava basıncı düşük'}, ${V.air.toFixed(1)} bar). Motoru çalıştırın ya da HUD’dan hava verin.`,'warn');SFX.buzz(doorPos(DOORS[id-1]));}
+  log(`Kapı ${id}: POWERLESS · hata (${why||'kapı '+id+' hava tankı düşük'}, ${s.air.toFixed(1)} bar). Motoru çalıştırın ya da bu kapıya hava verin.`,'warn');SFX.buzz(doorPos(DOORS[id-1]));}
 function airUse(id,src){const s=doorS[id];
-  if(s.state==='POWERLESS'||V.air<AIR.min){setPowerless(id);log(`${src} → Kapı ${id} hareket edemiyor: kapı devresinde hava yok (${V.air.toFixed(1)} bar)`,'warn');return false;}
-  V.air=Math.max(0,V.air-AIR.per);return true;}
-function airSupply(src){V.air=AIR.max;log(`${src} → Kapı devresine hava verildi (${AIR.max.toFixed(1)} bar)`);SFX.hiss([0.6,0.3,HW-0.2]);}
+  if(s.state==='POWERLESS'||s.air<AIR.min){setPowerless(id);log(`${src} → Kapı ${id} hareket edemiyor: kapı ${id} hava tankı boş (${s.air.toFixed(1)} bar)`,'warn');return false;}
+  s.air=Math.max(0,s.air-AIR.per);return true;}
+function airSupply(src,id){const ids=id?[id]:DOORS.map(d=>d.id);ids.forEach(z=>doorS[z].air=AIR.max);log(`${src} → ${id?'Kapı '+id+' hava tankına':'Tüm kapı tanklarına'} hava verildi (${AIR.max.toFixed(1)} bar)`);SFX.hiss(id?doorPos(DOORS[id-1]):[0.6,0.3,HW-0.2]);}
+function airLeak(id,on,src){doorS[id].leak=on;log(`${src} → Kapı ${id} hava kaçağı ${on?'AÇIK (tank '+AIR.leak+' bar/s boşalıyor; diğer kapılar etkilenmez)':'kapandı'}`,on?'warn':undefined);}
 let cDoorNoteT=0;function cDoorNote(id,src,what){const t=performance.now();if(t-cDoorNoteT>1500){cDoorNoteT=t;log(`${src} → kapı ${id} ${what}: karar C kodunda (Doors_BBCAN komutu bekleniyor)`);}}
 function openDoor(id,src,auto){
   if(src!=='C kodu'&&cDrivesDoors()){cDoorNote(id,src,'açma');return false;}
   const s=doorS[id],d=DOORS[id-1],b=doorBlockedOpen(id);
-  if(b){log(`${src} → Kapı ${id} açılamadı: ${b}`,'warn');SFX.buzz(doorPos(d));
+  if(b){log(`${src} → Kapı ${id} açılamadı: ${b}`,'warn');SFX.buzz(doorPos(d));if(b.indexOf('Manuel rampa')===0)RQs('mramp','ob',MRN,`Kapı ${id} kapalı ve manuel rampa kapalı değil → kapı açılmadı (açılma engeli)`);
     if(V.speed>1){RQ('block03864','pass',`${V.speed.toFixed(0)} km/h hızda kapı ${id} açılmadı`);if(!auto){const r=reqFor('drvbtn19027');if(r){r.seen.blk=true;setReq(r,r.seen.ok?'pass':'progress','Hareket halinde sürücü butonu kapıyı açmadı'+(r.seen.ok?'':' (araç dururken de dene)'));}}}return false;}
   const prev=s.state;s.auto=!!auto;if(!auto){s.hold=false;s.timer=0;}
   if(prev==='OPEN'||prev==='OPENING')return true;
@@ -1504,7 +1552,7 @@ function openDoor(id,src,auto){
 function closeDoor(id,src,reason){
   if(src!=='C kodu'&&cDrivesDoors()){cDoorNote(id,src,'kapama');return false;}
   const s=doorS[id],d=DOORS[id-1],b=doorBlockedClose(id);
-  if(b){log(`${src} → Kapı ${id} kapanamadı: ${b}`,'warn');SFX.buzz(doorPos(d));if(b.indexOf('Rampa')===0)RQ('ramp29327','pass',`Rampa açıkken kapı ${id} kapanma engeli aktif`);return false;}
+  if(b){log(`${src} → Kapı ${id} kapanamadı: ${b}`,'warn');SFX.buzz(doorPos(d));if(b.indexOf('Manuel rampa')===0)RQs('mramp','cb',MRN,`Manuel rampa açıkken kapı ${id} kapanmadı (kapanma engeli)`);return false;}
   const prev=s.state;if(prev==='CLOSED'||prev==='CLOSING')return true;
   if(s.hold&&prev==='OPEN'){const dur=(performance.now()-s.openAt)/1000,r=reqFor('hold');
     if(dur>=AUTO_T+0.5)setReq(r,'pass',`Kapı ${id} ${dur.toFixed(1)} s açık kaldı, kendiliğinden kapanmadı; sürücü kapattı`);
@@ -1619,16 +1667,37 @@ function applyLighting(){
   scene.background.set(n?SKY_NIGHT:SKY_DAY);scene.fog.color.set(n?SKY_NIGHT:SKY_DAY);
   MAT.head.color.set(V.head?'#ffffff':(n?'#4a4843':'#cfcdc4'));MAT.drl.color.set(V.engine?'#eaf6ff':'#7d8186');
 }
-function setRamp(on,src){
-  if(on&&doorS[2].state!=='OPEN'){if(V.speed>0.5){log(`${src} → Rampa açılamadı: araç hareket halinde`,'warn');return false;}
-    if(doorS[2].state==='OPENING'){V.rampPending=true;log(`${src} → Rampa: kapı 2 açılınca çıkacak`);return true;}
-    if(openDoor(2,src,false)!==false&&doorS[2].state==='OPENING'){V.rampPending=true;log(`${src} → Rampa: önce kapı 2 açılıyor`);return true;}
-    log(`${src} → Rampa açılamadı: kapı 2 açılamadı`,'warn');return false;}
-  if(on){
-    V.ramp=true;if(doorS[2].auto){doorS[2].hold=true;doorS[2].timer=0;}log(`${src} → Ramp=DEPLOYING (K2 açık tutuluyor)`);}
-  else{V.ramp=false;log(`${src} → Ramp=STOWING`);}
-  SFX.motor();return true;
-}
+/* ---- elektrikli rampa (kapı 2): 2021.29298 / 29299 / 29301-03 / 29315, 2025.03167 / 03168 ---- */
+function rampWhy(){return V.rampKey===0?'rampa anahtarı 0 (rampa kapalı, 2021.29302)':V.rampKey===2?'rampa anahtarı 2 (acil mod, 2021.29303)':V.speed>=1?'araç hızı 1 km/h’den yüksek':doorS[2].state!=='CLOSED'?'kapı 2 kapalı değil (rampa yalnızca kapı kapalıyken hareket eder)':doorS[2].err?'kapı 2’de arıza var':null;}
+function rampButton(down,src){
+  if(down===V.rampBtn)return true;V.rampBtn=down;PRS['RampBtn']=performance.now();
+  if(!down){if(V.rampDir>0&&V.rampPos<1){V.rampDir=-1;V.rampErly=true;log(`${src} → RAMPA bırakıldı, rampa tam açılmadan → geri toplanıyor (2021.29299)`);}return true;}
+  const why=rampWhy();
+  if(why){log(`${src} → Rampa isteği reddedildi: ${why}`,'warn');SFX.buzz([5.4,1,-0.5]);
+    if(V.rampKey===1&&doorS[2].state!=='CLOSED')RQs('eramp','blk',ERN,'Kapı 2 açıkken RAMPA isteği reddedildi');
+    if(V.rampKey===0)RQs('rampkey','k0',RKN,'Anahtar 0: rampa kapalı, istek reddedildi');
+    if(V.rampKey===2)RQs('rampkey','k2',RKN,'Anahtar 2: rampa acil modda, motor sürülmedi');
+    return false;}
+  if(V.rampPos>=1){V.rampDir=-1;V.rampErly=false;log(`${src} → ER_StRampRtrctnRqst=1 · rampa toplanıyor (2021.29298)`);}
+  else{V.rampDir=1;V.rampErly=false;log(`${src} → ER_StRampExtnRqst=1 · rampa çıkıyor; tam açılana kadar basılı tutun (2021.29299)`);RQs('rampkey','k1',RKN,'Anahtar 1: rampa açıldı');}
+  SFX.motor();return true;}
+function rampTick(dt){
+  if(V.rampDir!==0){const why=V.rampKey!==1?'rampa anahtarı '+V.rampKey:V.speed>=1?'araç hareket ediyor':doorS[2].state!=='CLOSED'?'kapı 2 kapalı değil':doorS[2].err?'kapı 2 arızalı':null;
+    if(why){log(`Rampa durdu: ${why}`,'warn');V.rampDir=0;V.rampErly=false;SFX.buzz([0.6,-0.1,HW]);}}
+  if(V.rampDir===0)return;
+  V.rampBz=(V.rampBz||0)-dt;if(V.rampBz<=0){V.rampBz=0.45;SFX.beep([0.6,-0.1,HW+0.2]);} // 2021.29315
+  V.rampPos=Math.min(1,Math.max(0,V.rampPos+V.rampDir*dt/RAMP_T));
+  if(V.rampPos>=1&&V.rampDir>0){V.rampDir=0;log('Ramp=DEPLOYED · rampa tam açık, buton LED’i sürekli yanıyor (2025.03167)');SFX.thunk([0.6,-0.1,HW+0.6]);
+    if(V.rampBtn)RQs('eramp','full',ERN,'Buton basılı tutuldu → rampa tam açıldı, LED sürekli yanıyor');}
+  if(V.rampPos<=0&&V.rampDir<0){V.rampDir=0;log('Ramp=STOWED');SFX.thunk([0.6,-0.1,HW]);
+    if(V.rampErly){V.rampErly=false;RQs('eramp','early',ERN,'Buton erken bırakıldı → rampa geri toplandı');}else RQs('eramp','ret',ERN,'Tam açık rampa RAMPA butonuyla toplandı');}}
+const rampLed=()=>V.rampDir!==0?(blink%0.6)<0.3:V.rampPos>=1; // 2025.03168 / 03167
+function setRampKey(k,src){k=+k;if(V.rampKey===k)return;V.rampKey=k;log(`${src} → Rampa anahtarı ${k} (${['kapalı','açık','acil mod'][k]})`);const sel=$('#rKey');if(sel)sel.value=String(k);}
+function setMRamp(on,src){if(V.mramp===on)return;V.mramp=on;
+  log(`${src} → MR_StDoor3RampOpnd=${on?1:0}`+(on?(V.mrBlkDis?' (engeller parametreyle kapalı)':doorS[3].state==='CLOSED'?' · kapı 3 kapalı → açılma engeli':' · kapı 3 açık → kapanma engeli'):''));SFX.thunk([-4.1,0,HW]);
+  if(on)RQs('mramp','clu',MRN,'Manuel rampa açık → göstergede engelli sembolü (RAMPA) yanıyor');}
+function holdBtn(b,down,src){if(down){PRS['Dash_'+b.id]=performance.now();SFX.click([5.45,0.98,-0.3]);b.presses=(b.presses||0)+1;b.pressT=0.14;}
+  if(b.impl)b.fn(down,src);curBtn=b;renderBtnCard();refreshBtns();}
 function announce(src){log(`${src} → Anons: Sonraki durak Belediye Meydanı`);SFX.chime();
   try{if(window.speechSynthesis&&AU.on){const u=new SpeechSynthesisUtterance('Sonraki durak, Belediye Meydanı');u.lang='tr-TR';u.rate=0.95;setTimeout(()=>speechSynthesis.speak(u),900);}}catch(e){}}
 
@@ -1732,9 +1801,9 @@ const HOLDW=()=>2400+AUTO_T*1000;
 function resetSim(){
   if(CSIM.on&&CSIM.build)cInitG();
   st.driving=false;$('#hDrive').setAttribute('aria-pressed',false);V.speed=0;DRV.force=null;rig.position.set(0,0,0);rig.rotation.y=0;
-  DOORS.forEach(d=>{Object.assign(doorS[d.id],{state:'CLOSED',err:false,pos:0,auto:false,hold:false,timer:0,reqOpen:false,lb:false,lbHit:false});doorPose(d.id,0);});
+  DOORS.forEach(d=>{Object.assign(doorS[d.id],{air:AIR.start,leak:false,state:'CLOSED',err:false,pos:0,auto:false,hold:false,timer:0,reqOpen:false,lb:false,lbHit:false});doorPose(d.id,0);});
   [1,2,3].forEach(z=>Object.keys(ZR[z]).forEach(k=>ZR[z][k]=false));recompute();refreshStop();
-  Object.assign(V,{release:false,ramp:false,rampPending:false,rampPos:0,air:AIR.start,doorLock:false,park:true,engine:true,intLight:true,dim:false,night:false,kneel:false});
+  Object.assign(V,{release:false,rampPos:0,rampDir:0,rampBtn:false,rampKey:1,rampErly:false,mramp:false,doorLock:false,park:true,engine:true,intLight:true,dim:false,night:false,kneel:false});
   Object.assign(CAB,{lock:true,timer:0,open:false,pos:0});applyLighting();refreshBtns();
 }
 const DEMOS={
@@ -1771,6 +1840,7 @@ const DEMOS={
 const sleep=ms=>new Promise((res,rej)=>{const t0=performance.now();const tick=()=>{if(!DEMO||DEMO.cancel)return rej('cancel');if(performance.now()-t0>=ms)return res();requestAnimationFrame(tick);};tick();});
 const SPD=v=>{if(v)DRV.force=v;else{DRV.force=null;V.speed=0;}};
 const DRVK=id=>doorToggle(id,'Demo · Sürücü K'+id);
+const RBTN=on=>holdBtn(BB('RAMPA'),on,'Demo · Gösterge B03');
 Object.assign(DEMOS,{
   clr19182:[['Kapı 2 bölgesinde STOP isteği veriliyor',()=>{cam('door2');stopRequest(null,'Demo · STOP',2);},2000],['Türfreigabe veriliyor → kapı açılmaya başlarken istek silinmeli',()=>TF(true),2600],['Kapı kendiliğinden kapanıyor',null,()=>AUTO_T*1000+2600],['Türfreigabe kapatılıyor',()=>TF(false),1000]],
   zone19171:[['Kapı 3 bölgesinde STOP isteği veriliyor',()=>{cam('door3');stopRequest(null,'Demo · STOP',3);},1800],['Sürücü kapı 2’yi açıyor → K3 isteği korunmalı',()=>{cam('drv');DRVK(2);},3000],['Kapı 2 kapatılıyor',()=>DRVK(2),2800],
@@ -1788,8 +1858,18 @@ Object.assign(DEMOS,{
   drvbtn19027:[['Araç dururken sürücü K2’ye basıyor → kapı açılmalı',()=>{cam('drv');DRVK(2);},3000],['Kapı kapatılıyor',()=>DRVK(2),2800],['El freni inik, araç 10 km/h',()=>{pressBtn(BB('PARK'),'Demo · El freni');SPD(10);},2000],
     ['Sürücü K2’ye basıyor → kapı açılmamalı',()=>DRVK(2),2000],['Araç duruyor, el freni çekiliyor',()=>{SPD(0);pressBtn(BB('PARK'),'Demo · El freni');},1200]],
   drvled19032:[['Sürücü K2’ye basıyor; kapı açıkken K2 butonu sürekli yanmalı',()=>{cam('drv');DRVK(2);},3600],['Kapı kapatılıyor',()=>DRVK(2),2800]],
-  ramp29327:[['Sürücü kapı 2’yi açıyor',()=>{cam('door2');DRVK(2);},3000],['Rampa açılıyor',()=>pressBtn(BB('RAMPA'),'Demo · Gösterge B03'),3600],['Sürücü K2’ye basıyor → kapanma engellenmeli',()=>DRVK(2),2000],
-    ['Rampa toplanıyor',()=>pressBtn(BB('RAMPA'),'Demo · Gösterge B03'),3600],['Kapı kapatılıyor',()=>DRVK(2),2800]],
+  eramp:[['Sürücü kapı 2’yi açıyor',()=>{cam('door2');DRVK(2);},3000],['Kapı açıkken RAMPA basılı tutuluyor → rampa çıkmamalı (kapı kapalı olmalı)',()=>RBTN(true),1400],
+    ['Buton bırakılıyor, kapı 2 kapatılıyor',()=>{RBTN(false);DRVK(2);},3000],['Kapı kapalı: RAMPA basılı tutuluyor → rampa çıkıyor, buzzer çalıyor, LED yanıp sönüyor',()=>RBTN(true),1300],
+    ['Buton tam açılmadan bırakılıyor → rampa geri toplanmalı (2021.29299)',()=>RBTN(false),2700],['RAMPA tam açılana kadar basılı tutuluyor → LED sürekli yanmalı',()=>RBTN(true),()=>RAMP_T*1000+700],
+    ['Buton bırakılıyor; rampa açık kalıyor. Sürücü kapı 2’yi açıyor (yolcu biner)',()=>{RBTN(false);DRVK(2);},3400],['Kapı 2 kapatılıyor',()=>DRVK(2),3000],
+    ['RAMPA’ya bir kez basılıyor → toplanma isteği, rampa kapanmalı (2021.29298)',()=>{RBTN(true);setTimeout(()=>RBTN(false),250);},()=>RAMP_T*1000+700]],
+  rampkey:[['Rampa anahtarı 0 (kapalı): RAMPA basılı tutuluyor → rampa çalışmamalı',()=>{cam('door2');setRampKey(0,'Demo · rampa anahtarı');RBTN(true);},1600],
+    ['Buton bırakılıyor; anahtar 2 (acil mod)',()=>{RBTN(false);setRampKey(2,'Demo · rampa anahtarı');},1500],['Acil modda RAMPA basılı tutuluyor → motor sürülmemeli, göstergede RAMPA ACİL',()=>RBTN(true),1600],
+    ['Anahtar 1: RAMPA basılı tutuluyor → rampa çıkmalı',()=>{RBTN(false);setRampKey(1,'Demo · rampa anahtarı');setTimeout(()=>RBTN(true),300);},1800],['Buton bırakılıyor → rampa geri toplanıyor',()=>RBTN(false),2400]],
+  mramp:[['Sürücü kapı 3’ü açıyor',()=>{cam('door3');DRVK(3);},3000],['Manuel rampa açılıyor → göstergede engelli sembolü, durak freni',()=>setMRamp(true,'Demo · manuel rampa'),2400],
+    ['Sürücü K3’e basıyor → kapanma engellenmeli (2021.29327)',()=>DRVK(3),2000],['Manuel rampa yerine katlanıyor',()=>setMRamp(false,'Demo · manuel rampa'),1800],['Kapı 3 kapatılıyor',()=>DRVK(3),3000],
+    ['Rampa kilidi oturmuyor (sensör: açık), kapı kapalı → durak freni devrede kalmalı',()=>setMRamp(true,'Demo · rampa sensörü'),1800],['Sürücü K3’e basıyor → açılma engellenmeli (2025.02180)',()=>DRVK(3),2000],
+    ['Rampa kilitleniyor',()=>setMRamp(false,'Demo · manuel rampa'),1600]],
   assign04582:[['Türfreigabe açılıyor',()=>{cam('k2p');TF(true);},1500],['Kapı 2 bölgesindeki bebek arabası butonuna basılıyor → yalnızca K2 açılmalı',()=>stopRequest('stroller','Demo · BTN-STR',2),3200],['Sürücü K2’yi kapatıyor',()=>{cam('drv');DRVK(2);},2800],['Türfreigabe kapatılıyor',()=>TF(false),1000]],
   auto18637:[['Türfreigabe açılıyor',()=>{cam('door3');TF(true);},1500],['Kapı 3 kanadındaki AÇ butonuna basılıyor → K3 otomatik açılmalı',()=>doorRequest(3,'Demo · Öffnung K3'),2800],['Açık kalma süresi doluyor, kapı kapanıyor',null,()=>AUTO_T*1000+2800],['Türfreigabe kapatılıyor',()=>TF(false),1000]]
 });
@@ -1839,6 +1919,7 @@ function scenHTML(r){const sc=scenarioSteps(r);if(!sc)return'';
 let curBtn=BTN[0];
 function pressBtn(b,src){
   PRS['Dash_'+b.id]=performance.now();
+  if(b.type==='hold'){holdBtn(b,true,src);setTimeout(()=>holdBtn(b,false,src),250);return;}
   SFX.click([5.45,0.98,-0.3]);b.presses=(b.presses||0)+1;b.pressT=0.14;if(b.type==='momentary')b.flashT=0.6;
   if(b.type==='toggle'){const next=!b.get();
     if(b.impl){if(b.fn(next,src)===false)SFX.buzz([5.4,1,-0.5]);}
@@ -1852,13 +1933,14 @@ $('#btnCnt').textContent=BTN.filter(b=>b.impl).length+' / '+BTN.length+' tanıml
 bgrid.addEventListener('click',e=>{const c=e.target.closest('.bchip');if(!c)return;curBtn=BTN[+c.dataset.b];renderBtnCard();});
 function renderBtnCard(){const b=curBtn;[...bgrid.children].forEach((c,i)=>c.setAttribute('aria-selected',BTN[i]===b));
   $('#bcard').innerHTML=`<div class="code">${b.id} · DASH-${b.id}</div><h4>${esc(b.name)}</h4><p>${esc(b.desc||'Fonksiyon henüz tanımlı değil. Kuralı yazınca eklenecek.')}</p>
-  <dl><dt>Tip</dt><dd>${b.type==='toggle'?'Aç / kapa':'Anlık'}</dd><dt>Durum</dt><dd id="bState"></dd><dt>Fonksiyon</dt><dd>${b.impl?'Tanımlı':'Tanımsız'}</dd><dt>Konum</dt><dd>${b.where}</dd><dt>Basılma sayısı</dt><dd id="bPress"></dd></dl>
+  <dl><dt>Tip</dt><dd>${b.type==='toggle'?'Aç / kapa':b.type==='hold'?'Basılı tut':'Anlık'}</dd><dt>Durum</dt><dd id="bState"></dd><dt>Fonksiyon</dt><dd>${b.impl?'Tanımlı':'Tanımsız'}</dd><dt>Konum</dt><dd>${b.where}</dd><dt>Basılma sayısı</dt><dd id="bPress"></dd></dl>
   <div class="brow"><button class="pbtn" id="bPressBtn">Bas</button><button class="pbtn ghost" id="bShow">Kokpitte göster</button></div>`;
-  $('#bPressBtn').onclick=()=>pressBtn(b,'Panel '+b.id);
+  if(b.type==='hold'){const pb=$('#bPressBtn');pb.textContent='Basılı tut';const up=()=>{if(V.rampBtn)holdBtn(b,false,'Panel '+b.id);};pb.onpointerdown=e=>{e.preventDefault();holdBtn(b,true,'Panel '+b.id);};pb.onpointerup=up;pb.onpointerleave=up;pb.onpointercancel=up;}
+  else $('#bPressBtn').onclick=()=>pressBtn(b,'Panel '+b.id);
   $('#bShow').onclick=()=>{teleport(4.9,-0.72,1.3,-1.92,-0.55);select(b.mesh,true);};updBtnCard();}
-function updBtnCard(){const b=curBtn,s=$('#bState'),p=$('#bPress');if(s)s.textContent=b.type==='toggle'?(b.get()?'AÇIK (1)':'KAPALI (0)'):'—';if(p)p.textContent=String(b.presses||0);}
+function updBtnCard(){const b=curBtn,s=$('#bState'),p=$('#bPress');if(s)s.textContent=b.type==='toggle'?(b.get()?'AÇIK (1)':'KAPALI (0)'):b.type==='hold'?(b.get()?'BASILI (1)':'BIRAKILDI (0)')+' · rampa '+rampState():'—';if(p)p.textContent=String(b.presses||0);}
 function refreshBtns(){
-  BTN.forEach((b,i)=>{const on=(b.type==='toggle'&&b.get())||b.flashT>0;b.ledM.color.set(on?(b.flashT>0&&b.type==='momentary'?'#eafff3':'#3ddc84'):'#1a2024');bgrid.children[i].classList.toggle('on',on);});
+  BTN.forEach((b,i)=>{const on=(b.type==='toggle'&&b.get())||b.flashT>0||(b.led&&b.led());b.ledM.color.set(on?(b.flashT>0&&b.type==='momentary'?'#eafff3':'#3ddc84'):'#1a2024');bgrid.children[i].classList.toggle('on',on);});
   updBtnCard();$('#hLight').setAttribute('aria-pressed',V.intLight);$('#hRelease').setAttribute('aria-pressed',V.release);
 }
 renderBtnCard();
@@ -1876,16 +1958,14 @@ let blink=0,hazOn=false,hazPrev=false;
 function updateDoors(dt){
   blink+=dt;const bl=(blink%0.6)<0.3;
   hazOn=V.hazard&&(blink%0.8)<0.4;if(hazOn!==hazPrev){hazPrev=hazOn;MAT.ind.color.set(hazOn?'#ffa31a':'#3a2a10');if(V.hazard)SFX.tick();}
-  const rt=V.ramp?1:0;
-  if(V.rampPos!==rt){V.rampPos=rt>V.rampPos?Math.min(1,V.rampPos+dt/3):Math.max(0,V.rampPos-dt/3);if(V.rampPos===1)log('Ramp=DEPLOYED');if(V.rampPos===0)log('Ramp=STOWED');}
+  rampTick(dt);
   {const p=V.rampPos,sl=Math.min(1,p/0.8),tl=Math.max(0,(p-0.8)/0.2);rampPivot.position.z=RAMP_Z0+0.88*sl;rampPivot.position.y=-0.035+0.02*sl;rampPivot.rotation.x=0.2*tl;}
-  if(V.rampPending&&doorS[2].state==='OPEN'){V.rampPending=false;V.ramp=true;if(doorS[2].auto){doorS[2].hold=true;doorS[2].timer=0;}log('Kapı 2 açıldı → Ramp=DEPLOYING');SFX.motor();}
-  if(V.rampPending&&doorS[2].state!=='OPEN'&&doorS[2].state!=='OPENING'){V.rampPending=false;log('Rampa iptal: kapı 2 açılamadı','warn');}
-  if(V.engine&&V.air<AIR.max)V.air=Math.min(AIR.max,V.air+AIR.comp*dt);
+  {const m=V.mramp?(doorS[3].pos>0.85?Math.PI+0.5:0.2):0;if(V.mrampPos!==m){const k=dt*2.4;V.mrampPos=V.mrampPos<m?Math.min(m,V.mrampPos+k):Math.max(m,V.mrampPos-k);}mrPivot.rotation.x=V.mrampPos;}
+  DOORS.forEach(d=>{const s=doorS[d.id];if(V.engine&&s.air<AIR.max)s.air=Math.min(AIR.max,s.air+AIR.comp*dt);if(s.leak)s.air=Math.max(0,s.air-AIR.leak*dt);});
   DOORS.forEach(d=>{const s=doorS[d.id];
-    if(s.state==='POWERLESS'){if(V.air>=AIR.ok){s.state=s.pos>0.5?'OPEN':'CLOSED';s.pos=s.state==='OPEN'?1:0;s.err=false;log(`Kapı ${d.id}: hava geldi (${V.air.toFixed(1)} bar) → ${s.state}, hata temizlendi`);}
+    if(s.state==='POWERLESS'){if(s.air>=AIR.ok){s.state=s.pos>0.5?'OPEN':'CLOSED';s.pos=s.state==='OPEN'?1:0;s.err=false;log(`Kapı ${d.id}: tankına hava geldi (${s.air.toFixed(1)} bar) → ${s.state}, hata temizlendi`);}
       else{s.pwT=(s.pwT||0)-dt;if(s.pwT<=0){s.pwT=2.5;SFX.buzz(doorPos(d));}}}
-    else if(V.air<AIR.min&&(s.state==='OPEN'||s.state==='CLOSED'))setPowerless(d.id);
+    else if(s.air<AIR.min&&(s.state==='OPEN'||s.state==='CLOSED'))setPowerless(d.id);
     if(s.state==='CLOSING'&&playerInDoor(d)){s.state='OPENING';onDoorOpened(d.id);if(s.auto)RQ('reopen18644','pass',`Otomatik kapanma sırasında ışık bariyeri → kapı ${d.id} yeniden açıldı`);log(`Sıkışma algılandı → Kapı ${d.id} yeniden açılıyor`,'warn');SFX.buzz(doorPos(d));SFX.hiss(doorPos(d));}
     if(s.state==='OPENING'){s.pos=Math.min(1,s.pos+dt/DOOR_T);
       if(s.pos>=1){s.state='OPEN';s.openAt=performance.now();log(`Kapı ${d.id}: OPEN`);SFX.thunk(doorPos(d));if(!s.auto)RQ('drvled19032','pass',`Kapı ${d.id} açık → sürücü K${d.id} butonu sürekli yanıyor`);
@@ -1909,10 +1989,11 @@ function updateDoors(dt){
     doorPose(d.id,e);
     s.btnMat.emissive.set(s.state==='CLOSED'?'#300000':s.state==='OPEN'?'#ff2a14':(bl?'#ff2a14':'#400000'));
   });
-  const sb=cDrivesBrake()?(V.stopBrakeMan||!!CSIM.G.DBSBR_StBstbrkReq):(V.stopBrakeMan||V.release||DOORS.some(d=>doorS[d.id].state!=='CLOSED'));
+  const sb=cDrivesBrake()?(V.stopBrakeMan||!!CSIM.G.DBSBR_StBstbrkReq):(V.stopBrakeMan||V.release||V.mramp||DOORS.some(d=>doorS[d.id].state!=='CLOSED')); // 2025.02179: manuel rampa açıkken durak freni
   if(sb!==V.stopBrake){V.stopBrake=sb;log(`GW_AcvBstbrkOn=${sb?1:0}`+(sb?' (hareket engeli aktif)':''));
     {const r=reqFor('bsb13674');if(r){if(sb&&V.release){r.seen.on=true;setReq(r,r.status==='pass'?'pass':'progress','Türfreigabe aktif → GW_AcvBstbrkOn=1');}else if(!sb&&r.seen.on)setReq(r,'pass','Türfreigabe kapatıldı → GW_AcvBstbrkOn=0');}}
     if(sb&&!V.release&&DOORS.some(d=>doorS[d.id].state!=='CLOSED'))RQ('bsb18762','pass','Kapı kapalı değil → GW_AcvBstbrkOn=1');}
+  if(V.mramp&&V.stopBrake&&!V.release&&!V.stopBrakeMan&&DOORS.every(d=>doorS[d.id].state==='CLOSED')){const r=reqFor('mramp');if(r&&!r.seen.bsb)RQs('mramp','bsb',MRN,'Kapılar kapalı, manuel rampa açık → GW_AcvBstbrkOn=1');}
 }
 
 /* ================= Cluster ================= */
@@ -1968,10 +2049,10 @@ function drawCluster(g,w,h){
     g.fillStyle=on?'#0b0e10':'#3c464e';g.font=`700 14px ${F}`;g.textAlign='center';g.fillText(t,x+25.5,271);});
   g.save();rr(g,4,4,w-8,h-8,46);g.clip();const gl=g.createLinearGradient(0,0,0,h*0.55);gl.addColorStop(0,'rgba(255,255,255,.10)');gl.addColorStop(1,'rgba(255,255,255,0)');
   g.fillStyle=gl;g.beginPath();g.moveTo(0,0);g.lineTo(w,0);g.lineTo(w,h*0.32);g.quadraticCurveTo(w/2,h*0.5,0,h*0.32);g.closePath();g.fill();g.restore();
-  {const pw=DOORS.some(x=>doorS[x.id].state==='POWERLESS'),lo=V.air<AIR.ok;g.textAlign='center';
-    if(pw&&(blink%1)<0.6){g.font=`700 17px ${F}`;const t='KAPI ARIZASI · HAVA BASINCI DÜŞÜK';const tw=g.measureText(t).width+28;rr(g,440-tw/2,62,tw,28,6);g.fillStyle='#ff3b22';g.fill();g.fillStyle='#0b0e10';g.fillText(t,440,82);}
-    else{g.font=`600 14px ${F}`;g.fillStyle=lo?'#ffb000':'#8f9aa3';g.fillText(`Kapı havası ${V.air.toFixed(1)} bar`,440,80);}}
-  const tt=[['DURAK FRENİ',V.stopBrake,'#ffb000'],['DURAK İSTEĞİ',V.stopReq,'#ffb000'],['RAMPA',V.req.prm,'#4d9bff'],['KAPI AÇIK',DOORS.some(x=>doorS[x.id].state!=='CLOSED'),'#ff3b22']];
+  {const pwl=DOORS.filter(x=>doorS[x.id].state==='POWERLESS').map(x=>'K'+x.id),pw=pwl.length>0,lo=V.air<AIR.ok;g.textAlign='center';
+    if(pw&&(blink%1)<0.6){g.font=`700 17px ${F}`;const t=`${pwl.join(' · ')} ARIZASI · HAVA BASINCI DÜŞÜK`;const tw=g.measureText(t).width+28;rr(g,440-tw/2,62,tw,28,6);g.fillStyle='#ff3b22';g.fill();g.fillStyle='#0b0e10';g.fillText(t,440,82);}
+    else{g.font=`600 14px ${F}`;g.fillStyle=lo?'#ffb000':'#8f9aa3';g.fillText('Kapı havası  '+DOORS.map(x=>`K${x.id} ${doorS[x.id].air.toFixed(1)}`).join(' · ')+' bar',440,80);}}
+  const tt=[['DURAK FRENİ',V.stopBrake,'#ffb000'],['DURAK İSTEĞİ',V.stopReq,'#ffb000'],[V.rampKey===2?'RAMPA ACİL':'RAMPA',V.req.prm||V.rampPos>0||V.mramp||V.rampKey===2,'#4d9bff'],['KAPI AÇIK',DOORS.some(x=>doorS[x.id].state!=='CLOSED'),'#ff3b22']];
   const pos=[[168,262],[168,296],[712,262],[712,296]];
   tt.forEach(([t,on,c],i)=>{const [x,y]=pos[i];g.font=`700 14px ${F}`;const tw=g.measureText(t).width+18;
     rr(g,x-tw/2,y-13,tw,24,5);g.fillStyle=on?c:'#151b20';g.fill();g.fillStyle=on?'#0b0e10':'#3c464e';g.textAlign='center';g.fillText(t,x,y+5);});
@@ -1982,13 +2063,21 @@ function renderCluster(){drawCluster(hudG,880,330);drawCluster(c3G,880,330);clus
 $('#hDrive').onclick=()=>toggleDrive('Gösterge HUD');$('#hHome').onclick=()=>goHome();$('#demoStop').onclick=()=>{if(DEMO)DEMO.cancel=true;};
 (()=>{const g=$('#hDrvIcon').getContext('2d');g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();g.arc(22,22,15,0,7);g.stroke();g.beginPath();g.arc(22,22,4,0,7);g.fill();g.fillStyle='#fff';g.fill();[0,2.1,4.2].forEach(a=>{g.beginPath();g.moveTo(22,22);g.lineTo(22+15*Math.cos(a+1.57),22+15*Math.sin(a+1.57));g.stroke();});})();
 $('#hLight').onclick=()=>pressBtn(BTN[4],'Gösterge HUD');$('#hC').onclick=()=>setView('code');$('#hAir').onclick=()=>airSupply('Gösterge HUD');
+{const box=$('#dAir');box.innerHTML=DOORS.map(d=>`<span>Kapı ${d.id}</span><b id="air${d.id}">—</b><button class="sfb" data-airfill="${d.id}">Hava ver</button><button class="sfb" data-airleak="${d.id}" aria-pressed="false">Kaçak</button>`).join('');
+  box.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;if(t.dataset.airfill)airSupply('Yan panel',+t.dataset.airfill);if(t.dataset.airleak){const z=+t.dataset.airleak;airLeak(z,!doorS[z].leak,'Yan panel');}updSidePanel();});
+  $('#rKey').addEventListener('change',e=>setRampKey(e.target.value,'Yan panel'));$('#mrBtn').onclick=()=>{setMRamp(!V.mramp,'Yan panel');updSidePanel();};$('#mrDis').addEventListener('change',e=>{V.mrBlkDis=e.target.checked;log(`Yan panel → MR_CfgDoorBlkgDisNv=${V.mrBlkDis?1:0}`);});
+  const rh=$('#rHold'),up=()=>{if(V.rampBtn)holdBtn(BB('RAMPA'),false,'Yan panel');};rh.onpointerdown=e=>{e.preventDefault();holdBtn(BB('RAMPA'),true,'Yan panel');};rh.onpointerup=up;rh.onpointerleave=up;rh.onpointercancel=up;}
+function updSidePanel(){if($('#pSig').hidden)return;DOORS.forEach(d=>{const s=doorS[d.id],el=$('#air'+d.id);const t=s.air.toFixed(1)+' bar'+(s.state==='POWERLESS'?' · POWERLESS':'');if(el.textContent!==t)el.textContent=t;el.className=s.state==='POWERLESS'?'bad':s.air<AIR.ok?'warn':'';
+    const lb=document.querySelector(`[data-airleak="${d.id}"]`);lb.setAttribute('aria-pressed',s.leak);});
+  $('#rState').textContent=rampState()+' · %'+Math.round(V.rampPos*100);$('#rHold').setAttribute('aria-pressed',V.rampBtn);$('#mrBtn').setAttribute('aria-pressed',V.mramp);$('#mrState').textContent=V.mramp?(mrBlk()==='open'?'açık · K3 açılma engeli':mrBlk()==='close'?'açık · K3 kapanma engeli':'açık'):'kapalı';
+  const k=$('#rKey');if(k.value!==String(V.rampKey))k.value=String(V.rampKey);$('#mrDis').checked=V.mrBlkDis;}
 $('#verBtn').onclick=()=>showNotes();
 {const box=$('#dTypes');box.innerHTML=DOORS.map(d=>`<label for="dt${d.id}">Kapı ${d.id}</label><select id="dt${d.id}" data-dtype="${d.id}">${Object.entries(DOOR_TYPES).map(([k,v])=>`<option value="${k}"${DCFG[d.id]===k?' selected':''}>${v.ad}</option>`).join('')}</select>`).join('');
   box.addEventListener('change',e=>{const id=+e.target.dataset.dtype;if(id)setDoorType(id,e.target.value);});DOORS.forEach(d=>setDoorType(d.id,DCFG[d.id],true));}$('#hPerf').onclick=()=>{const ks=Object.keys(PERF_CFG);setPerf(ks[(ks.indexOf(PERF.mode)+1)%ks.length]);};$('#hPerf').querySelector('b').textContent=PERF_CFG[PERF.mode].ad;$('#hRelease').onclick=()=>pressBtn(BTN[0],'Gösterge HUD');
 (()=>{const g=$('#hRelIcon').getContext('2d');g.strokeStyle='#fff';g.lineWidth=3;g.strokeRect(9,6,26,32);g.beginPath();g.moveTo(22,6);g.lineTo(22,38);g.stroke();g.fillStyle='#3ddc84';g.font='bold 13px sans-serif';g.textAlign='center';g.fillText('A',22,26);})();
 
 /* ================= Sinyal kataloğu ================= */
-const rampState=()=>V.rampPos===0?'STOWED':V.rampPos===1?'DEPLOYED':V.ramp?'DEPLOYING':'STOWING';
+const rampState=()=>V.rampDir>0?'DEPLOYING':V.rampDir<0?'STOWING':V.rampPos<=0?'STOWED':V.rampPos>=1?'DEPLOYED':'STOPPED';
 const sB=(n,g,tr,en,get,o)=>Object.assign({n,g,t:'bool',tr,en,get},o||{});
 const sE=(n,g,tr,en,get,act,o)=>Object.assign({n,g,t:'enum',tr,en,get,act},o||{});
 const sN=(n,g,tr,en,get,u,o)=>Object.assign({n,g,t:'num',tr,en,get,u},o||{});
@@ -2014,7 +2103,8 @@ const SIG_DB=[];
   ...(()=>{const GH='Araç (Gateway) ham giriş';return [b('GW_StClmp15',GH,()=>true,'KL15 ham (simülatörde hep açık)'),b('GW_StClmpRdo',GH,()=>true,'Radyo kontağı ham'),
     b('GW_SpdLess1',GH,()=>V.speed<1,'Hız < 1 km/h ham'),b('GW_SpdLess3',GH,()=>V.speed<3,'Hız < 3 km/h ham'),b('GW_StPrkgBrkEngd',GH,()=>V.park,'Park freni ham'),
     b('GW_AcvBstbrk',GH,()=>V.stopBrake,'Durak freni aktif ham'),b('GW_StEngRung',GH,()=>V.engine,'Motor çalışıyor ham'),b('GW_StEngAcv',GH,()=>V.engine&&V.speed<1,'Motor rölantide ham'),b('GW_ModeExbn',GH,()=>false,'Sergi modu (kapalı)'),
-    num('GW_PAirCirc4',GH,()=>Math.round(V.air*1000),'mbar','Hava basıncı devre 4 (kapılar)'),b('GW_PAirSplyLo',GH,()=>V.air<6.0,'Hava besleme basıncı düşük')];})(),
+    num('GW_PAirCirc4',GH,()=>Math.round(V.air*1000),'mbar','Hava basıncı devre 4 (kapılar)'),b('GW_PAirSplyLo',GH,()=>V.air<6.0,'Hava besleme basıncı düşük'),
+    ...[1,2,3].map(z=>num(`DC${z}_PAirDoor${z}`,GH,()=>Math.round(doorS[z].air*1000),'mbar',`Kapı ${z} hava tankı basıncı (her kapının kendi devresi)`))];})(),
   ...(()=>{const GK='Kapı kontrolcüsü (CAN girişi)',ST={CLOSED:1,OPEN:2,CLOSING:3,OPENING:4,POWERLESS:5},st=z=>ST[doorS[z].state]||0,ps=z=>Math.round(doorS[z].pos*100);
     return [num('BD12_StDoor1Wngfr_IC',GK,()=>st(1),'','Kapı 1 ön kanat durumu: 1 kapalı, 2 açık, 3 kapanıyor, 4 açılıyor'),num('BD12_StDoor1Wngre_IC',GK,()=>st(1),'','Kapı 1 arka kanat durumu'),
       num('BD12_StDoor2_IC',GK,()=>st(2),'','Kapı 2 durumu: 1 kapalı, 2 açık, 3 kapanıyor, 4 açılıyor'),num('BD34_StDoor3_IC',GK,()=>st(3),'','Kapı 3 durumu'),
@@ -2062,6 +2152,12 @@ const SIG_DB=[];
   b('DAD_StDrvrDoorLockRqst',GC,()=>CAB.lock,'Kabin kapısı kilit isteği (mıknatıs)'),
   b('DRB_StDrvrBuzActv',GC,()=>!!CAB.buzzOn,'Sürücü buzzer’ı aktif'),
   b('ER_StRampAllOpnd',GRp,()=>rampState()==='DEPLOYED','Rampa tamamen açık'),b('ER_StRampClsd',GRp,()=>rampState()==='STOWED','Rampa kapalı'),
+  num('ER_StRampKeySwt',GRp,()=>V.rampKey,'','Rampa anahtarı: 0 kapalı, 1 açık, 2 acil mod (2021.29301-03)'),b('ER_StRampBtn',GRp,()=>V.rampBtn,'Rampa butonu basılı'),
+  b('ER_StRampExtnRqst',GRp,()=>V.rampDir>0,'Rampa açılma isteği (2021.29299)'),b('ER_StRampRtrctnRqst',GRp,()=>V.rampDir<0,'Rampa toplanma isteği (2021.29298)'),
+  b('ER_StRampMvng',GRp,()=>V.rampDir!==0,'Rampa hareket ediyor'),b('ER_StRampBuzActv',GRp,()=>V.rampDir!==0,'Rampa buzzer’ı (2021.29315)'),
+  b('ER_StRampBtnLed',GRp,()=>rampLed(),'Rampa buton LED’i: hareket → yanıp söner, tam açık → sürekli (2025.03167 / 03168)'),b('ER_StRampLmpDoor2',GRp,()=>V.rampPos>0,'Kapı 2 uyarı lambası: rampa tam kapalı değil (2023.03730)'),
+  b('MR_StDoor3RampOpnd',GRp,()=>V.mramp,'Manuel rampa (kapı 3) açık'),b('MR_StDoor3ClsngBlkg',GRp,()=>mrBlk()==='close','Kapı 3 kapanma engeli: manuel rampa açık (2021.29327)'),
+  b('MR_StDoor3OpngBlkg',GRp,()=>mrBlk()==='open','Kapı 3 açılma engeli: manuel rampa kapalı değil (2025.02180)'),num('MR_CfgDoorBlkgDisNv',GRp,()=>V.mrBlkDis?1:0,'','Manuel rampa kapı engelleri kapalı (2021.29329)'),
   ...[1,2,3].map(z=>num(`D${z}A_StDoor${z}AutoOpndTiGp`,GPa,()=>AUTO_T,'s',`Kapı ${z} otomatik modda açık kalma süresi (MTS T08)`)));
  SIG_DB.forEach(x=>x.aswLive=true);}
 
@@ -3299,7 +3395,10 @@ Object.entries(TABS).forEach(([t,p])=>$('#'+t).onclick=()=>{showTab(p);setPanel(
 
 /* ================= Giriş ================= */
 const cv=$('#view'),ptrs=new Map();let drag=null,pinch=0;
+let holdFn=null;
 cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===1){const r=cv.getBoundingClientRect(),p=pickAt((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1),h=p&&p.obj.userData.info&&p.obj.userData.info.hold;
+    if(h){holdFn=h;h(true);select(p.obj,true);drag=null;return;}}
   if(ptrs.size===1)drag={x:e.clientX,y:e.clientY,t:performance.now(),moved:0};
   if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch=Math.hypot(a.x-b.x,a.y-b.y);drag=null;}});
 cv.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
@@ -3309,6 +3408,7 @@ cv.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(
   if(st.mode==='walk'){st.yaw+=dx*sens;st.pitch=Math.max(-1.35,Math.min(1.35,st.pitch+dy*sens));}
   else{st.orbit.theta+=dx*0.006;st.orbit.phi=Math.max(0.12,Math.min(1.52,st.orbit.phi-dy*0.005));}});
 const endPtr=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);
+  if(holdFn){holdFn(false);holdFn=null;if(ptrs.size===0)drag=null;return;}
   if(drag&&drag.moved<8&&performance.now()-drag.t<600&&e.type==='pointerup'){const r=cv.getBoundingClientRect();const p=pickAt((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);if(p)activate(p.obj);else select(null);}
   if(ptrs.size===0)drag=null;pinch=0;};
 cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
@@ -3316,13 +3416,14 @@ cv.addEventListener('wheel',e=>{e.preventDefault();zoomBy(Math.exp(e.deltaY*0.00
 addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,textarea,select'))return;if(VIEW!=='sim'){if(e.key==='Escape')setView('sim');return;}const k=e.key.toLowerCase();
   if(['1','2','3'].includes(k)&&!e.repeat){doorToggle(+k,'Klavye '+k);return;}
   if(k==='l'&&!e.repeat){pressBtn(BTN[4],'Klavye L');return;}
+  if(k==='r'){if(!e.repeat)holdBtn(BB('RAMPA'),true,'Klavye R');return;}
   if(k==='f'&&!e.repeat){pressBtn(BTN[0],'Klavye F');return;}
   if(k==='g'&&!e.repeat){toggleDrive('Klavye G');return;}
   if((k==='+'||k==='=')){zoomBy(1/1.15);return;} if(k==='-'){zoomBy(1.15);return;} if(k==='0'){zoomReset();return;}
   if((k==='e'||k==='enter')&&!e.repeat&&st.mode==='walk'&&!(e.target.closest&&e.target.closest('button'))){const p=pickAt(0,0);if(p&&p.dist<4)activate(p.obj);return;}
   st.keys[k]=true;if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)&&document.activeElement===cv)e.preventDefault();});
-addEventListener('keyup',e=>{st.keys[e.key.toLowerCase()]=false;});
-addEventListener('blur',()=>{st.keys={};});
+addEventListener('keyup',e=>{const k=e.key.toLowerCase();st.keys[k]=false;if(k==='r'&&V.rampBtn)holdBtn(BB('RAMPA'),false,'Klavye R');});
+addEventListener('blur',()=>{st.keys={};if(V.rampBtn)holdBtn(BB('RAMPA'),false,'Pencere odağı kaybedildi');});
 const joy=$('#joy'),knob=$('#knob');let joyId=null;
 function joySet(e){const r=joy.getBoundingClientRect();let x=(e.clientX-r.left-r.width/2)/(r.width/2),y=(e.clientY-r.top-r.height/2)/(r.height/2);const m=Math.hypot(x,y);if(m>1){x/=m;y/=m;}st.joy={x,y};knob.style.transform=`translate(${x*34}px,${y*34}px)`;}
 joy.addEventListener('pointerdown',e=>{joyId=e.pointerId;joy.setPointerCapture(e.pointerId);joySet(e);});
@@ -3335,7 +3436,131 @@ new ResizeObserver(resize).observe(cv);resize();
 /* ================= Döngü ================= */
 let last=performance.now(),hoverT=0,slowT=0;const fwd=new THREE.Vector3();
 setMode('walk');applyLighting();
-const hashView=()=>{const h=location.hash;if(h==='#gereksinimler')setView('reqs');else if(h==='#sinyaller')setView('sigs');else if(h==='#ckod')setView('code');};hashView();addEventListener('hashchange',hashView);
+/* ================= Parametre listesi: şasi parametre listesi oluştur / araç listesini içe aktar =================
+   Excel (reserved parameters): Reserve Name = BSW PARA_NAME, ASW Name = C kodundaki Nv. Eşleşme ASW Name üzerinden. */
+const PLX={db:null,p:null,rows:[],byAsw:new Map(),byRes:new Map(),flt:'code',ecu:'eIO-B24',ex:{},sach:{},offFmt:'hex',boolFmt:'bit',sec:'AANN_PARA',imp:null,out:'',nvKey:'',nv:null,msg:''};
+try{const o=JSON.parse(localStorage.getItem('otobus.pl')||'{}');['flt','ecu','ex','sach','offFmt','boolFmt','sec'].forEach(k=>{if(o[k]!=null)PLX[k]=o[k];});}catch(e){}
+const plSave=()=>{try{localStorage.setItem('otobus.pl',JSON.stringify({flt:PLX.flt,ecu:PLX.ecu,ex:PLX.ex,sach:PLX.sach,offFmt:PLX.offFmt,boolFmt:PLX.boolFmt,sec:PLX.sec}));}catch(e){}};
+const PL_TY={bool:{bits:1,lbl:'Bit',len:1,dt:'U',max:1},uint8:{bits:8,lbl:'Byte',len:1,dt:'U',max:255},sint8:{bits:8,lbl:'Byte',len:1,dt:'S',min:-128,max:127},
+  uint16:{bits:16,lbl:'Word',len:2,dt:'U',max:65535},sint16:{bits:16,lbl:'Word',len:2,dt:'S',min:-32768,max:32767},uint32:{bits:32,lbl:'DWord',len:4,dt:'U',max:4294967295},sint32:{bits:32,lbl:'DWord',len:4,dt:'S',min:-2147483648,max:2147483647}};
+function plIndex(d){PLX.db=d;const ix=Object.fromEntries(d.cols.map((c,i)=>[c,i]));PLX.rows=d.rows.map((r,i)=>({i,ecu:r[ix.ecu],reserve:r[ix.reserve],asw:r[ix.asw]||'',addr:r[ix.addr]||'',byte:+r[ix.byte]||0,bit:+r[ix.bit]||0,type:r[ix.type]||'',isRes:!!r[ix.isRes],active:!!r[ix.active],src:r[ix.src]||''}));
+  PLX.byAsw=new Map();PLX.byRes=new Map();const add=(m,k,r)=>{if(!k)return;(m.get(k)||m.set(k,[]).get(k)).push(r);};
+  PLX.rows.forEach(r=>{add(PLX.byAsw,r.asw,r);add(PLX.byAsw,r.asw.toLowerCase(),r);add(PLX.byRes,r.reserve,r);add(PLX.byRes,r.reserve.toLowerCase(),r);});
+  if(!PLX.rows.some(r=>r.ecu===PLX.ecu))PLX.ecu=(PLX.rows[0]||{}).ecu||'';}
+function plLoad(){if(PLX.p)return PLX.p;
+  PLX.p=IDB.get('nvdb').catch(()=>null).then(d=>d&&d.rows?Object.assign(d,{user:true}):fetch('data/nv_params.json').then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})).then(d=>{plIndex(d);return d;});
+  PLX.p.catch(()=>{PLX.p=null;});return PLX.p;}
+/* C kodundaki Nv’ler: derlenen ASW’lerin parametreleri + yüklenen kaynaklarda geçen ...Nv adları */
+function plCodeNv(){const key=Object.keys(CSIM.asws).map(n=>n+':'+(CSIM.asws[n].rev||0)+':'+(CSIM.mods[n]?1:0)).join('|');if(PLX.nv&&PLX.nvKey===key)return PLX.nv;
+  const m=new Map(),put=(p,n,built)=>{const e=m.get(p)||{built:false,asw:new Set()};if(built)e.built=true;e.asw.add(n);m.set(p,e);};
+  Object.entries(CSIM.mods||{}).forEach(([n,b])=>(b.params||[]).forEach(p=>{if(/Nv$/.test(p))put(p,n,true);}));
+  Object.entries(CSIM.asws||{}).forEach(([n,a])=>Object.entries(a.files).forEach(([fn,f])=>{if(/^SIM_/i.test(fn))return;const re=/\b([A-Za-z][A-Za-z0-9]*_\w*Nv)\b/g;let x;const t=f.cur||'';while((x=re.exec(t)))put(x[1],n,false);}));
+  PLX.nv=m;PLX.nvKey=key;return m;}
+const plKey=r=>r.asw||r.reserve;
+const plVal=n=>{const p=CSIM.params[n];if(p!=null)return +p;const g=CSIM.G&&CSIM.G[n];if(g!=null&&typeof g!=='object')return +g;const i=CSIM.paramInit&&CSIM.paramInit[n];return i!=null&&typeof i!=='object'?+i:0;};
+const plSrc=n=>CSIM.params[n]!=null?(PLX.imp&&PLX.imp.set.has(n)?'araç listesi':'elle'):(CSIM.paramInit&&n in CSIM.paramInit)?'C kodu':'—';
+const plOk=(r,v)=>{const t=PL_TY[r.type];return t&&Number.isInteger(v)&&v>=(t.min||0)&&v<=t.max;};
+function plSetVal(n,v){if(v==null||v===''){delete CSIM.params[n];if(CSIM.G&&CSIM.paramInit&&n in CSIM.paramInit)CSIM.G[n]=CSIM.paramInit[n];}else{CSIM.params[n]=v;if(CSIM.G)CSIM.G[n]=v;}cSaveCfg();}
+function plList(){const q=($('#docSearch').value||'').trim().toLowerCase(),ecuOk=r=>PLX.ecu==='*'||r.ecu===PLX.ecu;let rows=[],miss=[];
+  if(PLX.flt==='code'){const nv=plCodeNv();nv.forEach((e,n)=>{const rs=(PLX.byAsw.get(n)||PLX.byAsw.get(n.toLowerCase())||[]).filter(ecuOk);if(rs.length)rs.forEach(r=>{if(!rows.includes(r))rows.push(r);});else if(!(PLX.byAsw.get(n)||PLX.byAsw.get(n.toLowerCase())))miss.push(n);});}
+  else if(PLX.flt==='imp'){rows=PLX.imp?PLX.imp.rows.filter(ecuOk):[];}
+  else if(PLX.flt==='nz'){rows=PLX.rows.filter(r=>ecuOk(r)&&plVal(plKey(r))!==0);}
+  else if(PLX.flt==='active'){rows=PLX.rows.filter(r=>ecuOk(r)&&r.active&&r.asw);}
+  else rows=PLX.rows.filter(ecuOk);
+  if(q){const f=x=>x.toLowerCase().includes(q);rows=rows.filter(r=>f(r.asw)||f(r.reserve)||f(r.addr)||f(r.type));miss=miss.filter(f);}
+  rows.sort((a,b)=>a.ecu<b.ecu?-1:a.ecu>b.ecu?1:a.addr<b.addr?-1:a.addr>b.addr?1:a.byte-b.byte||a.bit-b.bit);miss.sort();return {rows,miss};}
+const plHx=(v,n)=>(Math.floor(v)>>>0).toString(16).toUpperCase().padStart(n,'0').slice(-n);
+const plSG=ecu=>String(ecu).replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+function plEntry(r,i,v){const t=PL_TY[r.type]||PL_TY.uint8,sg=plSG(r.ecu),bool=r.type==='bool';let mask,val,bits=t.bits,lbl=t.lbl;
+  if(bool){mask=plHx(1<<r.bit,2);val=plHx(v?1<<r.bit:0,2);if(PLX.boolFmt==='byte'){bits=8;lbl='Byte';}}
+  else{const nb=t.len*2;mask='F'.repeat(nb);val=plHx(t.dt==='S'&&v<0?v+2**t.bits:v,nb);}
+  return [`[${PLX.sec}_${i}]`,`SG=${sg},0000`,`SACHNR_PSW=${PLX.sach[sg]||''},0000`,`PARA_NAME=${r.reserve},000`,'PL_TYP=0,STANDARD','PL_MODE=0,FIX_PARA','ADR_MODE=0,LID',
+    `LOCAL_ID=${String(r.addr).replace(/^0x/i,'').toUpperCase().padStart(4,'0')}`,`LOCAL_ID_OFFSET=${PLX.offFmt==='hex'?plHx(r.byte,4):String(r.byte).padStart(4,'0')}`,'PARATYP=0,Value',
+    `KENNWERT_BIT_LAENGE=${bits},${lbl}`,`DATATYP=${t.dt}`,`PARALAENGE=${t.len}`,`PARAMASKE=${mask}`,`PARAWERT=${val}`,`BESCHREIBUNG=${v}`].join('\r\n');}
+function plBuild(){const {rows}=plList(),inc=rows.filter(r=>!PLX.ex[r.i]),bad=inc.filter(r=>!plOk(r,plVal(plKey(r))));
+  const ok=inc.filter(r=>plOk(r,plVal(plKey(r))));PLX.out=ok.map((r,i)=>plEntry(r,i+1,plVal(plKey(r)))).join('\r\n\r\n')+(ok.length?'\r\n':'');
+  const noS=[...new Set(ok.map(r=>plSG(r.ecu)))].filter(sg=>!PLX.sach[sg]);
+  PLX.msg=`${ok.length} parametre listeye yazıldı.`+(bad.length?` ${bad.length} satır değer tip aralığı dışında olduğu için alınmadı: ${bad.slice(0,6).map(r=>plKey(r)).join(', ')}${bad.length>6?' …':''}.`:'')+(noS.length?` Uyarı: ${noS.join(', ')} için SACHNR_PSW boş.`:'');}
+/* araç parametre listesini içe aktar: PARA_NAME → Reserve Name → ASW Name (Nv) → değer */
+function plParse(txt){const out=[];let cur=null;txt.split(/\r?\n/).forEach(l=>{const m=l.match(/^\s*\[([^\]]+)\]?\s*$/);if(m){cur={sec:m[1]};out.push(cur);return;}const k=l.indexOf('=');if(cur&&k>0)cur[l.slice(0,k).trim().toUpperCase()]=l.slice(k+1).trim();});return out.filter(x=>x.PARA_NAME);}
+function plImport(txt,fname){const sec=plParse(txt),set=new Set(),rows=[],un=[],noCode=[],nv=plCodeNv();let n=0;
+  sec.forEach(x=>{const pn=x.PARA_NAME.split(',')[0].trim();const rs=PLX.byRes.get(pn)||PLX.byRes.get(pn.toLowerCase())||PLX.byAsw.get(pn)||[];
+    const sg=(x.SG||'').split(',')[0].trim(),sach=(x.SACHNR_PSW||'').split(',')[0].trim();if(sg&&sach&&!PLX.sach[sg])PLX.sach[sg]=sach;
+    let r=rs.find(y=>plSG(y.ecu)===sg)||rs[0];if(!r){un.push(pn);return;}
+    let v=parseFloat((x.BESCHREIBUNG||'').replace(',','.'));
+    if(!Number.isFinite(v)){const w=parseInt(x.PARAWERT||'0',16)||0,mk=parseInt(x.PARAMASKE||'0',16)||0;v=r.type==='bool'?((w&(mk||1<<r.bit))?1:0):w;}
+    const k=plKey(r);plSetVal(k,v);set.add(k);rows.push(r);n++;if(r.asw&&!nv.has(r.asw))noCode.push(r.asw);});
+  PLX.imp={file:fname,n,set,rows,un,noCode,secs:sec.length};PLX.flt='imp';plSave();
+  log(`Parametre listesi içe aktarıldı (${fname}): ${sec.length} bölüm, ${n} eşleşti, ${un.length} Excel’de yok${noCode.length?`, ${noCode.length} NV yüklenen C kodunda yok`:''}`);}
+/* Excel’i sayfada içe aktar (SheetJS, gerektiğinde yüklenir) */
+function plXlsxLib(){if(window.XLSX)return Promise.resolve(window.XLSX);return new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=()=>window.XLSX?res(window.XLSX):rej(new Error('XLSX yüklenemedi'));s.onerror=()=>rej(new Error('Excel okuyucu (SheetJS) indirilemedi'));document.head.appendChild(s);});}
+async function plImportXlsx(file){const X=await plXlsxLib();const wb=X.read(await file.arrayBuffer(),{type:'array'});const cols=['ecu','reserve','asw','alt','addr','byte','bit','type','isRes','active','nvm','src','plant'],rows=[],ecus={};
+  wb.SheetNames.forEach(sn=>{const m=sn.match(/^(eIO-B\d+)\s+v(\d+)$/);if(!m)return;const a=X.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:null});const h=(a[0]||[]).map(x=>String(x||'').trim()),ix=Object.fromEntries(h.map((x,i)=>[x,i]));
+    const g=(r,k)=>{const v=ix[k]!=null?r[ix[k]]:null;return typeof v==='string'?v.trim():v;},yn=(r,k)=>String(g(r,k)||'').toLowerCase()==='yes'?1:0;let n=0;
+    a.slice(1).forEach(r=>{if(!g(r,'Reserve Name'))return;rows.push([m[1],g(r,'Reserve Name'),g(r,'ASW Name')||'',g(r,'Alt ASW Name')||'',String(g(r,'Address')||''),+g(r,'Byte')||0,+g(r,'Bit')||0,g(r,'Type')||'',yn(r,'IsReserved'),yn(r,'Active'),yn(r,'NVM'),g(r,'SRC')||'',g(r,'Plant')||'']);n++;});ecus[m[1]]={ver:+m[2],rows:n};});
+  if(!rows.length)throw new Error('“eIO-Bxx vN” adlı sayfa veya “Reserve Name” sütunu bulunamadı');
+  const d={source:file.name,built:new Date().toISOString().slice(0,16).replace('T',' '),ecus,cols,rows};await IDB.set('nvdb',d).catch(()=>{});d.user=true;plIndex(d);PLX.p=Promise.resolve(d);PLX.nv=null;
+  log(`NV Excel’i içe aktarıldı: ${file.name} · ${rows.length} satır`);}
+async function plDownload(btn){plBuild();if(!PLX.out){btn.textContent='Liste boş';setTimeout(()=>btn.textContent=btn.dataset.lbl,1500);return;}
+  const sg=PLX.ecu==='*'?'TUM':plSG(PLX.ecu),fn=`Parameterliste_${sg}_${new Date().toISOString().slice(0,16).replace(/[-:T]/g,'')}.txt`,blob=new Blob([PLX.out],{type:'text/plain'});
+  let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){}
+  if(dl){try{await dl.save({filename:fn,data:blob});btn.textContent='İndirildi';}catch(e){btn.textContent=e&&e.code==='declined'?'İptal edildi':'İndirilemedi';}setTimeout(()=>btn.textContent=btn.dataset.lbl,1500);return;}
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}catch(e){btn.textContent='İndirilemedi';}}
+function renderPar(){const m=$('#dmain');
+  if(!PLX.db){$('#dtoc').innerHTML='<div class="tochead">ECU’lar</div>';m.innerHTML='<div class="dwrap wide"><p class="note">NV listesi yükleniyor…</p></div>';
+    plLoad().then(()=>{if(VIEW==='par')renderPar();}).catch(e=>{if(VIEW==='par')m.innerHTML=`<div class="dwrap wide"><p class="note">NV listesi (data/nv_params.json) yüklenemedi: ${esc(String(e.message||e))}</p>${plXlsBtn()}</div>`;});return;}
+  const ecus=[...new Set(PLX.rows.map(r=>r.ecu))],nv=plCodeNv(),cnt=e=>PLX.rows.filter(r=>r.ecu===e).length,inCode=e=>PLX.rows.filter(r=>r.ecu===e&&r.asw&&nv.has(r.asw)).length;
+  $('#dtoc').innerHTML=`<div class="tochead">ECU’lar (SG)</div>${['*',...ecus].map(e=>`<a class="tocg${PLX.ecu===e?' cur':''}" href="#" data-plecu="${esc(e)}"><span>${e==='*'?'Tümü':esc(e)}</span><em>${e==='*'?PLX.rows.length:cnt(e)}${e!=='*'&&nv.size?' · kodda '+inCode(e):''}</em></a>`).join('')}
+    <p class="note tocnote">Kaynak: ${esc(PLX.db.source||'')}${PLX.db.user?' (bu tarayıcıda içe aktarıldı)':' (sayfaya gömülü)'} · ${esc(PLX.db.built||'')}</p>`;
+  const flts=[['code','C kodundaki NV’ler'],['nz','Değeri ≠ 0'],['active','Excel: Active = yes'],['all','Tümü'],...(PLX.imp?[['imp','Araç listesinden ('+PLX.imp.n+')']]:[])];
+  const sgs=[...new Set(PLX.rows.filter(r=>PLX.ecu==='*'||r.ecu===PLX.ecu).map(r=>plSG(r.ecu)))];
+  m.innerHTML=`<div class="dwrap wide pwrap"><div class="dsum"><div><div class="eyebrow">Şasi parametre listesi · Parameterliste erzeugen</div><h3>Parametre listesi</h3>
+    <p>C kodundaki her Nv, Excel’deki <b>ASW Name</b> ile eşleşir; aynı satırdaki <b>Reserve Name</b> listedeki <code>PARA_NAME</code>’dir (BSW adı). LID, ofset, bit ve tip de o satırdan gelir. Değerleri elle girin ya da bir aracın parametre listesini içe aktarın; değer C kodunda hemen kullanılır ve listeye <code>BESCHREIBUNG</code> olarak yazılır.</p></div></div>
+    <div class="pltools"><label class="pbtn">Araç parametre listesini içe aktar<input type="file" id="plImp" accept=".txt,.ini,.par,.csv,text/plain" hidden></label>${plXlsBtn()}${PLX.db.user?'<button class="sfb" data-plact="dbreset">Gömülü listeye dön</button>':''}</div>
+    ${PLX.imp?`<div class="cmsg info"><b>İçe aktarılan: ${esc(PLX.imp.file)}</b><div>${PLX.imp.secs} bölüm · ${PLX.imp.n} parametre Excel’le eşleşti, değerleri yazıldı${PLX.imp.un.length?` · ${PLX.imp.un.length} PARA_NAME Excel’de yok: ${PLX.imp.un.slice(0,8).map(esc).join(', ')}${PLX.imp.un.length>8?' …':''}`:''}${PLX.imp.noCode.length?` · ${PLX.imp.noCode.length} NV yüklenen C kodunda geçmiyor`:''}</div></div>`:''}
+    <div class="ctabs" role="tablist">${flts.map(([k,l])=>`<button class="sfb" data-plflt="${k}" aria-pressed="${PLX.flt===k}">${l}</button>`).join('')}</div>
+    <div id="plBody"></div>
+    <details class="cmsg plset"><summary>Liste ayarları</summary>
+      <div class="plgrid"><label for="plSec">Bölüm adı</label><input id="plSec" value="${esc(PLX.sec)}">
+      ${sgs.map(sg=>`<label for="plS_${sg}">SACHNR_PSW · ${sg}</label><input id="plS_${sg}" data-plsach="${sg}" value="${esc(PLX.sach[sg]||'')}" placeholder="ör. 33258062093">`).join('')}
+      <label for="plOff">LOCAL_ID_OFFSET</label><select id="plOff"><option value="hex"${PLX.offFmt==='hex'?' selected':''}>Byte, onaltılık (0126)</option><option value="dec"${PLX.offFmt==='dec'?' selected':''}>Byte, ondalık (0294)</option></select>
+      <label for="plBool">bool biçimi</label><select id="plBool"><option value="bit"${PLX.boolFmt==='bit'?' selected':''}>KENNWERT_BIT_LAENGE=1,Bit</option><option value="byte"${PLX.boolFmt==='byte'?' selected':''}>KENNWERT_BIT_LAENGE=8,Byte</option></select></div>
+      <p class="note">VARSAYIM: Örnekte yalnızca uint16 (ofset 0) vardı. bool satırlarda PARALAENGE=1, PARAMASKE = bitin maskesi (bit 5 → 20), PARAWERT = değer × maske. Ofset varsayılan olarak onaltılık. Gerçek bir listeyle karşılaştırıp gerekirse buradan değiştirin.</p></details>
+    <div class="pltools"><button class="pbtn" data-plact="build">Parametre listesini oluştur</button><button class="sfb" data-plact="dl" data-lbl="İndir (.txt)">İndir (.txt)</button><button class="sfb" data-plact="copy">Kopyala</button><span class="note" id="plMsg">${esc(PLX.msg)}</span></div>
+    <textarea id="plOut" class="plout" readonly spellcheck="false" placeholder="“Parametre listesini oluştur” ile seçili satırlar burada listelenir.">${esc(PLX.out)}</textarea></div>`;
+  renderParBody();}
+const plXlsBtn=()=>'<label class="sfb">NV Excel’i yükle (.xlsx)<input type="file" id="plXls" accept=".xlsx,.xlsm" hidden></label>';
+function renderParBody(){const el=$('#plBody');if(!el)return;const {rows,miss}=plList(),nv=plCodeNv(),noCode=PLX.flt==='code'&&!Object.keys(CSIM.asws).length;
+  const inc=rows.filter(r=>!PLX.ex[r.i]).length,LIM=600;
+  el.innerHTML=(noCode?`<div class="cmsg warn"><b>Yüklenmiş C kodu yok</b><div>C Kod sayfasından B24 kodunu yükleyince koddaki Nv’ler burada listelenir. Şimdilik “Excel: Active = yes” ya da “Tümü” ile çalışabilirsiniz.</div><button class="sfb" data-goview="code">C Kod sayfasına git</button></div>`:'')
+    +`<p class="note">${rows.length} satır · ${inc} listeye dahil${rows.length>LIM?` · ilk ${LIM} gösteriliyor, aramayla daraltın (listeye hepsi yazılır)`:''} · <button class="linkbtn" data-plact="all1">tümünü seç</button> · <button class="linkbtn" data-plact="all0">hiçbirini seçme</button></p>
+    <div class="stable-wrap"><table class="stable pltable"><thead><tr><th></th><th>ASW (Nv)</th><th>PARA_NAME (BSW)</th><th>SG · LID · ofset · bit</th><th>Tip</th><th>Değer</th><th>Kaynak</th></tr></thead><tbody>${rows.slice(0,LIM).map(r=>{const k=plKey(r),v=plVal(k),t=PL_TY[r.type]||{},e=r.asw&&nv.get(r.asw);
+      return `<tr${PLX.ex[r.i]?' class="off"':''}><td><input type="checkbox" data-plinc="${r.i}" ${PLX.ex[r.i]?'':'checked'} aria-label="${esc(k)} listeye"></td><td><code>${esc(r.asw||'—')}</code>${e?`<div class="en">${e.built?'derlendi':'kaynakta'} · ${[...e.asw].slice(0,2).map(esc).join(', ')}</div>`:''}</td><td><code>${esc(r.reserve)}</code>${r.isRes?'<div class="en">rezerv</div>':''}${r.active?'':'<div class="en">Active = no</div>'}</td>
+        <td class="stype">${esc(plSG(r.ecu))} · ${esc(String(r.addr).replace(/^0x/i,''))} · ${r.byte} · ${r.bit}</td><td class="stype">${esc(r.type)}</td>
+        <td><input class="cpar${plOk(r,v)?'':' bad'}" type="number" step="1" min="${t.min||0}" max="${t.max!=null?t.max:''}" data-plv="${esc(k)}" value="${esc(String(v))}" aria-label="${esc(k)} değeri"></td><td class="stype">${esc(plSrc(k))}</td></tr>`;}).join('')||'<tr><td colspan="7" class="note">Eşleşen satır yok.</td></tr>'}</tbody></table></div>`
+    +(miss.length?`<details class="cmsg"><summary>${miss.length} Nv C kodunda var ama Excel’de ASW Name olarak yok</summary><div class="note">${miss.slice(0,200).map(x=>`<code>${esc(x)}</code>`).join(' ')}${miss.length>200?' …':''}</div><div class="note">Bu NV’lerin BSW (Reserve Name) karşılığı listede tanımlı değil; parametre listesine yazılamaz.</div></details>`:'');}
+function plClick(e){const t=e.target.closest('button,a,input[type=checkbox]');if(!t)return false;
+  if(t.dataset.plflt){PLX.flt=t.dataset.plflt;plSave();renderPar();return true;}
+  if(t.dataset.plinc!=null){const i=+t.dataset.plinc;if(t.checked)delete PLX.ex[i];else PLX.ex[i]=1;plSave();t.closest('tr').classList.toggle('off',!t.checked);return true;}
+  const a=t.dataset.plact;if(!a)return false;e.preventDefault();
+  if(a==='build'){plBuild();$('#plOut').value=PLX.out;$('#plMsg').textContent=PLX.msg;}
+  else if(a==='dl'){plDownload(t).then(()=>{$('#plOut').value=PLX.out;$('#plMsg').textContent=PLX.msg;});}
+  else if(a==='copy'){plBuild();$('#plOut').value=PLX.out;$('#plMsg').textContent=PLX.msg;(navigator.clipboard?navigator.clipboard.writeText(PLX.out):Promise.reject()).then(()=>{t.textContent='Kopyalandı';setTimeout(()=>t.textContent='Kopyala',1200);}).catch(()=>{const ta=$('#plOut');ta.select();document.execCommand&&document.execCommand('copy');});}
+  else if(a==='all1'||a==='all0'){plList().rows.forEach(r=>{if(a==='all1')delete PLX.ex[r.i];else PLX.ex[r.i]=1;});plSave();renderParBody();}
+  else if(a==='dbreset'){IDB.set('nvdb',null).catch(()=>{});PLX.db=null;PLX.p=null;PLX.imp=null;renderPar();}
+  return true;}
+function plInput(e){const t=e.target;
+  if(t.dataset.plv){const n=t.dataset.plv,r=(PLX.byAsw.get(n)||PLX.byRes.get(n)||[])[0],v=t.value===''?null:+t.value;plSetVal(n,v);if(r)t.classList.toggle('bad',v!=null&&!plOk(r,v));if(PLX.imp)PLX.imp.set.delete(n);const s=t.closest('tr').lastElementChild;if(s)s.textContent=plSrc(n);return true;}
+  if(t.dataset.plsach){PLX.sach[t.dataset.plsach]=t.value.trim();plSave();return true;}
+  if(t.id==='plSec'){PLX.sec=t.value.trim()||'AANN_PARA';plSave();return true;}
+  return false;}
+function plChange(e){const t=e.target;
+  if(t.id==='plOff'){PLX.offFmt=t.value;plSave();return true;}if(t.id==='plBool'){PLX.boolFmt=t.value;plSave();return true;}
+  if(t.id==='plImp'&&t.files[0]){const f=t.files[0];f.text().then(x=>{plImport(x,f.name);renderPar();}).catch(err=>cNotice('Liste okunamadı: '+err.message,'bad'));return true;}
+  if(t.id==='plXls'&&t.files[0]){const f=t.files[0];$('#plMsg')&&($('#plMsg').textContent='Excel okunuyor…');plImportXlsx(f).then(()=>renderPar()).catch(err=>cNotice('Excel içe aktarılamadı: '+err.message,'bad'));return true;}
+  return false;}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-plecu]');if(!a)return;e.preventDefault();PLX.ecu=a.dataset.plecu;plSave();renderPar();});
+const hashView=()=>{const h=location.hash;if(h==='#gereksinimler')setView('reqs');else if(h==='#sinyaller')setView('sigs');else if(h==='#ckod')setView('code');else if(h==='#parametre')setView('par');};hashView();addEventListener('hashchange',hashView);
 function needRender(now){const c=PERF_CFG[PERF.mode];if(now-PERF.lastR<1000/c.fps-4)return false;
   const p=camera.position,r=camera.rotation,key=`${p.x.toFixed(3)},${p.y.toFixed(3)},${p.z.toFixed(3)},${r.x.toFixed(4)},${r.y.toFixed(4)},${r.z.toFixed(4)},${camera.fov},${renderer.domElement.width}`;
   const anim=st.driving||Math.abs(V.speed)>0.01||DOORS.some(d=>{const x=doorS[d.id].state;return x==='OPENING'||x==='CLOSING';})||(CAB.pos>0&&CAB.pos<1)||(V.rampPos>0&&V.rampPos<1)||(V.kneelPos>0&&V.kneelPos<1)||V.wiper||(WIPERS.wph||0)>0.02||V.hazard||BTN.some(b=>b.pressT>0)||!!DEMO;
@@ -3372,7 +3597,7 @@ function frame(now){
     else{l.setPosition(p.x,p.y,p.z);l.setOrientation(fwd.x,fwd.y,fwd.z,0,1,0);}}
   REC.acc+=dt;if(REC.acc>=0.05){REC.acc=0;recSample();}
   if(CSIM.on&&CSIM.build&&!CSIM.paused){const c0=performance.now();CSIM.acc+=dt*1000;if(CSIM.acc>=CSIM.period){cInputs();let n=0;while(CSIM.acc>=CSIM.period&&n++<10){CSIM.acc-=CSIM.period;cStep(true);}if(CSIM.acc>CSIM.period)CSIM.acc=0;}PERF.cAcc+=performance.now()-c0;}
-  slowT-=dt;if(slowT<=0){slowT=PERF_CFG[PERF.mode].slow;if(VIEW==='sim'){renderCluster();refreshBtns();drawDoorSigns();{const h=$('#hAir'),pw=DOORS.some(x=>doorS[x.id].state==='POWERLESS');$('#hAirV').textContent=V.air.toFixed(1)+' bar';h.classList.toggle('warn',V.air<AIR.ok&&!pw);h.classList.toggle('bad',pw);}}renderSignals();if(DEMO)renderDemoSig();updateCodeView();}
+  slowT-=dt;if(slowT<=0){slowT=PERF_CFG[PERF.mode].slow;if(VIEW==='sim'){renderCluster();refreshBtns();drawDoorSigns();updSidePanel();{const h=$('#hAir'),pw=DOORS.some(x=>doorS[x.id].state==='POWERLESS');$('#hAirV').textContent=V.air.toFixed(1)+' bar';h.classList.toggle('warn',V.air<AIR.ok&&!pw);h.classList.toggle('bad',pw);}}renderSignals();if(DEMO)renderDemoSig();updateCodeView();}
   if(selHelper)selHelper.update();
   PERF.frames++;
   if(VIEW==='sim'&&needRender(now)){renderer.render(scene,camera);drawMap();PERF.renders++;}
