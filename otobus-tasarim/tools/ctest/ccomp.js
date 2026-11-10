@@ -175,6 +175,7 @@ function parse(toks,ctx){
   function isTypeName(o){const t=peek(o);if(t.t!=='id')return false;
     if(['const','volatile','signed','unsigned','void','char','short','int','long','float','double','_Bool','struct','union','enum'].includes(t.v))return true;return typedefs.has(t.v);}
   function parseCast(){
+    if(is('(')&&peek(1).t==='id'&&!KW.has(peek(1).v)&&!typedefs.has(peek(1).v)&&((peek(2).v==='*'&&(peek(3).v===')'||peek(3).v==='*'))||(peek(2).v===')'&&/(_T|_t|_Type|Type)$/.test(peek(1).v)&&(peek(3).t==='id'||peek(3).t==='num'||peek(3).v==='('))))typedefs.set(peek(1).v,{k:'struct',name:peek(1).v,fields:null});
     if(is('(')&&isTypeName(1)){const t=next();const {ty}=parseBaseType();let ty2=ty;while(is('*')){next();ty2={k:'ptr',to:ty2};}expect(')');
       if(is('{'))throw new CErr('Bileşik sabitler desteklenmiyor',t);return {k:'cast',ty:ty2,e:parseCast(),tok:t};}
     return parseUnary();}
@@ -192,7 +193,7 @@ function parse(toks,ctx){
       return {k:'num',val,ty,tok:t};}
     if(t.t==='id'){if(KW.has(t.v))throw new CErr(`Beklenmeyen anahtar kelime “${t.v}”`,t);return {k:'id',name:t.v,tok:t};}
     if(t.v==='('){const e=parseExpr();expect(')');return e;}
-    if(t.t==='str'||t.t==='chr'){if(t.t==='chr')return {k:'num',val:(t.v.length===3?t.v.charCodeAt(1):0),ty:TY.i32,tok:t};throw new CErr('Metin sabitleri desteklenmiyor',t);}
+    if(t.t==='str'||t.t==='chr'){if(t.t==='chr')return {k:'num',val:(t.v.length===3?t.v.charCodeAt(1):0),ty:TY.i32,tok:t};while(peek().t==='str')next();return {k:'num',val:0,ty:TY.i32,tok:t};}
     throw new CErr(`Beklenmeyen “${t.v}”`,t);}
   function parsePostfix(e){
     for(;;){const t=peek();
@@ -345,7 +346,10 @@ function compile(fileMap,opts){
           return {js:`(G[${JSON.stringify(gs.sig)}]=${conv(ty.k==='unk'?null:ty,x.js,x.ty)})`,ty};}
         const ty=typeOfGlobal(gs.sig)||TY.unk;if(/(_P|Nv)$/.test(gs.sig))io.params.add(gs.sig);else io.inputs.add(gs.sig);return {js:`(G[${JSON.stringify(gs.sig)}]??0)`,ty};}
       if(MATH[name]){const args=e.args.map(a=>gen(a).js);return {js:`${MATH[name]}(${args.join(',')})`,ty:TY.f64};}
-      throw new CErr(`Tanımsız fonksiyon: ${name}`,e.tok);}
+      if(name==='memset'||name==='memcpy'||name==='memmove'){const a=e.args.map(x=>gen(x).js);return {js:name==='memset'?`$mset(${a[0]},${a[1]})`:`$mcpy(${a[0]},${a[1]})`,ty:TY.u32};}
+      if(name==='abs'||name==='labs')return {js:`Math.abs(${gen(e.args[0]).js})`,ty:TY.i32};
+      ctx.warnings.push({msg:`Tanımsız fonksiyon ${name}() → simülasyonda 0 döndürüyor`,file:e.tok&&e.tok.f,line:e.tok&&e.tok.l});(io.stubs=io.stubs||new Set()).add(name);
+      return {js:`((${e.args.map(x=>gen(x).js).join(',')||'0'}),0)`,ty:TY.i32};}
     case 'sizeofE':return {js:'4',ty:TY.u32};
     default:throw new CErr('Desteklenmeyen ifade',e.tok);}}
   function genStmt(s,ind){const I='  '.repeat(ind);
@@ -386,11 +390,13 @@ function compile(fileMap,opts){
     if(g.init)gInit.push(`G[${JSON.stringify(name)}]=${initJS(ty,g.init)};`);
     else if(ty.k==='struct')gInit.push(`G[${JSON.stringify(name)}]={};`);else if(ty.k==='arr')gInit.push(`G[${JSON.stringify(name)}]=[];`);
     else gInit.push(`G[${JSON.stringify(name)}]=0;`);}
-  const js=`"use strict";const $o=(o,k)=>{let v=o[k];if(v==null||typeof v!=='object'){v=o[k]={};}return v;};let $it=0;const F={};let G={};\n${fnJS.join('\n')}\nfunction $init(g){G=g;${gInit.join('\n')}}\nreturn {F,$init,resetIt(){$it=0;}};`;
+  const js=`"use strict";const $o=(o,k)=>{let v=o[k];if(v==null||typeof v!=='object'){v=o[k]={};}return v;};const $mset=(o,v)=>{if(o&&typeof o==='object'){for(const k in o){if(o[k]&&typeof o[k]==='object')$mset(o[k],v);else o[k]=v;}}return 0;};const $mcpy=(d,s)=>{if(d&&s&&typeof d==='object'&&typeof s==='object'){for(const k in s){if(s[k]&&typeof s[k]==='object'){if(!d[k]||typeof d[k]!=='object')d[k]=Array.isArray(s[k])?[]:{};$mcpy(d[k],s[k]);}else d[k]=s[k];}}return 0;};let $it=0;const F={};let G={};\n${fnJS.join('\n')}\nfunction $init(g){G=g;${gInit.join('\n')}}\nreturn {F,$init,resetIt(){$it=0;}};`;
   /* adım / init / reset fonksiyonları */
   const called=io.funcsCalled;const roots=[...F.values()].filter(f=>!called.has(f.name)&&f.params.length===0);
   const steps=roots.filter(f=>/(\d+)ms$/i.test(f.name)||/step/i.test(f.name)).map(f=>({name:f.name,period:+(/(\d+)ms$/i.exec(f.name)||[0,10])[1]}));
   const init=roots.filter(f=>/init(ialize)?$/i.test(f.name)).map(f=>f.name),reset=roots.filter(f=>/reset$/i.test(f.name)).map(f=>f.name);
+  if(!steps.length){roots.filter(f=>!/init(ialize)?$|reset$|term(inate)?$|^SIM_/i.test(f.name)&&!/\.h$/i.test(f.tok&&f.tok.f||'')).forEach(f=>{steps.push({name:f.name,period:+(/(\d+)\s*ms/i.exec(f.name)||[0,100])[1],guess:true});});
+    if(steps.length)ctx.warnings.push({msg:`Adım fonksiyonu adından anlaşılamadı; ${steps.map(x=>x.name).join(', ')} ${steps[0].period} ms adım kabul edildi`});}
   const assume=roots.filter(f=>/^SIM_/i.test(f.name)).map(f=>f.name);
   /* çıktılar: Output.c içinde tanımlanan globaller de çıkıştır */
   for(const [name,g] of G){if(g.tok&&/_Output\.c$/i.test(g.tok.f))io.outputs.add(name);if(g.tok&&/_Local\.c$/i.test(g.tok.f)&&/(_P|Nv)$/.test(name))io.params.add(name);}

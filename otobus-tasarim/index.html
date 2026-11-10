@@ -350,7 +350,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev V</div>
+    <div class="eyebrow">Konsept · Rev W</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
   </div>
@@ -2371,6 +2371,7 @@ function parse(toks,ctx){
   function isTypeName(o){const t=peek(o);if(t.t!=='id')return false;
     if(['const','volatile','signed','unsigned','void','char','short','int','long','float','double','_Bool','struct','union','enum'].includes(t.v))return true;return typedefs.has(t.v);}
   function parseCast(){
+    if(is('(')&&peek(1).t==='id'&&!KW.has(peek(1).v)&&!typedefs.has(peek(1).v)&&((peek(2).v==='*'&&(peek(3).v===')'||peek(3).v==='*'))||(peek(2).v===')'&&/(_T|_t|_Type|Type)$/.test(peek(1).v)&&(peek(3).t==='id'||peek(3).t==='num'||peek(3).v==='('))))typedefs.set(peek(1).v,{k:'struct',name:peek(1).v,fields:null});
     if(is('(')&&isTypeName(1)){const t=next();const {ty}=parseBaseType();let ty2=ty;while(is('*')){next();ty2={k:'ptr',to:ty2};}expect(')');
       if(is('{'))throw new CErr('Bileşik sabitler desteklenmiyor',t);return {k:'cast',ty:ty2,e:parseCast(),tok:t};}
     return parseUnary();}
@@ -2388,7 +2389,7 @@ function parse(toks,ctx){
       return {k:'num',val,ty,tok:t};}
     if(t.t==='id'){if(KW.has(t.v))throw new CErr(`Beklenmeyen anahtar kelime “${t.v}”`,t);return {k:'id',name:t.v,tok:t};}
     if(t.v==='('){const e=parseExpr();expect(')');return e;}
-    if(t.t==='str'||t.t==='chr'){if(t.t==='chr')return {k:'num',val:(t.v.length===3?t.v.charCodeAt(1):0),ty:TY.i32,tok:t};throw new CErr('Metin sabitleri desteklenmiyor',t);}
+    if(t.t==='str'||t.t==='chr'){if(t.t==='chr')return {k:'num',val:(t.v.length===3?t.v.charCodeAt(1):0),ty:TY.i32,tok:t};while(peek().t==='str')next();return {k:'num',val:0,ty:TY.i32,tok:t};}
     throw new CErr(`Beklenmeyen “${t.v}”`,t);}
   function parsePostfix(e){
     for(;;){const t=peek();
@@ -2541,7 +2542,10 @@ function compile(fileMap,opts){
           return {js:`(G[${JSON.stringify(gs.sig)}]=${conv(ty.k==='unk'?null:ty,x.js,x.ty)})`,ty};}
         const ty=typeOfGlobal(gs.sig)||TY.unk;if(/(_P|Nv)$/.test(gs.sig))io.params.add(gs.sig);else io.inputs.add(gs.sig);return {js:`(G[${JSON.stringify(gs.sig)}]??0)`,ty};}
       if(MATH[name]){const args=e.args.map(a=>gen(a).js);return {js:`${MATH[name]}(${args.join(',')})`,ty:TY.f64};}
-      throw new CErr(`Tanımsız fonksiyon: ${name}`,e.tok);}
+      if(name==='memset'||name==='memcpy'||name==='memmove'){const a=e.args.map(x=>gen(x).js);return {js:name==='memset'?`$mset(${a[0]},${a[1]})`:`$mcpy(${a[0]},${a[1]})`,ty:TY.u32};}
+      if(name==='abs'||name==='labs')return {js:`Math.abs(${gen(e.args[0]).js})`,ty:TY.i32};
+      ctx.warnings.push({msg:`Tanımsız fonksiyon ${name}() → simülasyonda 0 döndürüyor`,file:e.tok&&e.tok.f,line:e.tok&&e.tok.l});(io.stubs=io.stubs||new Set()).add(name);
+      return {js:`((${e.args.map(x=>gen(x).js).join(',')||'0'}),0)`,ty:TY.i32};}
     case 'sizeofE':return {js:'4',ty:TY.u32};
     default:throw new CErr('Desteklenmeyen ifade',e.tok);}}
   function genStmt(s,ind){const I='  '.repeat(ind);
@@ -2582,11 +2586,13 @@ function compile(fileMap,opts){
     if(g.init)gInit.push(`G[${JSON.stringify(name)}]=${initJS(ty,g.init)};`);
     else if(ty.k==='struct')gInit.push(`G[${JSON.stringify(name)}]={};`);else if(ty.k==='arr')gInit.push(`G[${JSON.stringify(name)}]=[];`);
     else gInit.push(`G[${JSON.stringify(name)}]=0;`);}
-  const js=`"use strict";const $o=(o,k)=>{let v=o[k];if(v==null||typeof v!=='object'){v=o[k]={};}return v;};let $it=0;const F={};let G={};\n${fnJS.join('\n')}\nfunction $init(g){G=g;${gInit.join('\n')}}\nreturn {F,$init,resetIt(){$it=0;}};`;
+  const js=`"use strict";const $o=(o,k)=>{let v=o[k];if(v==null||typeof v!=='object'){v=o[k]={};}return v;};const $mset=(o,v)=>{if(o&&typeof o==='object'){for(const k in o){if(o[k]&&typeof o[k]==='object')$mset(o[k],v);else o[k]=v;}}return 0;};const $mcpy=(d,s)=>{if(d&&s&&typeof d==='object'&&typeof s==='object'){for(const k in s){if(s[k]&&typeof s[k]==='object'){if(!d[k]||typeof d[k]!=='object')d[k]=Array.isArray(s[k])?[]:{};$mcpy(d[k],s[k]);}else d[k]=s[k];}}return 0;};let $it=0;const F={};let G={};\n${fnJS.join('\n')}\nfunction $init(g){G=g;${gInit.join('\n')}}\nreturn {F,$init,resetIt(){$it=0;}};`;
   /* adım / init / reset fonksiyonları */
   const called=io.funcsCalled;const roots=[...F.values()].filter(f=>!called.has(f.name)&&f.params.length===0);
   const steps=roots.filter(f=>/(\d+)ms$/i.test(f.name)||/step/i.test(f.name)).map(f=>({name:f.name,period:+(/(\d+)ms$/i.exec(f.name)||[0,10])[1]}));
   const init=roots.filter(f=>/init(ialize)?$/i.test(f.name)).map(f=>f.name),reset=roots.filter(f=>/reset$/i.test(f.name)).map(f=>f.name);
+  if(!steps.length){roots.filter(f=>!/init(ialize)?$|reset$|term(inate)?$|^SIM_/i.test(f.name)&&!/\.h$/i.test(f.tok&&f.tok.f||'')).forEach(f=>{steps.push({name:f.name,period:+(/(\d+)\s*ms/i.exec(f.name)||[0,100])[1],guess:true});});
+    if(steps.length)ctx.warnings.push({msg:`Adım fonksiyonu adından anlaşılamadı; ${steps.map(x=>x.name).join(', ')} ${steps[0].period} ms adım kabul edildi`});}
   const assume=roots.filter(f=>/^SIM_/i.test(f.name)).map(f=>f.name);
   /* çıktılar: Output.c içinde tanımlanan globaller de çıkıştır */
   for(const [name,g] of G){if(g.tok&&/_Output\.c$/i.test(g.tok.f))io.outputs.add(name);if(g.tok&&/_Local\.c$/i.test(g.tok.f)&&/(_P|Nv)$/.test(name))io.params.add(name);}
@@ -2701,11 +2707,28 @@ async function cAddFiles(list){const fs=[...list];if(!fs.length)return;
     if(k==='zip'){cImportZip(f);return;}
     if(k==='7z'||k==='rar'||k==='gz'){cNotice(`“${f.name}” bir ${k==='gz'?'tar.gz/gzip':k.toUpperCase()} arşivi. Tarayıcı yalnızca .zip açabiliyor: arşivi bilgisayarda açıp “Klasör seç” ile klasörü seçin ya da .zip olarak yeniden sıkıştırın.`,'bad');return;}}
   const src=fs.filter(f=>/\.(c|h)$/i.test(f.name));if(!src.length){cNotice(`Tanınmayan dosya: ${fs.map(f=>`“${f.name}”`).join(', ')}. B24 için .zip arşivi ya da “Klasör seç”, tek ASW için .c ve .h dosyaları kullanılabilir.`,'bad');return;}
-  Promise.all(src.map(f=>f.text().then(t=>[f.name,t.replace(/\r\n/g,'\n')]))).then(async arr=>{
-    let nm=CSIM.sel&&CSIM.asws[CSIM.sel]&&!CSIM.src?CSIM.sel:cAswNameFromFiles(arr.map(x=>x[0]));if(CSIM.src&&!CSIM.asws[nm])nm=cAswNameFromFiles(arr.map(x=>x[0]));
-    const a=CSIM.asws[nm]||(CSIM.asws[nm]={files:{},active:true});arr.forEach(([n,t])=>a.files[n]={orig:t,cur:t,path:n});a.active=true;CSIM.sel=nm;
-    if(!CSIM.cur||!a.files[CSIM.cur])CSIM.cur=Object.keys(a.files).sort((x,y)=>cRank(x)-cRank(y))[0];
-    cSave();await cBuildOne(nm);cRewire();renderCode();});}
+  const arr=await Promise.all(src.map(f=>f.text().then(t=>[f.name,t.replace(/\r\n/g,'\n')])));
+  /* dosya adından ASW: Doors_DoorsRels.c, Doors_DoorsRels_Local.c, …_Output.c, …_Input.h → Doors_DoorsRels */
+  const SUF=/_(Local|Output|Input|System_Input|data|types|private|Interface|MemMap|Data|ConstB|ConstP|Global|Cal)$/i;
+  const base=n=>n.replace(/\.(c|h)$/i,'').replace(SUF,'');
+  const aswNames=new Set(arr.filter(([n])=>/\.c$/i.test(n)).map(([n])=>base(n)));
+  if(!aswNames.size&&CSIM.sel&&CSIM.asws[CSIM.sel]){arr.forEach(([n,t])=>CSIM.asws[CSIM.sel].files[n]={orig:t,cur:t,path:n});CSIM.asws[CSIM.sel].rev=(CSIM.asws[CSIM.sel].rev||0)+1;cSave();await cBuildOne(CSIM.sel);cRewire();renderCode();cNotice(`${arr.length} başlık dosyası ${CSIM.sel} ASW’sine eklendi.`);return;}
+  const groups={},common={};arr.forEach(([n,t])=>{const b=base(n);if(aswNames.has(b))(groups[b]=groups[b]||[]).push([n,t]);else common[n]=t;});
+  Object.entries(groups).forEach(([g,fl])=>{const a=CSIM.asws[g]||(CSIM.asws[g]={files:{},active:false});fl.forEach(([n,t])=>a.files[n]={orig:t,cur:t,path:n});a.rev=(a.rev||0)+1;delete CSIM.cache[g];});
+  if(Object.keys(common).length){CSIM.common=Object.assign({},CSIM.common,common);CSIM.cache={};CW.commonRef=null;}
+  const names=Object.keys(groups);if(names.length===1)CSIM.asws[names[0]].active=true;
+  CSIM.sel=names.includes(CSIM.sel)?CSIM.sel:names.sort()[0];CSIM.cur=null;
+  if(!CSIM.src)CSIM.src={name:'Elle eklenen dosyalar',date:new Date().toISOString(),asw:Object.keys(CSIM.asws).length,files:arr.length,common:Object.keys(CSIM.common).length,manual:true};
+  else{CSIM.src.asw=Object.keys(CSIM.asws).length;CSIM.src.common=Object.keys(CSIM.common).length;}
+  cSave();renderCode();
+  cNotice(`${arr.length} dosya eklendi: ${names.length} ASW${Object.keys(common).length?`, ${Object.keys(common).length} ortak başlık`:''}. Derleniyor…`);
+  await cCheckAll();await cBuildActive();if(CSIM.build&&!CSIM.on&&names.length===1)cSetOn(true);renderCode();}
+/* tüm kodu / tek ASW'yi sil */
+async function cClearAll(){if(!(await cAsk('Yüklenen tüm C kodu bu tarayıcıdan silinsin mi? (ASW’ler, ortak başlıklar, değişiklikleriniz ve parametre/elle değerleri)','Hepsini sil')))return;
+  if(CSIM.on)cSetOn(false);const ns=Object.keys(CSIM.asws);Object.assign(CSIM,{asws:{},common:{},src:null,sel:null,cur:null,mods:{},errs:{},cache:{},chk:{},prod:{},extIn:[],order:[],tasks:[],build:null,forces:{},params:{}});CW.commonRef=null;
+  try{for(const n of ns)await IDB.set('a:'+n,null);await IDB.set('meta',null);await IDB.set('src',null);await IDB.set('cfg',null);}catch(e){}cRewire();renderCode();cNotice('Tüm C kodu silindi.');}
+async function cRemoveAsw(n){if(!(await cAsk(`${n} ASW’si silinsin mi?`,'Sil')))return;delete CSIM.asws[n];delete CSIM.mods[n];delete CSIM.errs[n];delete CSIM.cache[n];delete CSIM.chk[n];
+  try{await IDB.set('a:'+n,null);}catch(e){}if(CSIM.sel===n){CSIM.sel=cAswNames()[0]||null;CSIM.cur=null;}cRewire();cSaveMeta();cSaveCfg();renderCode();}
 /* ---- varsayım dosyası: eksik sabitler ---- */
 function cAssumeFile(asw,b){
   const src=Object.entries(CSIM.asws[asw].files).filter(([n])=>!/^SIM_/i.test(n)).map(([,f])=>f.cur).join('\n');
@@ -2864,6 +2887,7 @@ function cMsgsHTML(){const n=CSIM.sel,b=CSIM.mods[n],a=CSIM.asws[n],o=[],er=CSIM
     const miss=b.missingInc.filter(x=>!/MemMap/i.test(x));
     if(miss.length)o.push(`<details class="cmsg"><summary>${miss.length} başlık dosyası bulunamadı</summary><div class="note">Tipler Excel envanterinden ve koddaki kullanımdan çıkarıldı: ${miss.map(esc).join(', ')}</div></details>`);
     const w=b.warnings.filter(x=>!(a.files['SIM_varsayimlar.c']&&/Tanımsız değişken \w+(_Const[BP]|_C) /.test(x.msg)));
+    const stub=w.filter(x=>/Tanımsız fonksiyon/.test(x.msg));if(stub.length)o.push(`<div class="cmsg info"><b>${stub.length} fonksiyonun tanımı yok; simülasyonda 0 döndürüyor</b><div class="note">${stub.slice(0,12).map(x=>esc(x.msg.replace(/^Tanımsız fonksiyon /,'').replace(/ →.*$/,''))).join(', ')}${stub.length>12?' …':''}. Bunlar genelde RTE/kütüphane çağrılarıdır; tanımlarının olduğu .c dosyasını eklerseniz gerçek değerle çalışır.</div></div>`);
     if(w.length)o.push(`<details class="cmsg"><summary>${w.length} uyarı</summary>${w.slice(0,40).map(x=>`<div class="note">${x.file?`<button class="linkbtn" data-cjump="${esc(x.file)}:${x.line}">${esc(x.file)}:${x.line}</button> `:''}${esc(x.msg)}</div>`).join('')}</details>`);}
   return o.join('');}
 function cIOHTML(){const b=CSIM.mods[CSIM.sel];if(!b)return `<p class="note" style="padding:12px">${CSIM.asws[CSIM.sel]&&!CSIM.asws[CSIM.sel].active?'Bu ASW çalışmıyor. Yukarıdan “Bu ASW’yi C koduyla çalıştır”ı işaretleyin.':'Önce kodu derleyin.'}</p>`;
@@ -2891,9 +2915,10 @@ function renderCode(){
   const names=cAswNames();$('#dtoc').innerHTML=names.length?cTocHTML():'<div class="tochead">ASW’ler</div><p class="note tocnote">Henüz kod yok.</p>';
   const m=$('#dmain');
   const drop=(big)=>`<div class="cdrop${big?'':' small'}" id="cDrop"><b>${big?'B24 entegrasyonunu yükleyin':'Yeni sürüm yükle'}</b>
-      <div class="cpick"><label class="pbtn">Zip seç<input type="file" id="cFiles" multiple hidden></label><label class="sfb">Klasör seç<input type="file" id="cDir" webkitdirectory directory multiple hidden></label><span class="note">ya da zip’i / klasörü buraya sürükleyin</span></div>
+      <div class="cpick"><label class="pbtn">C dosyalarını seç<input type="file" id="cFiles" multiple hidden></label><label class="sfb">Zip seç<input type="file" id="cZip" multiple hidden></label><label class="sfb">Klasör seç<input type="file" id="cDir" webkitdirectory directory multiple hidden></label>${big?'':'<button class="sfb" data-cact="clearall">Tüm kodu sil</button>'}</div>
+      <span class="note">Birden çok ASW’nin .c/.h dosyalarını tek seferde seçebilirsiniz (dosya penceresinde Ctrl+A); dosya adından ASW’lere ayrılır, ASW’ye ait olmayan başlıklar ortak başlık olur. Zip veya klasör de sürükleyebilirsiniz.</span>
       ${big?`<span>Zip veya açılmış B24 klasörü: içinde <code>…/ASW/&lt;ASW&gt;/src/*.c, *.h</code> yapısı aranır; ASW’ler ayrılır, ortak başlıklar (rtwtypes.h, CmnAsw…) paylaşılır. Tek ASW için <code>.c</code> ve <code>.h</code> dosyalarını “Zip seç” ile de ekleyebilirsiniz.</span><span>Dosyalar yalnızca bu tarayıcıda saklanır, kimseyle paylaşılmaz.</span>`:''}</div><div class="note" id="cImp" role="status"></div>`;
-  if(!names.length){m.innerHTML=`<div class="dwrap wide"><div class="dsum"><div><div class="eyebrow">C kodu · tarayıcıda derlenir, simülatöre bağlanır</div><h3>B24 entegrasyonunu yükleyin</h3>
+  if(!names.length){m.innerHTML=`<div class="dwrap wide"><div class="dsum"><div><div class="eyebrow">C kodu · tarayıcıda derlenir, simülatöre bağlanır</div><h3>C kodunu yükleyin</h3>
     <p>Entegrasyon zip’ini bir kez yükleyin; ASW’ler listelenir. Çalıştırmak istediklerinizi seçin, değiştirmek istediğiniz ASW’nin kodunu düzenleyip derleyin. Seçili ASW’ler birbirine bağlı çalışır: birinin çıkışı diğerinin girişine gider, kalan girişler simülatörden okunur.</p></div></div>${drop(true)}</div>`;return;}
   if(!CSIM.sel||!CSIM.asws[CSIM.sel])CSIM.sel=names[0];
   const a=CSIM.asws[CSIM.sel],fnames=Object.keys(a.files).sort((x,y)=>cRank(x)-cRank(y)||(x<y?-1:1));if(!CSIM.cur||!a.files[CSIM.cur])CSIM.cur=fnames[0];
@@ -2907,7 +2932,7 @@ function renderCode(){
         <span class="sp"></span><button class="linkbtn" data-cact="selchg">Değişenleri çalıştır</button>${CSIM.order.length?' · <button class="linkbtn" data-cact="selnone">Hepsini durdur</button>':''}${nChg?` · <span class="note">${nChg} dosya değişti</span>`:''}</div>
       ${drop(false)}</section>
     <div class="dsum"><div><div class="eyebrow">ASW · C kodu</div><h3>${esc(CSIM.sel)}</h3>
-      <label class="cact"><input type="checkbox" data-cact2="active" ${a.active?'checked':''}> Bu ASW’yi C koduyla çalıştır</label>
+      <label class="cact"><input type="checkbox" data-cact2="active" ${a.active?'checked':''}> Bu ASW’yi C koduyla çalıştır</label> <button class="linkbtn" data-cact="rmasw">Bu ASW’yi sil</button>
       <div class="cstat" id="cStat">${cStatusHTML()}</div></div>
       <div class="cctl"><button class="pbtn" data-cact="build">Derle ve çalıştır</button>
         <button class="sfb" data-cact="on" aria-pressed="${CSIM.on}" ${CSIM.build?'':'disabled'}>Simülatörde kullan: ${CSIM.on?'Açık':'Kapalı'}</button>
@@ -2948,6 +2973,8 @@ function cCodeClick(e){const t=e.target.closest('button,a');if(!t)return false;
     else if(a==='fcten'){const b=CSIM.mods[CSIM.sel];b.params.filter(n=>/StsFctEna_P$/.test(n)).forEach(n=>{CSIM.params[n]=1;CSIM.G[n]=1;});cSaveCfg();cRefreshTop();}
     else if(a==='selchg'){cAswNames().forEach(n=>{if(cChanged(CSIM.asws[n]))CSIM.asws[n].active=true;});cSaveCfg();cBuildActive().then(()=>{if(CSIM.build&&!CSIM.on)cSetOn(true);renderCode();});}
     else if(a==='checkall'){cCheckAll().then(renderCode);}
+    else if(a==='clearall'){cClearAll();}
+    else if(a==='rmasw'){cRemoveAsw(CSIM.sel);}
     else if(a==='runall'){const bad=cAswNames().filter(n=>CSIM.chk[n]&&!CSIM.chk[n].ok),io=cAswNames().filter(n=>C_IO_ASW.test(n)&&!bad.includes(n));
       const nRun=cAswNames().length-bad.length-io.length;
       cAsk(`Derlenen ${nRun} ASW birlikte çalıştırılsın mı? Araç gibi çalışır: kapıları, Türfreigabe’yi ve durak frenini C kodu sürer; Nv/_P değerleri koddaki gibi kalır.${io.length?` G/Ç katmanı (${io.join(', ')}) simülatörden beslenir.`:''}${bad.length?` ${bad.length} ASW derlenemediği için dışarıda kalır.`:''}`,'Tümünü çalıştır').then(ok=>{if(!ok)return;
@@ -2969,7 +2996,7 @@ function cCodeClick(e){const t=e.target.closest('button,a');if(!t)return false;
   if(t.dataset.cparrst){const n=t.dataset.cparrst;delete CSIM.params[n];CSIM.G[n]=CSIM.paramInit[n]??0;cSaveCfg();$('#cIO').innerHTML=cIOHTML();return true;}
   return false;}
 function cCodeChange(e){const t=e.target;
-  if(t.id==='cFiles'||t.id==='cDir'){const fl=[...t.files];t.value='';if(t.id==='cDir')cImportFolder(fl);else cAddFiles(fl);return true;}
+  if(t.id==='cFiles'||t.id==='cDir'||t.id==='cZip'){const fl=[...t.files];t.value='';if(t.id==='cDir')cImportFolder(fl);else cAddFiles(fl);return true;}
   if(t.id==='cSel'){CSIM.cur=t.value;renderCode();return true;}
   if(t.dataset.cact2==='active'){cSetActive(CSIM.sel,t.checked).then(()=>{if(CSIM.build&&!CSIM.on&&t.checked)cSetOn(true);renderCode();});return true;}
   if(t.dataset.cforce){const n=t.dataset.cforce,inp=document.querySelector(`[data-cfv="${CSS.escape(n)}"]`);if(t.checked){CSIM.forces[n]=+(inp.value||CSIM.G[n]||0);inp.disabled=false;inp.value=CSIM.forces[n];}else{delete CSIM.forces[n];inp.disabled=true;inp.value='';}cSaveCfg();return true;}

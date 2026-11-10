@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev V)
+# Otobüs Tasarım Stüdyosu (konsept, Rev W)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -155,3 +155,7 @@ Sinyaller: DoorRelease, DoorState_K2
 - **Araç modu**: Tümünü çalıştır'da G/Ç katmanı (PinManager, FAP_Manager, NetworkManager, BDC_Dummy) hariç tüm ASW'ler çalışır. Simülatör ham gateway girişlerini (GW_StClmp15, GW_SpdLess1, GW_StPrkgBrkEngd…) ve kapı kontrolcüsü CAN geri bildirimini (BD12_StDoor2_IC, kalibrasyon, ışık bariyeri, konum) verir. Doors_BBCAN'ın CAN komutları (BD12_ReqDoor2Opg_OC, …Clsng_OC) kapıları sürer; simülatörün kendi kapı kararları devre dışı kalır. DBSBR_StBstbrkReq durak frenini sürer.
 - Nv/_P girilmezse fonksiyonlar koddaki gibi kapalı kalır (ör. DR_StsFctEna_P = 0 → Türfreigabe açılmaz).
 - Araç modunda otomatik test sonucuna uyarı: karar simülatör akışına göre, kapı sinyallerini grafikte kontrol edin.
+
+## Rev W
+- **C dosyalarını seç**: birden çok ASW’nin .c/.h dosyaları tek seferde seçilir, dosya adından ASW’lere ayrılır (…_Local/_Output/_Input/_data/… ekleri), ASW’ye ait olmayan başlıklar ortak başlık olur. **Tüm kodu sil** ve **Bu ASW’yi sil** düğmeleri.
+- Derleyici durmak yerine uyarıyla devam eder: tanımı olmayan fonksiyonlar (RTE/kütüphane) 0 döndürür, memset/memcpy desteklenir, metin sabitleri ve bilinmeyen tip adlı dönüşümler kabul edilir, adım fonksiyonu adından anlaşılamazsa parametresiz kök fonksiyonlar 100 ms adım sayılır.
