@@ -338,6 +338,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
 .cask{position:fixed;inset:0;z-index:210;background:rgba(10,14,16,.45);display:grid;place-items:center;padding:16px}
 .caskbox{background:var(--panel);color:var(--ink);border-radius:10px;padding:18px;max-width:460px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.25)} .caskbox p{margin:0 0 14px;line-height:1.5}
 .caskbtn{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.dtype{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;margin-top:6px} .dtype select{font:500 13px var(--f-body);padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
 .cdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--line);margin-right:8px;vertical-align:1px} .cdot.ok{background:var(--ok)} .cdot.idle{background:transparent;box-shadow:inset 0 0 0 2px var(--ok)} .cbad{color:var(--warn)} .cdot.bad{background:var(--warn)}
 .csrc .chd2{align-items:flex-start} .crun{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)} .crun .sp{flex:1}
 .cdrop.small{padding:14px;margin:10px 12px;border-width:1.5px} #cImp:empty{display:none} #cImp{padding:0 12px 10px;font-weight:600;color:var(--accent)}
@@ -350,7 +351,7 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
   <div id="hoverLabel" class="float" hidden></div>
 
   <div id="brand" class="float">
-    <div class="eyebrow">Konsept · Rev AB</div>
+    <div class="eyebrow">Konsept · Rev AC</div>
     <h1>Solo otobüs <span class="led">12M</span> · 3 kapı</h1>
     <nav class="views" aria-label="Sayfa"><button class="vbtn" data-view="sim" aria-current="page">Simülatör</button><button class="vbtn" data-view="reqs" aria-current="false">Gereksinimler</button><button class="vbtn" data-view="sigs" aria-current="false">Sinyaller</button><button class="vbtn" data-view="code" aria-current="false">C Kod</button></nav>
   </div>
@@ -408,6 +409,11 @@ details.cancelled>summary{cursor:pointer;font:600 12px var(--f-mono);color:var(-
     </div>
 
     <div class="pbody" id="pSig" role="tabpanel" hidden>
+      <section>
+        <h3>Kapı tipleri</h3>
+        <div class="dtype" id="dTypes"></div>
+        <p class="note">IST: içe salınımlı · AST: dışa salınımlı · SST: sürgülü-salınımlı. Seçim kapının hareketini ve iç geçişteki kanat engelini değiştirir; bu tarayıcıda saklanır.</p>
+      </section>
       <section>
         <h3>İç aydınlatma devreleri</h3>
         <div class="kreis">
@@ -476,7 +482,7 @@ if(!window.THREE){fail();return;}
 const L=12, W=2.55, HW=W/2, WT=0.08, IN=HW-WT, CEIL=2.35, ROOF=2.75, GROUND=-0.34;
 const FRONT=6, REAR=-6;
 const DOORS=[
-  {id:1,x0:4.25,x1:5.45,w:1200,name:'Kapı 1 · ön',desc:'Çift kanatlı, içe salınımlı. Biniş kapısı.'},
+  {id:1,x0:4.25,x1:5.45,w:1200,name:'Kapı 1 · ön',desc:'Çift kanatlı. Biniş kapısı.'},
   {id:2,x0:0.00,x1:1.20,w:1200,name:'Kapı 2 · orta',desc:'Çift kanatlı. Tekerlekli sandalye rampası bu kapıda.'},
   {id:3,x0:-4.60,x1:-3.60,w:1000,name:'Kapı 3 · arka',desc:'Çift kanatlı, iniş kapısı.'}
 ];
@@ -488,6 +494,9 @@ const PRS={};const CSIM={asws:{},common:{},src:null,sel:null,cur:null,mods:{},er
 const V={speed:0,rpm:620,gear:'N',stopReq:false,req:{stroller:false,prm:false,elderly:false},temp:17,odo:47389,stopBrake:false,intLight:true,night:false,
   release:false,kneel:false,kneelPos:0,fog:false,wiper:false,ramp:false,rampPos:0,dim:false,engine:true,hazard:false,head:false,park:true,stopBrakeMan:false,doorLock:false};
 const DOOR_T=2.4;
+/* kapı tipi: IST içe salınımlı, AST dışa salınımlı, SST sürgülü-salınımlı (Schwenkschiebetür) */
+const DOOR_TYPES={IST:{ad:'İçe salınımlı (IST)',kisa:'IST',desc:'Kanatlar menteşe etrafında araç içine döner.'},AST:{ad:'Dışa salınımlı (AST)',kisa:'AST',desc:'Kanatlar menteşe etrafında araç dışına döner.'},SST:{ad:'Sürgülü-salınımlı (SST)',kisa:'SST',desc:'Kanatlar önce dışarı çıkar, sonra gövde boyunca yana kayar.'}};
+const DCFG=(()=>{const def={1:'IST',2:'SST',3:'AST'};try{const v=JSON.parse(localStorage.getItem('otobus.doortype')||'null');if(v&&[1,2,3].every(k=>DOOR_TYPES[v[k]]))return v;}catch(e){}return def;})();
 const doorS={};DOORS.forEach(d=>doorS[d.id]={state:'CLOSED',pos:0,pivots:[],btnMat:null,beepT:0,auto:false,hold:false,timer:0,openAt:0,reqOpen:false});
 const t0=performance.now();const now_s=()=>((performance.now()-t0)/1000).toFixed(1)+' s';
 const logEl=$('#log');let logN=0;
@@ -692,7 +701,7 @@ DOORS.forEach(d=>{
         info(bp,{name:'Kapı açma butonu (Öffnung) · K'+d.id+' '+side,code:c,desc:'Kapı kanadı üstünde, '+side+' taraf. Türfreigabe açıksa yalnızca K'+d.id+' açılır, açık kalma süresi dolunca kapanır. Türfreigabe yoksa istek kaydedilir, buton yanıp söner; serbest bırakılınca kapı açılır.',tag:'Fonksiyon: aktif',action:()=>doorRequest(d.id,c)});});}
     cyl(0.025,2.2,MAT.frame,0,1.1,-0.03,pv,10);
     info(g,{name:d.name,code:'DOOR-0'+d.id,desc:d.desc+' Net geçiş '+d.w+' mm. Sürücü panelindeki K'+d.id+' butonuyla açılır/kapanır.',tag:'Fonksiyon: aktif'});
-    doorS[d.id].pivots.push({pv,dir:k?-1:1});
+    doorS[d.id].pivots.push({pv,dir:k?-1:1,k,lw,bx:pv.position.x,bz:pv.position.z,g});
   });
   boxE(d.x0-0.05,d.x1+0.05,2.18,2.24,HW-0.08,HW,MAT.frame);
 });
@@ -1694,7 +1703,7 @@ const HOLDW=()=>2400+AUTO_T*1000;
 function resetSim(){
   if(CSIM.on&&CSIM.build)cInitG();
   st.driving=false;$('#hDrive').setAttribute('aria-pressed',false);V.speed=0;DRV.force=null;rig.position.set(0,0,0);rig.rotation.y=0;
-  DOORS.forEach(d=>{Object.assign(doorS[d.id],{state:'CLOSED',pos:0,auto:false,hold:false,timer:0,reqOpen:false,lb:false,lbHit:false});doorS[d.id].pivots.forEach(q=>q.pv.rotation.y=0);});
+  DOORS.forEach(d=>{Object.assign(doorS[d.id],{state:'CLOSED',pos:0,auto:false,hold:false,timer:0,reqOpen:false,lb:false,lbHit:false});doorPose(d.id,0);});
   [1,2,3].forEach(z=>Object.keys(ZR[z]).forEach(k=>ZR[z][k]=false));recompute();refreshStop();
   Object.assign(V,{release:false,ramp:false,rampPos:0,doorLock:false,park:true,engine:true,intLight:true,dim:false,night:false,kneel:false});
   Object.assign(CAB,{lock:true,timer:0,open:false,pos:0});applyLighting();refreshBtns();
@@ -1825,6 +1834,13 @@ function refreshBtns(){
 }
 renderBtnCard();
 
+function doorPose(id,e){const t=DCFG[id];doorS[id].pivots.forEach(q=>{
+    if(t==='SST'){const out=Math.min(1,e/0.28),sl=Math.max(0,(e-0.18)/0.82);q.pv.rotation.y=0;q.pv.position.set(q.bx+(q.k?1:-1)*q.lw*0.97*sl,q.pv.position.y,q.bz+0.14*out);}
+    else{q.pv.position.set(q.bx,q.pv.position.y,q.bz);q.pv.rotation.y=(t==='AST'?-1:1)*q.dir*e*Math.PI/2*0.94;}});}
+function setDoorType(id,t,quiet){if(!DOOR_TYPES[t])return;DCFG[id]=t;try{localStorage.setItem('otobus.doortype',JSON.stringify(DCFG));}catch(e){}
+  const s=doorS[id],p=s.pos,ee=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;doorPose(id,ee);
+  s.pivots.forEach(q=>{const inf=q.g.userData.info;if(inf)inf.desc=`${DOOR_TYPES[t].ad}: ${DOOR_TYPES[t].desc} ${DOORS[id-1].desc.replace(/^Çift kanatlı, içe salınımlı\. /,'')} Net geçiş ${DOORS[id-1].w} mm.`;});
+  if(renderer&&renderer.shadowMap)renderer.shadowMap.needsUpdate=true;PERF.lastR=-1e9;if(!quiet)log(`Kapı ${id} tipi: ${DOOR_TYPES[t].ad}`);}
 function playerInDoor(d){return st.mode==='walk'&&st.x>d.x0-0.05&&st.x<d.x1+0.05&&st.z>IN-0.6&&st.z<HW+0.5;}
 let blink=0,hazOn=false,hazPrev=false;
 function updateDoors(dt){
@@ -1854,7 +1870,7 @@ function updateDoors(dt){
     else if(s.state==='CLOSING'){s.beepT-=dt;if(s.beepT<=0){s.beepT=0.5;SFX.beep(doorPos(d));}
       s.pos=Math.max(0,s.pos-dt/DOOR_T);if(s.pos<=0){s.state='CLOSED';s.auto=false;s.hold=false;s.timer=0;s.lb=false;s.lbHit=false;log(`Kapı ${d.id}: CLOSED`);SFX.thunk(doorPos(d));}}
     const p=s.pos,e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
-    s.pivots.forEach(q=>q.pv.rotation.y=q.dir*e*Math.PI/2*0.94);
+    doorPose(d.id,e);
     s.btnMat.emissive.set(s.state==='CLOSED'?'#300000':s.state==='OPEN'?'#ff2a14':(bl?'#ff2a14':'#400000'));
   });
   const sb=cDrivesBrake()?(V.stopBrakeMan||!!CSIM.G.DBSBR_StBstbrkReq):(V.stopBrakeMan||V.release||DOORS.some(d=>doorS[d.id].state!=='CLOSED'));
@@ -1926,7 +1942,9 @@ function renderCluster(){drawCluster(hudG,880,330);drawCluster(c3G,880,330);clus
 [1,2,3].forEach(k=>{const el=document.getElementById('kr'+k);el.addEventListener('input',()=>{KREIS[k].set=+el.value;applyLighting();});el.addEventListener('change',()=>log(`İç aydınlatma Kreis ${k} ayarı = ${KREIS[k].set} %`));});
 $('#hDrive').onclick=()=>toggleDrive('Gösterge HUD');$('#hHome').onclick=()=>goHome();$('#demoStop').onclick=()=>{if(DEMO)DEMO.cancel=true;};
 (()=>{const g=$('#hDrvIcon').getContext('2d');g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();g.arc(22,22,15,0,7);g.stroke();g.beginPath();g.arc(22,22,4,0,7);g.fill();g.fillStyle='#fff';g.fill();[0,2.1,4.2].forEach(a=>{g.beginPath();g.moveTo(22,22);g.lineTo(22+15*Math.cos(a+1.57),22+15*Math.sin(a+1.57));g.stroke();});})();
-$('#hLight').onclick=()=>pressBtn(BTN[4],'Gösterge HUD');$('#hC').onclick=()=>setView('code');$('#hPerf').onclick=()=>{const ks=Object.keys(PERF_CFG);setPerf(ks[(ks.indexOf(PERF.mode)+1)%ks.length]);};$('#hPerf').querySelector('b').textContent=PERF_CFG[PERF.mode].ad;$('#hRelease').onclick=()=>pressBtn(BTN[0],'Gösterge HUD');
+$('#hLight').onclick=()=>pressBtn(BTN[4],'Gösterge HUD');$('#hC').onclick=()=>setView('code');
+{const box=$('#dTypes');box.innerHTML=DOORS.map(d=>`<label for="dt${d.id}">Kapı ${d.id}</label><select id="dt${d.id}" data-dtype="${d.id}">${Object.entries(DOOR_TYPES).map(([k,v])=>`<option value="${k}"${DCFG[d.id]===k?' selected':''}>${v.ad}</option>`).join('')}</select>`).join('');
+  box.addEventListener('change',e=>{const id=+e.target.dataset.dtype;if(id)setDoorType(id,e.target.value);});DOORS.forEach(d=>setDoorType(d.id,DCFG[d.id],true));}$('#hPerf').onclick=()=>{const ks=Object.keys(PERF_CFG);setPerf(ks[(ks.indexOf(PERF.mode)+1)%ks.length]);};$('#hPerf').querySelector('b').textContent=PERF_CFG[PERF.mode].ad;$('#hRelease').onclick=()=>pressBtn(BTN[0],'Gösterge HUD');
 (()=>{const g=$('#hRelIcon').getContext('2d');g.strokeStyle='#fff';g.lineWidth=3;g.strokeRect(9,6,26,32);g.beginPath();g.moveTo(22,6);g.lineTo(22,38);g.stroke();g.fillStyle='#3ddc84';g.font='bold 13px sans-serif';g.textAlign='center';g.fillText('A',22,26);})();
 
 /* ================= Sinyal kataloğu ================= */
@@ -2561,7 +2579,7 @@ function compile(fileMap,opts){
     case 'pre':case 'post':{const l=lval(e.e);const lt=!l.ty||l.ty.k==='unk'||l.ty.k==='ptr'?null:l.ty;const one={js:'1',ty:TY.i32};const v=binop(e.op==='++'?'+':'-',{js:l.get,ty:l.ty},one);const nv=conv(lt,v.js,v.ty);
       if(e.k==='pre')return {js:l.set(nv),ty:l.ty};return {js:`(($t=${l.get}),${l.set(nv)},$t)`,ty:l.ty};}
     case 'call':{if(e.f.k!=='id')throw new CErr('Fonksiyon işaretçileri desteklenmiyor',e.tok);const name=e.f.name;
-      if(F.has(name)||protos.has(name)){const fd=F.get(name)||protos.get(name);if(!F.has(name))throw new CErr(`${name} fonksiyonunun gövdesi yok (yalnızca bildirim)`,e.tok);
+      if(F.has(name)||protos.has(name)){const fd=F.get(name)||protos.get(name);if(!F.has(name)){ctx.warnings.push({msg:`Tanımsız fonksiyon ${name}() (yalnızca bildirimi var, gövdesi yüklenen dosyalarda yok) → simülasyonda 0 döndürüyor`,file:e.tok&&e.tok.f,line:e.tok&&e.tok.l});(io.stubs=io.stubs||new Set()).add(name);return {js:`((${e.args.map(x=>gen(x).js).join(',')||'0'}),0)`,ty:fd.ret&&fd.ret.k!=='void'?fd.ret:TY.i32};}
         io.funcsCalled.add(name);const args=e.args.map((a,i)=>{const x=gen(a);const pt=fd.params[i]&&fd.params[i].ty;return pt&&pt.k!=='ptr'&&pt.k!=='struct'&&pt.k!=='arr'?conv(pt,x.js,x.ty):x.js;});
         return {js:`F.${id(name)}(${args.join(',')})`,ty:fd.ret};}
       const gs=resolveGetSet(name);
@@ -3142,7 +3160,7 @@ function free(x,z){
   if(z<-IN+R||x<REAR+0.08+R||x>FRONT-0.1-R)return false;
   for(const o of obstacles)if(x>o.x0-R&&x<o.x1+R&&z>o.z0-R&&z<o.z1+R)return false;
   if(CAB.pos<0.6){if(x>CAB_X-R&&x<5.32+R&&z>-0.31-R&&z<-0.19+R)return false;}else if(x>5.27-R&&x<5.37+R&&z>-0.25-R&&z<0.74+R)return false;
-  for(const d of DOORS){if(doorS[d.id].pos<0.05)continue;const lw=(d.x1-d.x0)/2*doorS[d.id].pos;
+  for(const d of DOORS){if(doorS[d.id].pos<0.05||DCFG[d.id]!=='IST')continue;const lw=(d.x1-d.x0)/2*doorS[d.id].pos;
     for(const hx of [d.x0,d.x1])if(Math.abs(x-hx)<0.04+R&&z>HW-0.05-lw-R)return false;}
   return true;
 }

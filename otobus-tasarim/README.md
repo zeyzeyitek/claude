@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev AB)
+# Otobüs Tasarım Stüdyosu (konsept, Rev AC)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -178,3 +178,7 @@ Sinyaller: DoorRelease, DoorState_K2
 
 ## Rev AB
 - Başlıklardaki `static inline` fonksiyonlar (ör. Mcal_WdtCalcSeqPassword) birden çok .c dosyasına dahil edilince “iki kez tanımlanmış” hatası vermiyor. Farklı .c dosyalarında aynı adlı fonksiyon varsa ilki kullanılır ve uyarı verilir.
+
+## Rev AC
+- **Kapı tipleri**: her kapı IST (içe salınımlı), AST (dışa salınımlı) veya SST (sürgülü-salınımlı) olabilir; varsayılan K1 IST, K2 SST, K3 AST. Yan panel → Sinyal → Kapı tipleri’nden değiştirilir, tarayıcıda saklanır. SST kanatları önce dışarı çıkar sonra gövde boyunca kayar; yalnızca IST kanatları içeride geçişi engeller.
+- Yalnızca bildirimi olan, gövdesi yüklenen dosyalarda bulunmayan fonksiyonlar (ör. KSWpinningWriteDigitalOutput) hata yerine uyarı verir ve 0 döndürür.

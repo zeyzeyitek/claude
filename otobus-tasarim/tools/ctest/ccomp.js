@@ -365,7 +365,7 @@ function compile(fileMap,opts){
     case 'pre':case 'post':{const l=lval(e.e);const lt=!l.ty||l.ty.k==='unk'||l.ty.k==='ptr'?null:l.ty;const one={js:'1',ty:TY.i32};const v=binop(e.op==='++'?'+':'-',{js:l.get,ty:l.ty},one);const nv=conv(lt,v.js,v.ty);
       if(e.k==='pre')return {js:l.set(nv),ty:l.ty};return {js:`(($t=${l.get}),${l.set(nv)},$t)`,ty:l.ty};}
     case 'call':{if(e.f.k!=='id')throw new CErr('Fonksiyon işaretçileri desteklenmiyor',e.tok);const name=e.f.name;
-      if(F.has(name)||protos.has(name)){const fd=F.get(name)||protos.get(name);if(!F.has(name))throw new CErr(`${name} fonksiyonunun gövdesi yok (yalnızca bildirim)`,e.tok);
+      if(F.has(name)||protos.has(name)){const fd=F.get(name)||protos.get(name);if(!F.has(name)){ctx.warnings.push({msg:`Tanımsız fonksiyon ${name}() (yalnızca bildirimi var, gövdesi yüklenen dosyalarda yok) → simülasyonda 0 döndürüyor`,file:e.tok&&e.tok.f,line:e.tok&&e.tok.l});(io.stubs=io.stubs||new Set()).add(name);return {js:`((${e.args.map(x=>gen(x).js).join(',')||'0'}),0)`,ty:fd.ret&&fd.ret.k!=='void'?fd.ret:TY.i32};}
         io.funcsCalled.add(name);const args=e.args.map((a,i)=>{const x=gen(a);const pt=fd.params[i]&&fd.params[i].ty;return pt&&pt.k!=='ptr'&&pt.k!=='struct'&&pt.k!=='arr'?conv(pt,x.js,x.ty):x.js;});
         return {js:`F.${id(name)}(${args.join(',')})`,ty:fd.ret};}
       const gs=resolveGetSet(name);
