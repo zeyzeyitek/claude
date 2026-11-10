@@ -1,4 +1,4 @@
-# Otobüs Tasarım Stüdyosu (konsept, Rev AA)
+# Otobüs Tasarım Stüdyosu (konsept, Rev AB)
 
 12 m, körüksüz, 3 kapılı şehir içi otobüs. İçinde birinci şahıs gezilebilen 3D tasarım aracı (Three.js r128, tek dosya).
 
@@ -175,3 +175,6 @@ Sinyaller: DoorRelease, DoorState_K2
 ## Rev AA
 - Adsız parametreli fonksiyon tanımları (`void f(uint8 a, uint8)`) ve okunamayan parametre adları artık benzersiz adlandırılıyor (önceden “Duplicate parameter name” iç hatası).
 - Her fonksiyonun üretilen kodu tek tek doğrulanıyor; ana model dışındaki dosyada çevrilemeyen fonksiyon 0 döndüren taslak olur, ana dosyada ise hata fonksiyon adı ve satırla gösterilir.
+
+## Rev AB
+- Başlıklardaki `static inline` fonksiyonlar (ör. Mcal_WdtCalcSeqPassword) birden çok .c dosyasına dahil edilince “iki kez tanımlanmış” hatası vermiyor. Farklı .c dosyalarında aynı adlı fonksiyon varsa ilki kullanılır ve uyarı verilir.

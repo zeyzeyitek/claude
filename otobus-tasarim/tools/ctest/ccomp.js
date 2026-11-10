@@ -270,7 +270,8 @@ function compile(fileMap,opts){
   if(!items.length&&ctx.skippedFiles.length)throw new CErr('Derlenecek dosya kalmadı: '+ctx.skippedFiles.map(x=>x.file+' — '+x.msg).join('; '),null);
   const G=new Map();const F=new Map();const protos=new Map();
   items.forEach(it=>{if(it.k==='gvar'){const old=G.get(it.name);if(!old||it.storage!=='extern'||old.storage==='extern')G.set(it.name,Object.assign({},old||{},it,{init:it.init||(old&&old.init)}));if(it.storage==='extern'&&old&&old.storage!=='extern')G.set(it.name,old);}
-    else if(it.k==='func'){if(F.has(it.name))throw new CErr(`${it.name} iki kez tanımlanmış`,it.tok);F.set(it.name,it);}else if(it.k==='proto')protos.set(it.name,it);});
+    else if(it.k==='func'){if(F.has(it.name)){const o=F.get(it.name);const same=o.tok&&it.tok&&o.tok.f===it.tok.f&&o.tok.l===it.tok.l;
+      if(!same&&!/\.h$/i.test(it.tok&&it.tok.f||'')&&!/\.h$/i.test(o.tok&&o.tok.f||''))ctx.warnings.push({msg:`${it.name}() birden çok dosyada tanımlı; ilki (${o.tok&&o.tok.f}:${o.tok&&o.tok.l}) kullanıldı`,file:it.tok&&it.tok.f,line:it.tok&&it.tok.l});return;}F.set(it.name,it);}else if(it.k==='proto')protos.set(it.name,it);});
   const typeOfGlobal=n=>{const g=G.get(n);if(g)return g.ty;if(externTy.has(n))return externTy.get(n);if(opts.typeHint){const h=opts.typeHint(n);if(h&&BUILTIN_TYPEDEF[h])return BUILTIN_TYPEDEF[h];}return null;};
   const io={inputs:new Set(),outputs:new Set(),params:new Set(),funcsCalled:new Set()};
   const runnables=[...ctx.runnables].sort((a,b)=>b.length-a.length);
